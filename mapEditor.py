@@ -9,6 +9,7 @@ from modules.Controller import *
 
 def main():
     app = QApplication(sys.argv)
+    #app.setStyle(QStyleFactory.create("Fusion"));
 
     view = Window()
     view.show()
@@ -23,7 +24,7 @@ def main():
 
     exitcode = app.exec_()
     
-    del stream
+    #del stream
     sys.stdout = sys.__stdout__
 
     sys.exit(exitcode)

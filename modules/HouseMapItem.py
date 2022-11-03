@@ -8,10 +8,22 @@ class HouseMapItem(QWidget):
         QWidget.__init__(self)
         
         self._id = id
+        self._tilesize = 64;
+        
+        size = QSize(self._tilesize, self._tilesize)
         
         self.widget = QtGui.QLabel(self)
-        self.widget.setPixmap(QtGui.QPixmap("none.png"))
-        #self.widget.show() # ???
+        #self.widget = QtGui.QPushButton(self)
+        
+        pixmap = QtGui.QPixmap("resources/none.png")
+        scaledPixmap = pixmap.scaled(size, QtCore.Qt.KeepAspectRatio)
+        self.widget.setPixmap(scaledPixmap)
+        self.widget.setFixedSize(size)
+        
+        self.widget.setStyleSheet("background-color: lightgray")
+        
         layout = QVBoxLayout()
         layout.addWidget(self.widget)
+        layout.setContentsMargins(0,0,0,0)
+
         self.setLayout(layout)

@@ -7,21 +7,26 @@ from PyQt5.QtWidgets import *
 from functools import partial
 
 from modules.HouseMapItem import *
-    
+
 class HouseMapPanel(QWidget):
-    def __init__(self, width, heigth):
+    def __init__(self, height, width):
         QWidget.__init__(self)
         self._layout = QGridLayout()
         self._items = {}
         self.setLayout(self._layout)
-        
+        self._layout.setContentsMargins(0,0,0,0)
+        self._layout.setMargin(0);
+        self._layout.setSpacing(0);
+
         for column in range(width):
-            for row in range(heigth):
+            for row in range(height):
                 id = row*1000 + column
                 item = HouseMapItem(id)
                 self._layout.addWidget(item, row, column)
-
-
+                
+        self._layout.setRowStretch(height, 1)
+        self._layout.setColumnStretch(width, 1)
+                
     #def _onSetClicked(self, name):
     #    if self._model is None:
     #        raise NoModelDefinedException
