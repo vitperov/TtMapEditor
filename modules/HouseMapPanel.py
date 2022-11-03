@@ -13,6 +13,7 @@ class HouseMapPanel(QWidget):
         QWidget.__init__(self)
         self._layout = QGridLayout()
         self._items = {}
+        self.setLayout(self._layout)
         
         for column in range(width):
             for row in range(heigth):
