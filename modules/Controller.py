@@ -35,5 +35,6 @@ class Controller:
 
     def _connectSignals(self):
         """Connect signals and slots."""
+        self._view.houseMapPanel.activeItemChanged.connect(self._view.propPanel.showItem)
 
         

@@ -9,6 +9,8 @@ from functools import partial
 from modules.HouseMapItem import *
 
 class HouseMapPanel(QWidget):
+    activeItemChanged = pyqtSignal(int)
+
     def __init__(self, height, width):
         QWidget.__init__(self)
         self._layout = QGridLayout()
@@ -23,6 +25,7 @@ class HouseMapPanel(QWidget):
                 id = row*1000 + column
                 item = HouseMapItem(id)
                 self._layout.addWidget(item, row, column)
+                item.clicked.connect(self.onItemClicked)
                 
         self._layout.setRowStretch(height, 1)
         self._layout.setColumnStretch(width, 1)
@@ -33,6 +36,10 @@ class HouseMapPanel(QWidget):
     #
     #    value = self._variables[name].edit.text()
     #    self._model.setVariable(name, value)
+    
+    def onItemClicked(self, itemId):
+        print("Item clicked Id=" + str(itemId))
+        self.activeItemChanged.emit(itemId)
 
 
     def populateModelVariables(self, model):

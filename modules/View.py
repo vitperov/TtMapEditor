@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 from modules.HouseMapPanel import *
+from modules.PropertiesPanel import *
 
 
 class Window(QMainWindow):
@@ -24,7 +25,10 @@ class Window(QMainWindow):
         layout = QGridLayout()
 
         self.houseMapPanel = HouseMapPanel(5, 5)
+        self.propPanel = PropertiesPanel()
+        
         layout.addWidget(self.houseMapPanel, 0, 0)
+        layout.addWidget(self.propPanel, 0, 1)
 
         return layout
 

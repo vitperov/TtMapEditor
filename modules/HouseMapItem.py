@@ -4,10 +4,12 @@ from PyQt5.QtCore import *
 from pyqtgraph.Qt import QtCore, QtGui
 
 class HouseMapItem(QWidget):
+    clicked = pyqtSignal(int)
+
     def __init__(self, id):
         QWidget.__init__(self)
         
-        self._id = id
+        self.id = id
         self._tilesize = 64;
         
         size = QSize(self._tilesize, self._tilesize)
@@ -27,3 +29,7 @@ class HouseMapItem(QWidget):
         layout.setContentsMargins(0,0,0,0)
 
         self.setLayout(layout)
+        
+    def mousePressEvent(self, event):
+        self.clicked.emit(self.id)
+
