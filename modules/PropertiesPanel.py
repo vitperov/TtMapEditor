@@ -19,5 +19,20 @@ class PropertiesPanel(QWidget):
         
     def showSquareProperties(self, squareModel):
         [x, y] = squareModel.getXY()
-        self.coordinatesLbl.setText("#X: " + str(x) + " Y: " + str(y))
+        self.coordinatesLbl.setText("X: " + str(x) + " Y: " + str(y))
+        #properties = squareModel.properties
+        for propName, propValue in squareModel.properties.items():
+            groupbox = QGroupBox(propName)
+            self._layout.addWidget(groupbox)
+            vbox = QHBoxLayout()
+            groupbox.setLayout(vbox)
+            
+            valType = type(propValue)
+            # assume valType is Enum
+            nValues = len(valType)
+            for option in list(valType):
+                print("    " + option.name + "->" + str(option.value))
+                btn = QRadioButton(option.name)
+                btn.setChecked(option.value == propValue)
+                vbox.addWidget(btn)
 

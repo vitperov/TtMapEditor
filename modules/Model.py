@@ -1,7 +1,7 @@
 from enum import Enum
 
 class HouseSquareType(Enum):
-    Empry   = 0
+    Empty   = 0
     Corner  = 1
     Wall    = 2
     Door    = 3
@@ -26,9 +26,19 @@ class HouseMapSquareModel:
         #self.rotationsList = [0, 90, 180, 370]
         #self.territoriesList = ['None', 'Kitchen', 'Bedroom', 'LivingRoom', 'StoreRoom']
 
-        self.typeId         = 0
-        self.rotationId     = 0
-        self.territoryId    = 0
+        #self.typeId         = 0
+        #self.rotationId     = 0
+        #self.territoryId    = 0
+        
+        #print(len(HouseSquareType))
+        #print(list(HouseSquareType))
+        #for val in list(HouseSquareType):
+        #    print("    " + val.name + "->" + str(val.value))
+        
+        self.properties = dict()
+        self.properties['type']      = HouseSquareType.Empty
+        self.properties['rotation']  = HouseSquareRotation.deg0
+        self.properties['territory'] = HouseSquareTerritory.Empty
 
     def getXY(self):
         y = int(self.id / 1000)
