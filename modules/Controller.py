@@ -33,6 +33,7 @@ class Controller:
         """Connect signals and slots."""
         #self._view.houseMapPanel.activeItemChanged.connect(self._view.propPanel.showItem)
         self._view.houseMapPanel.activeItemChanged.connect(self._onHouseSquareClicked)
+        #self._view.propPanel.
         
         
     def _onHouseSquareClicked(self, squareId):

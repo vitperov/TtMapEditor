@@ -1,4 +1,5 @@
 from enum import Enum
+from PyQt5.QtCore import *
 
 class HouseSquareType(Enum):
     Empty   = 0
@@ -19,8 +20,11 @@ class HouseSquareTerritory(Enum):
     LivingRoom  = 3
     StoreRoom   = 4
 
-class HouseMapSquareModel:
+class HouseMapSquareModel(QObject):
+    changed = pyqtSignal()
+    
     def __init__(self, id):
+        QObject.__init__(self)
         self.id = id
         #self.typesList = ['None,', 'Corner', 'Wall', 'Door', 'Window']
         #self.rotationsList = [0, 90, 180, 370]
@@ -45,6 +49,11 @@ class HouseMapSquareModel:
         x = self.id % 1000
 
         return [x, y]
+        
+    def setProperty(self, name, value):
+        print("setProperty " + name + ": " + str(value))
+        self.properties[name] = value;
+        self.changed.emit()
 
 
 class HouseMapModel:

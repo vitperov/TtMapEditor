@@ -34,6 +34,9 @@ class HouseMapItem(QWidget):
     def setModel(self, model):
         self._mode = model
         
+    def updateState(self):
+        print("Updating widget state")
+        
     def mousePressEvent(self, event):
         self.clicked.emit(self.id)
 

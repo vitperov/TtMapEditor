@@ -4,6 +4,8 @@ from pyqtgraph.Qt import QtCore, QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
+from functools import partial
+
 
 class PropertiesPanel(QWidget):
     def __init__(self):
@@ -30,15 +32,21 @@ class PropertiesPanel(QWidget):
         for propName, propValue in squareModel.properties.items():
             groupbox = QGroupBox(propName)
             self._propertiesLayout.addWidget(groupbox)
-            vbox = QHBoxLayout()
-            groupbox.setLayout(vbox)
-            
+            box = QVBoxLayout()
+            groupbox.setLayout(box)
+            #print(propName + "->" + str(propValue.value))
+
             valType = type(propValue)
             # assume valType is Enum
             nValues = len(valType)
             for option in list(valType):
                 #print("    " + option.name + "->" + str(option.value))
                 btn = QRadioButton(option.name)
-                btn.setChecked(option.value == propValue)
-                vbox.addWidget(btn)
+                #print("    Checked = " + str(option.value == propValue.value))
+                if option.value == propValue.value:
+                    btn.setChecked(True)
+                #btn.setChecked(option.value == propValue)
+                box.addWidget(btn)
+                
+                btn.toggled.connect(partial(squareModel.setProperty, propName, option.value))
 
