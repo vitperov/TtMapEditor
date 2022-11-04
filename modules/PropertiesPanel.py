@@ -9,21 +9,27 @@ class PropertiesPanel(QWidget):
     def __init__(self):
         QWidget.__init__(self)
         
-        self._model = None
-        self._layout = QVBoxLayout()
-        self.setLayout(self._layout)
+        #self._model = None
+        layout = QVBoxLayout()
+        self.setLayout(layout)
 
         self.coordinatesLbl = QLabel("X: ? Y: ?")
-        self._layout.addWidget(self.coordinatesLbl)
+        layout.addWidget(self.coordinatesLbl)
+        
+        self._propertiesLayout = QVBoxLayout()
+        layout.addLayout(self._propertiesLayout)
         
         
     def showSquareProperties(self, squareModel):
         [x, y] = squareModel.getXY()
         self.coordinatesLbl.setText("X: " + str(x) + " Y: " + str(y))
-        #properties = squareModel.properties
+        
+        for i in reversed(range(self._propertiesLayout.count())): 
+            self._propertiesLayout.itemAt(i).widget().setParent(None)
+
         for propName, propValue in squareModel.properties.items():
             groupbox = QGroupBox(propName)
-            self._layout.addWidget(groupbox)
+            self._propertiesLayout.addWidget(groupbox)
             vbox = QHBoxLayout()
             groupbox.setLayout(vbox)
             
@@ -31,7 +37,7 @@ class PropertiesPanel(QWidget):
             # assume valType is Enum
             nValues = len(valType)
             for option in list(valType):
-                print("    " + option.name + "->" + str(option.value))
+                #print("    " + option.name + "->" + str(option.value))
                 btn = QRadioButton(option.name)
                 btn.setChecked(option.value == propValue)
                 vbox.addWidget(btn)
