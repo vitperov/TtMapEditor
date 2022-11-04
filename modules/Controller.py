@@ -17,20 +17,16 @@ class Stream(QtCore.QObject):
         self.newText.emit(str(text))
 
 class Controller:
-    def __init__(self, view, model):
+    def __init__(self, view, houseModel):
         """Controller initializer."""
         self._view = view
-        self._model = model
+        self._houseModel = houseModel
 
-        self._populateView()
+        self._provideModel()
         self._connectSignals()
         
-    def _onUpdateFirmwareClicked(self):
-        filename = self._view.firmwareEdit.text()
-        self._model.updateFirmware(filename)
-
-    def _populateView(self):
-        self._view.houseMapPanel.populateModelVariables(self._model)
+    def _provideModel(self):
+        self._view.houseMapPanel.setModel(self._houseModel)
         
 
     def _connectSignals(self):

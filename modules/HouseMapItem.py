@@ -10,7 +10,8 @@ class HouseMapItem(QWidget):
         QWidget.__init__(self)
         
         self.id = id
-        self._tilesize = 64;
+        self._model = None
+        self._tilesize = 64
         
         size = QSize(self._tilesize, self._tilesize)
         
@@ -29,6 +30,9 @@ class HouseMapItem(QWidget):
         layout.setContentsMargins(0,0,0,0)
 
         self.setLayout(layout)
+        
+    def setModel(self, model):
+        self._mode = model
         
     def mousePressEvent(self, event):
         self.clicked.emit(self.id)

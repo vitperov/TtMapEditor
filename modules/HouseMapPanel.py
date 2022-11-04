@@ -14,50 +14,30 @@ class HouseMapPanel(QWidget):
     def __init__(self, height, width):
         QWidget.__init__(self)
         self._layout = QGridLayout()
-        self._items = {}
+        #self._items = {}
+        self._model = None
+
         self.setLayout(self._layout)
         self._layout.setContentsMargins(0,0,0,0)
         self._layout.setMargin(0);
         self._layout.setSpacing(0);
 
-        for column in range(width):
-            for row in range(height):
-                id = row*1000 + column
-                item = HouseMapItem(id)
-                self._layout.addWidget(item, row, column)
-                item.clicked.connect(self.onItemClicked)
-                
         self._layout.setRowStretch(height, 1)
         self._layout.setColumnStretch(width, 1)
-                
-    #def _onSetClicked(self, name):
-    #    if self._model is None:
-    #        raise NoModelDefinedException
-    #
-    #    value = self._variables[name].edit.text()
-    #    self._model.setVariable(name, value)
-    
+
     def onItemClicked(self, itemId):
         print("Item clicked Id=" + str(itemId))
         self.activeItemChanged.emit(itemId)
 
 
-    def populateModelVariables(self, model):
-        print("populateModelVariables")
+    def setModel(self, model):
+        self._model = model
+        [h, w] = self._model.size()
+        mapSquares = self._model.getAllSquares().items()
 
-    def _connectVariables(self):
-        for name in self._variables:
-            #FIXME: getters and setters should be implemented inside item class
-            try:
-                self._variables[name].setBtn.clicked.connect(partial(self._onSetClicked, name))
-            except Exception:
-                pass
-            try:
-                self._variables[name].getBtn.clicked.connect(partial(self._onGetClicked, name))
-            except Exception:
-                pass
-            try:
-                self._variables[name].cmdBtn.clicked.connect(partial(self._onCmdClicked, name))
-            except Exception:
-                pass
-
+        for id, squareModel in mapSquares:
+            [x, y] = squareModel.getXY()
+            widget = HouseMapItem(squareModel.id)
+            self._layout.addWidget(widget, y, x)
+            widget.setModel(squareModel)
+            widget.clicked.connect(self.onItemClicked)
