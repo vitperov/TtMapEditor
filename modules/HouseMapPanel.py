@@ -37,7 +37,8 @@ class HouseMapPanel(QWidget):
 
         for id, squareModel in mapSquares:
             [x, y] = squareModel.getXY()
-            widget = HouseMapItem(squareModel.id)
+            widget = HouseMapItem(squareModel)
             self._layout.addWidget(widget, y, x)
-            widget.setModel(squareModel)
+            #widget.setModel(squareModel)
             widget.clicked.connect(self.onItemClicked)
+            squareModel.changed.connect(widget.updateState)

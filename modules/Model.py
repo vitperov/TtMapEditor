@@ -54,6 +54,9 @@ class HouseMapSquareModel(QObject):
         print("setProperty " + name + ": " + str(value))
         self.properties[name] = value;
         self.changed.emit()
+        
+    def getProperty(self, name):
+        return self.properties[name]
 
 
 class HouseMapModel:

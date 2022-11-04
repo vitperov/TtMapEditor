@@ -48,5 +48,5 @@ class PropertiesPanel(QWidget):
                 #btn.setChecked(option.value == propValue)
                 box.addWidget(btn)
                 
-                btn.toggled.connect(partial(squareModel.setProperty, propName, option.value))
+                btn.pressed.connect(partial(squareModel.setProperty, propName, option.value))
 
