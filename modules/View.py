@@ -8,6 +8,7 @@ from PyQt5.QtCore import *
 
 from modules.HouseMapPanel import *
 from modules.PropertiesPanel import *
+from modules.ActionsPanel import *
 
 
 class Window(QMainWindow):
@@ -16,19 +17,27 @@ class Window(QMainWindow):
         """Initializer."""
         super().__init__()
         self.setWindowTitle('TT Map editor')
+        
+        self._createWidgets()
 
         self._centralWidget = QWidget(self)
         self.setCentralWidget(self._centralWidget)
         self._centralWidget.setLayout(self._createLayout())
-
-    def _createLayout(self):
-        layout = QGridLayout()
-
+        
+    def _createWidgets(self):
         self.houseMapPanel = HouseMapPanel(5, 5)
         self.propPanel = PropertiesPanel()
+        self.actionsPanel = ActionsPanel() 
+
+    def _createLayout(self):
+        layout = QVBoxLayout()
         
-        layout.addWidget(self.houseMapPanel, 0, 0)
-        layout.addWidget(self.propPanel, 0, 1)
+        layout.addWidget(self.actionsPanel)
+        mapLayout = QHBoxLayout()
+        layout.addLayout(mapLayout)
+
+        mapLayout.addWidget(self.houseMapPanel)
+        mapLayout.addWidget(self.propPanel)
 
         return layout
 
