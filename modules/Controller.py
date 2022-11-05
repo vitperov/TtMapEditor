@@ -34,7 +34,11 @@ class Controller:
         #self._view.houseMapPanel.activeItemChanged.connect(self._view.propPanel.showItem)
         self._view.houseMapPanel.activeItemChanged.connect(self._onHouseSquareClicked)
         #self._view.propPanel.
+        self._view.actionsPanel.newMap.connect(self._houseModel.newMap)
+        self._view.actionsPanel.loadMap.connect(self._houseModel.loadMap)
+        self._view.actionsPanel.saveMap.connect(self._houseModel.saveMap)
         
+        self._houseModel.updatedEntireMap.connect(self._view.houseMapPanel.redrawAll)
         
     def _onHouseSquareClicked(self, squareId):
         model = self._houseModel.getSquare(squareId)

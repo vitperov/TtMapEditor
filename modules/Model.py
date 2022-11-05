@@ -49,29 +49,40 @@ class HouseMapSquareModel(QObject):
         return self.properties[name]
 
 
-class HouseMapModel:
+class HouseMapModel(QObject):
+    updatedEntireMap = pyqtSignal()
     def __init__(self):
-        """Model initializer."""
+        QObject.__init__(self)
+        
         self.width = 0
         self.height = 0
         self._squares = dict()
 
-    def initMap(self, h, w):
+    def newMap(self, h, w):
+        print("ne map model")
         self.width = w
         self.height = h
         for row in range(h):
             for column in range(w):
                 id = row*1000 + column
                 self._squares[id] = HouseMapSquareModel(id)
+                
+        self.updatedEntireMap.emit()
 
     def getSquare(self, id):
         return self._squares[id]
-
 
     def getAllSquares(self):
         return self._squares
 
     def size(self):
         return [self.height, self.width]
+
+    def saveMap(self, filename):
+        print("Saving map to " + filename)
+        
+    def loadMap(self, filename):
+        print("Loading map to " + filename)
+        self.updatedEntireMap.emit()
 
 

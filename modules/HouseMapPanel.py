@@ -32,6 +32,8 @@ class HouseMapPanel(QWidget):
 
     def setModel(self, model):
         self._model = model
+        
+    def redrawAll(self):
         [h, w] = self._model.size()
         mapSquares = self._model.getAllSquares().items()
 

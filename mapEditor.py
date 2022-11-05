@@ -9,7 +9,6 @@ from modules.Controller import *
 
 def main():
     app = QApplication(sys.argv)
-    #app.setStyle(QStyleFactory.create("Fusion"));
 
     view = Window()
     view.show()
@@ -19,7 +18,7 @@ def main():
         
 
     model = HouseMapModel()
-    model.initMap(5, 6)
+    #model.initMap(5, 6)
 
     controller = Controller(view=view, houseModel=model)
 

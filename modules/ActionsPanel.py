@@ -7,9 +7,9 @@ from PyQt5.QtWidgets import *
 from functools import partial
 
 class ActionsPanel(QWidget):
-    createNewMap    = pyqtSignal()
-    saveMap         = pyqtSignal(str)
-    loadMap         = pyqtSignal()
+    newMap      = pyqtSignal(int, int)
+    saveMap     = pyqtSignal(str)
+    loadMap     = pyqtSignal()
 
     def __init__(self):
         QWidget.__init__(self)
@@ -26,12 +26,12 @@ class ActionsPanel(QWidget):
         self._layout.addWidget(self._saveBtn)
         self._layout.addStretch()
 
-        #self._newBtn.clicked.connect(self._newFile)
-        self._newBtn.clicked.connect(self.createNewMap.emit)
+        self._newBtn.clicked.connect(self._newFile)
         self._saveBtn.clicked.connect(self._saveFile)
 
     def _newFile(self):
-        self.createNewMap.emit()
+        print("new map")
+        self.newMap.emit(8, 8)
 
     def _saveFile(self):
         name = QtGui.QFileDialog.getSaveFileName(self, 'Save File', filter='*.house')
