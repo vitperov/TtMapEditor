@@ -35,7 +35,7 @@ class Controller:
         self._view.houseMapPanel.activeItemChanged.connect(self._onHouseSquareClicked)
         #self._view.propPanel.
         self._view.actionsPanel.newMap.connect(self._houseModel.newMap)
-        self._view.actionsPanel.loadMap.connect(self._houseModel.loadMap)
+        self._view.actionsPanel.openMap.connect(self._houseModel.openMap)
         self._view.actionsPanel.saveMap.connect(self._houseModel.saveMap)
         
         self._houseModel.updatedEntireMap.connect(self._view.houseMapPanel.redrawAll)

@@ -9,7 +9,7 @@ from functools import partial
 class ActionsPanel(QWidget):
     newMap      = pyqtSignal(int, int)
     saveMap     = pyqtSignal(str)
-    loadMap     = pyqtSignal()
+    openMap     = pyqtSignal(str)
 
     def __init__(self):
         QWidget.__init__(self)
@@ -27,6 +27,7 @@ class ActionsPanel(QWidget):
         self._layout.addStretch()
 
         self._newBtn.clicked.connect(self._newFile)
+        self._openBtn.clicked.connect(self._openFile)
         self._saveBtn.clicked.connect(self._saveFile)
 
     def _newFile(self):
@@ -39,4 +40,7 @@ class ActionsPanel(QWidget):
         print(name)
         self.saveMap.emit(name)
 
-
+    def _openFile(self):
+        name = QtGui.QFileDialog.getOpenFileName(self, 'Open File', filter='*.house')
+        name = name[0]
+        self.openMap.emit(name)

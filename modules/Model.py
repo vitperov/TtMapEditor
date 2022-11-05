@@ -63,10 +63,19 @@ class HouseMapSquareModel(QObject):
         # properties are enums, they can't be directly converted to int
         obj = dict()
         for name, prop in self.properties.items():
-            obj[name] = prop.value
+            value = prop
+            if not isinstance(value, int):
+                value = value.value #FIXME: enum instead
+            obj[name] = value
 
         obj['id'] =  self.id
         return obj
+        
+    def restoreFromJson(self, js):
+        self.id = js['id']
+        self.properties['type']      = js['type']
+        self.properties['rotation']  = js['rotation']
+        self.properties['territory'] = js['territory']
 
 
 class HouseMapModel(QObject):
@@ -79,7 +88,6 @@ class HouseMapModel(QObject):
         self._squares = dict()
 
     def newMap(self, h, w):
-        print("ne map model")
         self.width = w
         self.height = h
         for row in range(h):
@@ -106,8 +114,21 @@ class HouseMapModel(QObject):
         obj = dict()
         obj['version'] = 1
         obj['squares'] = squares
+        obj['width']   = self.width
+        obj['height']  = self.height
 
         return obj
+        
+    def restoreFromJson(self, js):
+        self.width  = js['width']
+        self.height = js['height']
+        
+        self._squares = dict()
+        for id, square in js['squares'].items():
+            obj = HouseMapSquareModel(id)
+            obj.restoreFromJson(square)
+            self._squares[id] = obj
+
 
     def saveMap(self, filename):
         extension = '.house'
@@ -118,9 +139,16 @@ class HouseMapModel(QObject):
         with open(filename, "w") as writeFile:
             json.dump(self.toSerializableObj(), writeFile, indent=4)
 
-
-    def loadMap(self, filename):
+    def openMap(self, filename):
+        extension = '.house'
+        if not filename.endswith(extension):
+            filename = filename + extension
+            
         print("Loading map to " + filename)
+        
+        with open(filename, "r") as readFile:
+            jsObj = json.load(readFile)
+            self.restoreFromJson(jsObj)
+        
         self.updatedEntireMap.emit()
-
 
