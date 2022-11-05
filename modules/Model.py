@@ -6,6 +6,8 @@ class HouseSquareType(Enum):
     Corner  = 1
     Wall    = 2
     Door    = 3
+    Window  = 4
+    Floor   = 5
 
 class HouseSquareRotation(Enum):
     deg0    = 0
@@ -22,23 +24,11 @@ class HouseSquareTerritory(Enum):
 
 class HouseMapSquareModel(QObject):
     changed = pyqtSignal()
-    
+
     def __init__(self, id):
         QObject.__init__(self)
         self.id = id
-        #self.typesList = ['None,', 'Corner', 'Wall', 'Door', 'Window']
-        #self.rotationsList = [0, 90, 180, 370]
-        #self.territoriesList = ['None', 'Kitchen', 'Bedroom', 'LivingRoom', 'StoreRoom']
 
-        #self.typeId         = 0
-        #self.rotationId     = 0
-        #self.territoryId    = 0
-        
-        #print(len(HouseSquareType))
-        #print(list(HouseSquareType))
-        #for val in list(HouseSquareType):
-        #    print("    " + val.name + "->" + str(val.value))
-        
         self.properties = dict()
         self.properties['type']      = HouseSquareType.Empty
         self.properties['rotation']  = HouseSquareRotation.deg0
@@ -49,12 +39,12 @@ class HouseMapSquareModel(QObject):
         x = self.id % 1000
 
         return [x, y]
-        
+
     def setProperty(self, name, value):
         print("setProperty " + name + ": " + str(value))
         self.properties[name] = value;
         self.changed.emit()
-        
+
     def getProperty(self, name):
         return self.properties[name]
 

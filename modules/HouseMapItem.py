@@ -3,6 +3,8 @@ from PyQt5.QtCore import *
 
 from pyqtgraph.Qt import QtCore, QtGui
 
+from modules.Model import *
+
 def rotIdToAngle(rotId):
     return rotId * 90;
 
@@ -20,30 +22,31 @@ class HouseMapItem(QWidget):
 
         self.widget = QtGui.QLabel(self)
 
-        pixmap = QtGui.QPixmap("resources/none.png")
-        scaledPixmap = pixmap.scaled(size, QtCore.Qt.KeepAspectRatio)
-        self.widget.setPixmap(scaledPixmap)
-        self.widget.setFixedSize(size)
-
-        self.widget.setStyleSheet("background-color: lightgray")
-
         self._layout = QVBoxLayout()
         self._layout.addWidget(self.widget)
         self._layout.setContentsMargins(0,0,0,0)
 
         self.setLayout(self._layout)
 
+        self.updateState()
+
 
     def updateState(self):
-        print("Updating widget state")
         sqType      = self._model.getProperty('type')
+        if isinstance(sqType, HouseSquareType):
+            sqType = sqType.value
         rotation    = self._model.getProperty('rotation')
+        if isinstance(rotation, HouseSquareRotation):
+            rotation = rotation.value
         territory   = self._model.getProperty('territory')
 
         self.widget.setParent(None)
         self.widget = QtGui.QLabel(self)
 
-        pixmap = QtGui.QPixmap("resources/none.png")
+
+        sqTypeName = list(HouseSquareType)[sqType].name
+        imgFile = "resources/SquareType/" + sqTypeName + ".png"
+        pixmap = QtGui.QPixmap(imgFile)
         transform = QtGui.QTransform().rotate(rotIdToAngle(rotation))
         size = QSize(self._tilesize, self._tilesize)
         rotatedPixmap = pixmap.transformed(transform, QtCore.Qt.SmoothTransformation)
