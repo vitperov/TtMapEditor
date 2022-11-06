@@ -5,8 +5,8 @@ from pyqtgraph.Qt import QtCore, QtGui
 
 from modules.Model import *
 
-def rotIdToAngle(rotId):
-    return rotId * 90;
+def rotIdToAngle(rotStr):
+    return int(rotStr) * 90;
 
 class HouseMapItem(QWidget):
     clicked = pyqtSignal(int)
@@ -33,18 +33,13 @@ class HouseMapItem(QWidget):
 
     def updateState(self):
         sqType      = self._model.getProperty('type')
-        if isinstance(sqType, HouseSquareType):
-            sqType = sqType.value
         rotation    = self._model.getProperty('rotation')
-        if isinstance(rotation, HouseSquareRotation):
-            rotation = rotation.value
         territory   = self._model.getProperty('territory')
 
         self.widget.setParent(None)
         self.widget = QtGui.QLabel(self)
 
-
-        sqTypeName = list(HouseSquareType)[sqType].name
+        sqTypeName = sqType
         imgFile = "resources/SquareType/" + sqTypeName + ".png"
         pixmap = QtGui.QPixmap(imgFile)
         transform = QtGui.QTransform().rotate(rotIdToAngle(rotation))

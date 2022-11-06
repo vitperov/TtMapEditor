@@ -11,7 +11,6 @@ class PropertiesPanel(QWidget):
     def __init__(self):
         QWidget.__init__(self)
         
-        #self._model = None
         layout = QVBoxLayout()
         self.setLayout(layout)
 
