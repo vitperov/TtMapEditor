@@ -25,7 +25,7 @@ class Window(QMainWindow):
         self._centralWidget.setLayout(self._createLayout())
         
     def _createWidgets(self):
-        self.houseMapPanel = HouseMapPanel(5, 5)
+        self.houseMapPanel = HouseMapPanel()
         self.propPanel = PropertiesPanel()
         self.actionsPanel = ActionsPanel() 
 

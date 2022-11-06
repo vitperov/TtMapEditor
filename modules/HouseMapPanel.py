@@ -11,7 +11,7 @@ from modules.HouseMapItem import *
 class HouseMapPanel(QWidget):
     activeItemChanged = pyqtSignal(int)
 
-    def __init__(self, height, width):
+    def __init__(self):
         QWidget.__init__(self)
         self._layout = QGridLayout()
         #self._items = {}
@@ -21,9 +21,6 @@ class HouseMapPanel(QWidget):
         self._layout.setContentsMargins(0,0,0,0)
         self._layout.setMargin(0);
         self._layout.setSpacing(0);
-
-        self._layout.setRowStretch(height, 1)
-        self._layout.setColumnStretch(width, 1)
 
     def onItemClicked(self, itemId):
         print("Item clicked Id=" + str(itemId))
@@ -44,3 +41,6 @@ class HouseMapPanel(QWidget):
             #widget.setModel(squareModel)
             widget.clicked.connect(self.onItemClicked)
             squareModel.changed.connect(widget.updateState)
+            
+        self._layout.setRowStretch(h, 1)
+        self._layout.setColumnStretch(w, 1)

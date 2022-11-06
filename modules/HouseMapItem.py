@@ -6,7 +6,7 @@ from pyqtgraph.Qt import QtCore, QtGui
 from modules.Model import *
 
 def rotIdToAngle(rotStr):
-    return int(rotStr) * 90;
+    return int(rotStr);
 
 class HouseMapItem(QWidget):
     clicked = pyqtSignal(int)
