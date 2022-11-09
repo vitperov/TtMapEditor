@@ -102,9 +102,9 @@ class HouseMapModel(QObject):
         return [self.height, self.width]
 
     def toSerializableObj(self):
-        squares = dict()
+        squares = list()
         for id, square in self._squares.items():
-            squares[id] = square.toSerializableObj()
+            squares.append(square.toSerializableObj())
 
         obj = dict()
         obj['version'] = 1
@@ -119,8 +119,8 @@ class HouseMapModel(QObject):
         self.height = js['height']
 
         self._squares = dict()
-        for id, square in js['squares'].items():
-            id = int(id)
+        for square in js['squares']:
+            id = int(square['id'])
             obj = HouseMapSquareModel(id)
             obj.restoreFromJson(square)
             self._squares[id] = obj
