@@ -8,7 +8,7 @@ from PyQt5.QtCore import *
 
 from modules.HouseMapPanel import *
 from modules.PropertiesPanel import *
-from modules.ActionsPanel import *
+from modules.MapActionsPanel import *
 
 
 class MapView(QMainWindow):
@@ -24,13 +24,12 @@ class MapView(QMainWindow):
         self._centralWidget.setLayout(self._createLayout())
 
     def _createWidgets(self):
-        #self.actionsPanel = ActionsPanel()
-        print("Stub")
+        self.actionsPanel = MapActionsPanel()
 
     def _createLayout(self):
         layout = QVBoxLayout()
 
-        #layout.addWidget(self.actionsPanel)
+        layout.addWidget(self.actionsPanel)
 
         return layout
 
