@@ -6,6 +6,7 @@ from PyQt5.QtCore import *
 from modules.MapModel import *
 from modules.MapView import *
 from modules.MapController import *
+from modules.MapGenerator import *
 
 def main():
     app = QApplication(sys.argv)
@@ -14,8 +15,9 @@ def main():
     view.show()
 
     model = MapModel()
+    generator = MapGenerator(model)
 
-    controller = MapController(view=view, mapModel=model)
+    controller = MapController(view, model, generator)
 
     exitcode = app.exec_()
 

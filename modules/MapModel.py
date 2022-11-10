@@ -48,9 +48,7 @@ class MapModel(QObject):
         self.height = 0
         self._squares = dict()
 
-    def generateMap(self):
-        h = 44
-        w = 78
+    def newMap(self, w, h):
         self.width = w
         self.height = h
         for row in range(h):
