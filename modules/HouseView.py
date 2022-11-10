@@ -14,7 +14,6 @@ from modules.ActionsPanel import *
 class HouseView(QMainWindow):
     """Main Window."""
     def __init__(self):
-        """Initializer."""
         super().__init__()
         self.setWindowTitle('TT House editor')
         

@@ -12,20 +12,12 @@ def main():
 
     view = HouseView()
     view.show()
-    
-    #stream = Stream(newText=view.consoleWrite)
-    #sys.stdout = stream
-        
 
     model = HouseMapModel()
-    #model.initMap(5, 6)
 
     controller = HouseController(view=view, houseModel=model)
 
     exitcode = app.exec_()
-    
-    #del stream
-    sys.stdout = sys.__stdout__
 
     sys.exit(exitcode)
 

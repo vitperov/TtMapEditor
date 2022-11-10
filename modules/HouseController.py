@@ -10,15 +10,8 @@ import numpy
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
-class Stream(QtCore.QObject):
-    newText = QtCore.pyqtSignal(str)
-
-    def write(self, text):
-        self.newText.emit(str(text))
-
 class HouseController:
     def __init__(self, view, houseModel):
-        """Controller initializer."""
         self._view = view
         self._houseModel = houseModel
 
@@ -30,10 +23,7 @@ class HouseController:
         
 
     def _connectSignals(self):
-        """Connect signals and slots."""
-        #self._view.houseMapPanel.activeItemChanged.connect(self._view.propPanel.showItem)
         self._view.houseMapPanel.activeItemChanged.connect(self._onHouseSquareClicked)
-        #self._view.propPanel.
         self._view.actionsPanel.newMap.connect(self._houseModel.newMap)
         self._view.actionsPanel.openMap.connect(self._houseModel.openMap)
         self._view.actionsPanel.saveMap.connect(self._houseModel.saveMap)
