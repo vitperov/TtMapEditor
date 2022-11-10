@@ -6,8 +6,7 @@ import random
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
-from modules.HouseMapPanel import *
-from modules.PropertiesPanel import *
+from modules.MapWidget import *
 from modules.MapActionsPanel import *
 
 
@@ -25,11 +24,13 @@ class MapView(QMainWindow):
 
     def _createWidgets(self):
         self.actionsPanel = MapActionsPanel()
+        self.mapWidget = MapWidget()
 
     def _createLayout(self):
         layout = QVBoxLayout()
 
         layout.addWidget(self.actionsPanel)
+        layout.addWidget(self.mapWidget)
 
         return layout
 

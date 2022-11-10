@@ -15,14 +15,16 @@ class MapController:
         self._view = view
         self._mapModel = mapModel
 
-        #self._provideModel()
+        self._provideModel()
         self._connectSignals()
 
-    #def _provideModel(self):
-    #    self._view.houseMapPanel.setModel(self._houseModel)
+    def _provideModel(self):
+        self._view.mapWidget.setModel(self._mapModel)
 
+        self._view.actionsPanel.generateMap.connect(self._mapModel.generateMap)
+        self._view.actionsPanel.saveMap.connect(self._mapModel.saveMap)
 
     def _connectSignals(self):
-        #self._view.mapPanel.activeItemChanged.connect(self._onHouseSquareClicked)
-        #self._mapModel.updatedEntireMap.connect(self._view.houseMapPanel.redrawAll)
+        #self._view.mapWidget.activeItemChanged.connect(self._onHouseSquareClicked)
+        self._mapModel.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
         print("Stub")
