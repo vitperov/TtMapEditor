@@ -3,6 +3,13 @@ from PyQt5.QtCore import *
 
 import json
 
+class SquareType(str, Enum):
+    Empty   = 'Empty'
+    Grass   = 'Grass'
+    Forest  = 'Forest'
+    Road    = 'Road'
+    House   = 'House'
+    Shed    = 'Shed'
 
 class MapSquareModel(QObject):
     changed = pyqtSignal()
@@ -12,6 +19,10 @@ class MapSquareModel(QObject):
         self.id = id
 
         self.classnames = dict()
+        self.classnames['type']      = SquareType
+
+        self.properties = dict()
+        self.properties['type']      = SquareType.Empty
 
     def getXY(self):
         y = int(self.id / 1000)
@@ -20,7 +31,6 @@ class MapSquareModel(QObject):
         return [x, y]
 
     def setProperty(self, name, value):
-        print("setProperty " + name + ": " + str(value))
         variableClass = self.classnames[name]
         self.properties[name] = variableClass(value);
         self.changed.emit()
@@ -60,6 +70,11 @@ class MapModel(QObject):
 
     def getSquare(self, id):
         return self._squares[id]
+
+
+    def getSquareXY(self, row, column):
+        id = row*1000 + column
+        return self.getSquare(id)
 
     def getAllSquares(self):
         return self._squares

@@ -30,7 +30,9 @@ class MapItem(QWidget):
         self.widget.setParent(None)
         self.widget = QtGui.QLabel(self)
 
-        sqTypeName = 'Empty16'
+        sqType      = self._model.getProperty('type')
+        sqTypeName = sqType
+
         imgFile = "resources/MapSquare/" + sqTypeName + ".png"
         pixmap = QtGui.QPixmap(imgFile)
         #transform = QtGui.QTransform().rotate(rotIdToAngle(rotation))
