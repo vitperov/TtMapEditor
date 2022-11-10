@@ -11,12 +11,12 @@ from modules.PropertiesPanel import *
 from modules.ActionsPanel import *
 
 
-class Window(QMainWindow):
+class HouseView(QMainWindow):
     """Main Window."""
     def __init__(self):
         """Initializer."""
         super().__init__()
-        self.setWindowTitle('TT Map editor')
+        self.setWindowTitle('TT House editor')
         
         self._createWidgets()
 

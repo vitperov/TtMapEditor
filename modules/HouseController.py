@@ -16,7 +16,7 @@ class Stream(QtCore.QObject):
     def write(self, text):
         self.newText.emit(str(text))
 
-class Controller:
+class HouseController:
     def __init__(self, view, houseModel):
         """Controller initializer."""
         self._view = view

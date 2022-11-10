@@ -3,7 +3,7 @@ from PyQt5.QtCore import *
 
 from pyqtgraph.Qt import QtCore, QtGui
 
-from modules.Model import *
+from modules.HouseModel import *
 
 def rotIdToAngle(rotStr):
     return int(rotStr);
