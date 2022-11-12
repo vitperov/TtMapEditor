@@ -21,6 +21,7 @@ class MapGenerator():
 
         # TODO: randomly choose house
         self._houseSize = AreaSize(7, 7)
+        self._houseProb = 0.9
 
         self._shedSize = AreaSize(2, 2)
         self._shedProb = 0.5 #probability
@@ -70,6 +71,11 @@ class MapGenerator():
                 self.genZone(startPt)
 
     def genZone(self, startPt):
+        generateHouse = (random() < self._houseProb)
+        
+        if not generateHouse:
+            return # it it's no house, no need to generate shed
+        
         zoneKeepout = 1
         houseKeepout = 1
         
