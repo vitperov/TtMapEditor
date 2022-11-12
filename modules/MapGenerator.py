@@ -1,7 +1,7 @@
 import math
 from random import randrange, random
 
-from modules.MapModel import SquareType
+from modules.MapModel import *
 from modules.GeometryPrimitives import *
 
 class MapGenerator():
@@ -97,6 +97,9 @@ class MapGenerator():
         print("        abs position: " + str(houseAbs))
         self.fillArea(houseAbs, self._houseSize, 'type', SquareType.House)
         
+        houseObj = MapObjectModel(houseAbs.x, houseAbs.y, MapObjectType.House)
+        self._model.addMapObject(houseObj)
+        
         generateShed = (random() < self._shedProb)
         
         if generateShed:
@@ -111,5 +114,8 @@ class MapGenerator():
                 
             shedAbs = shedRel + startPt
             self.fillArea(shedAbs, self._shedSize, 'type', SquareType.Shed)
+            
+            shedObj = MapObjectModel(shedAbs.x, shedAbs.y, MapObjectType.Shed)
+            self._model.addMapObject(shedObj)
         
 

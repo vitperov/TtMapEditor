@@ -11,6 +11,11 @@ class SquareType(str, Enum):
     House   = 'House'
     Shed    = 'Shed'
 
+class MapObjectType(str, Enum):
+    Empty   = 'Empty'
+    House   = 'House'
+    Shed    = 'Shed'
+
 class MapSquareModel(QObject):
     changed = pyqtSignal()
 
@@ -47,6 +52,18 @@ class MapSquareModel(QObject):
 
         obj['id'] =  self.id
         return obj
+        
+        
+class MapObjectModel:
+    def __init__(self, x, y, type):
+        self.classnames = dict()
+        self.classnames['type']      = MapObjectType
+
+        self.properties = dict()
+        self.properties['type']      = type
+        
+        self.x = x
+        self.y = y
 
 
 class MapModel(QObject):
@@ -57,6 +74,7 @@ class MapModel(QObject):
         self.width = 0
         self.height = 0
         self._squares = dict()
+        self._objects = list()
 
     def newMap(self, w, h):
         self.width = w
@@ -81,6 +99,9 @@ class MapModel(QObject):
 
     def size(self):
         return [self.height, self.width]
+        
+    def addMapObject(self, obj):
+        self._objects.append(obj)
 
     def toSerializableObj(self):
         squares = list()
