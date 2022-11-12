@@ -1,5 +1,6 @@
 import math
-from random import randrange
+from copy import copy
+from random import randrange, random
 
 from modules.MapModel import SquareType
 
@@ -8,18 +9,58 @@ class AreaSize:
         self.w = w
         self.h = h
 
+    def __repr__(self):
+        return "(" + str(self.w) + ", " + str(self.h) + ")"
+
 class Point:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        
+
     def __add__(self, pt):
-        return Point(self.x + pt.x, 
+        return Point(self.x + pt.x,
                      self.y + pt.y)
 
     def __repr__(self):
         return "(" + str(self.x) + ", " + str(self.y) + ")"
 
+class Rectangle:
+    def __init__(self, pt, sz):
+        self.pt = copy(pt)
+        self.sz = copy(sz)
+        
+    def __repr__(self):
+        return "[pt:" + str(self.pt) + ", sz:" + str(self.sz) + "]"
+        
+    def expand(self, value):
+        self.pt.x -= value
+        self.pt.y -= value
+        self.sz.w += value
+        self.sz.h += value
+        
+    def shrink(self, value):
+        # TODO check null size
+        self.pt.x += value
+        self.pt.y += value
+        self.sz.w -= value
+        self.sz.h -= value
+        
+    def isRectInside(self, rect):
+        return ((rect.pt.x >= self.pt.x) and
+                (rect.pt.y >= self.pt.y) and
+                (rect.pt.x + rect.sz.w <= self.pt.x + self.sz.w) and
+                (rect.pt.y + rect.sz.h <= self.pt.y + self.sz.h) )
+               
+    def isRectPartiallyInside(self, rect):
+        return (self.isPointInside(rect.pt) or
+                self.isPointInside(Point(rect.pt.x + rect.sz.w, rect.pt.y + rect.sz.h)))
+               
+               
+    def isPointInside(self, pt):
+        return ((pt.x >= self.pt.x) and
+                (pt.y >= self.pt.y) and
+                (pt.x <= self.pt.x + self.sz.w) and
+                (pt.y <= self.pt.y + self.sz.h) )
 
 class MapGenerator():
     def __init__(self, model):
@@ -38,6 +79,9 @@ class MapGenerator():
 
         # TODO: randomly choose house
         self._houseSize = AreaSize(7, 7)
+
+        self._shedSize = AreaSize(1, 1)
+        self._shedProb = 0.5 #probability
 
     def generateMap(self):
         print("Generating map size=" + str(self._h) + "x" + str(self._w))
@@ -84,15 +128,38 @@ class MapGenerator():
 
     def genZone(self, startPt):
         zoneKeepout = 1
-        xRange = self._zoneSize.w - 2*zoneKeepout - self._houseSize.w
-        yRange = self._zoneSize.h - 2*zoneKeepout - self._houseSize.h
+        houseKeepout = 1
+        
+        zoneRect = Rectangle(Point(0,0), self._zoneSize)
+        zoneRect.shrink(zoneKeepout)
+        print("    Shrinked rect=" + str(zoneRect))
+        
+        def genRandomObjPlace(zoneRect, objSize):
+            x = randrange(zoneRect.pt.x, zoneRect.pt.x + zoneRect.sz.w - objSize.w)
+            y = randrange(zoneRect.pt.y, zoneRect.pt.y + zoneRect.sz.h - objSize.h)
+            return Point(x, y)
 
-        houseRelative = Point(randrange(0,xRange) + zoneKeepout,
-                              randrange(0, yRange)+ zoneKeepout)
+        houseRelative = genRandomObjPlace(zoneRect, self._houseSize)
         print("    House placed at: " + str(houseRelative))
-        
+
         houseAbs = houseRelative + startPt;
-        
+
         print("        abs position: " + str(houseAbs))
         self.fillArea(houseAbs, self._houseSize, 'type', SquareType.House)
+        
+        generateShed = (random() < self._shedProb)
+        
+        if generateShed:
+            houseRectRel = Rectangle(houseRelative, self._houseSize)
+            houseRectRel.expand(houseKeepout)
+        
+            placeOk = False
+            while not placeOk:
+                shedRel = genRandomObjPlace(zoneRect, self._shedSize)
+                shedRect = Rectangle(shedRel, self._shedSize)
+                placeOk = not houseRectRel.isRectPartiallyInside(shedRect)
+                
+            shedAbs = shedRel + startPt
+            self.fillArea(shedAbs, self._shedSize, 'type', SquareType.Shed)
+        
 
