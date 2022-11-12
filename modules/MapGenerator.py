@@ -22,7 +22,7 @@ class MapGenerator():
         # TODO: randomly choose house
         self._houseSize = AreaSize(7, 7)
 
-        self._shedSize = AreaSize(1, 1)
+        self._shedSize = AreaSize(2, 2)
         self._shedProb = 0.5 #probability
 
     def generateMap(self):
@@ -66,6 +66,7 @@ class MapGenerator():
                     startPt.y += self._roadWidth;
                     print("    -->Add road offset")
 
+                print("    startPt=" + str(startPt))
                 self.genZone(startPt)
 
     def genZone(self, startPt):
@@ -73,6 +74,7 @@ class MapGenerator():
         houseKeepout = 1
         
         zoneRect = Rectangle(Point(0,0), self._zoneSize)
+        #print("    Orig rect=" + str(zoneRect))
         zoneRect.shrink(zoneKeepout)
         print("    Shrinked rect=" + str(zoneRect))
         

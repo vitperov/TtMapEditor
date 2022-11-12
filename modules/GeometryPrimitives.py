@@ -17,6 +17,10 @@ class Point:
         return Point(self.x + pt.x,
                      self.y + pt.y)
 
+    def __iadd__(self, pt):
+        return Point(self.x + pt.x,
+                     self.y + pt.y)
+
     def __repr__(self):
         return "(" + str(self.x) + ", " + str(self.y) + ")"
 
