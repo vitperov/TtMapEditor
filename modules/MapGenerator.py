@@ -25,6 +25,8 @@ class MapGenerator():
 
         self._shedSize = AreaSize(2, 2)
         self._shedProb = 0.5 #probability
+        
+        self._currentZoneId = 0
 
     def generateMap(self):
         print("Generating map size=" + str(self._h) + "x" + str(self._w))
@@ -43,12 +45,15 @@ class MapGenerator():
 
     def fillEverythingGrass(self):
         self.fillArea(Point(0,0), AreaSize(self._w, self._h), 'type', SquareType.Grass)
+        
+    def fillAreaBorder(self, startPt, size, type):
+        self.fillArea(startPt,                                  AreaSize(size.w, 1), 'type', type)
+        self.fillArea(Point(startPt.x ,startPt.y + size.h - 1), AreaSize(size.w, 1), 'type', type)
+        self.fillArea(startPt,                                  AreaSize(1, size.h), 'type', type)
+        self.fillArea(Point(startPt.x + size.w - 1, startPt.y), AreaSize(1, size.h), 'type', type)
 
     def genKeepOutForest(self):
-        self.fillArea(Point(0,0),           AreaSize(self._w, 1), 'type', SquareType.Forest)
-        self.fillArea(Point(0,self._h -1),  AreaSize(self._w, 1), 'type', SquareType.Forest)
-        self.fillArea(Point(0,0),           AreaSize(1, self._h), 'type', SquareType.Forest)
-        self.fillArea(Point(self._w -1, 0), AreaSize(1, self._h), 'type', SquareType.Forest)
+        self.fillAreaBorder(Point(0,0),  AreaSize(self._w, self._h), SquareType.Forest)
 
     def genRoad(self):
         #FIXME: do road after every zone height
@@ -59,8 +64,8 @@ class MapGenerator():
         for row in range(self._rows):
             for column in range(self._columns):
                 print("Generating zone. Row=" + str(row) + " column=" + str(column))
-                startPt = Point(column * self._zoneSize.w,
-                                row * self._zoneSize.h)
+                startPt = Point(column * self._zoneSize.w + self._forestKeepOut,
+                                row * self._zoneSize.h + self._forestKeepOut)
 
                 #if (row != 0) and (row != self._rows - 1):
                 if row != 0:
@@ -69,8 +74,12 @@ class MapGenerator():
 
                 print("    startPt=" + str(startPt))
                 self.genZone(startPt)
+                self._currentZoneId += 1
 
     def genZone(self, startPt):
+        # Debug zone location
+        #self.fillAreaBorder(startPt, self._zoneSize, SquareType.Empty)
+
         generateHouse = (random() < self._houseProb)
         
         if not generateHouse:
