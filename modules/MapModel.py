@@ -65,6 +65,18 @@ class MapObjectModel:
         self.x = x
         self.y = y
 
+    def toSerializableObj(self):
+        # properties are enums, they can't be directly converted to int
+        obj = dict()
+        for name, prop in self.properties.items():
+            value = prop
+            obj[name] = value
+            
+        obj['x'] =  self.x
+        obj['y'] =  self.y
+
+        return obj
+
 
 class MapModel(QObject):
     updatedEntireMap = pyqtSignal()
@@ -107,10 +119,15 @@ class MapModel(QObject):
         squares = list()
         for id, square in self._squares.items():
             squares.append(square.toSerializableObj())
+            
+        objects = list()
+        for obj in self._objects:
+            objects.append(obj.toSerializableObj())
 
         obj = dict()
         obj['version'] = 1
         obj['squares'] = squares
+        obj['objects'] = objects
         obj['width']   = self.width
         obj['height']  = self.height
 
@@ -128,7 +145,7 @@ class MapModel(QObject):
             self._squares[id] = obj
 
     def saveMap(self, filename):
-        extension = '.map'
+        extension = '.json'
         if not filename.endswith(extension):
             filename = filename + extension
 
@@ -137,7 +154,7 @@ class MapModel(QObject):
             json.dump(self.toSerializableObj(), writeFile, indent=4)
 
     def openMap(self, filename):
-        extension = '.map'
+        extension = '.json'
         if not filename.endswith(extension):
             filename = filename + extension
 
