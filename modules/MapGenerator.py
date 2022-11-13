@@ -1,7 +1,7 @@
 import math
 from random import randrange, random
 
-from modules.MapModel import *
+from modules.TerrainMapModel import *
 from modules.GeometryPrimitives import *
 
 class MapGenerator():

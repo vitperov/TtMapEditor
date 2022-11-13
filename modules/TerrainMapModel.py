@@ -78,7 +78,7 @@ class MapObjectModel:
         return obj
 
 
-class MapModel(QObject):
+class TerrainMapModel(QObject):
     updatedEntireMap = pyqtSignal()
     def __init__(self):
         QObject.__init__(self)
