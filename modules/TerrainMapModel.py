@@ -1,7 +1,7 @@
 from enum import Enum
 from PyQt5.QtCore import *
 
-import json
+from modules.MapModelGeneral import *
 
 class SquareType(str, Enum):
     Empty   = 'Empty'
@@ -53,7 +53,7 @@ class MapSquareModel(QObject):
         obj['id'] =  self.id
         return obj
         
-        
+
 class MapObjectModel:
     def __init__(self, x, y, type):
         self.classnames = dict()
@@ -77,92 +77,13 @@ class MapObjectModel:
 
         return obj
 
-
-class TerrainMapModel(QObject):
+class TerrainMapModel(MapModelGeneral, QObject):
     updatedEntireMap = pyqtSignal()
     def __init__(self):
+        MapModelGeneral.__init__(self, MapSquareModel)
         QObject.__init__(self)
-
-        self.width = 0
-        self.height = 0
-        self._squares = dict()
-        self._objects = list()
-
-    def newMap(self, w, h):
-        self.width = w
-        self.height = h
-        for row in range(h):
-            for column in range(w):
-                id = row*1000 + column
-                self._squares[id] = MapSquareModel(id)
-
-        self.updatedEntireMap.emit()
-
-    def getSquare(self, id):
-        return self._squares[id]
-
-
-    def getSquareXY(self, row, column):
-        id = row*1000 + column
-        return self.getSquare(id)
-
-    def getAllSquares(self):
-        return self._squares
-
-    def size(self):
-        return [self.height, self.width]
         
-    def addMapObject(self, obj):
-        self._objects.append(obj)
-
-    def toSerializableObj(self):
-        squares = list()
-        for id, square in self._squares.items():
-            squares.append(square.toSerializableObj())
-            
-        objects = list()
-        for obj in self._objects:
-            objects.append(obj.toSerializableObj())
-
-        obj = dict()
-        obj['version'] = 1
-        obj['squares'] = squares
-        obj['objects'] = objects
-        obj['width']   = self.width
-        obj['height']  = self.height
-
-        return obj
-
-    def restoreFromJson(self, js):
-        self.width  = js['width']
-        self.height = js['height']
-
-        self._squares = dict()
-        for square in js['squares']:
-            id = int(square['id'])
-            obj = HouseMapSquareModel(id)
-            obj.restoreFromJson(square)
-            self._squares[id] = obj
-
-    def saveMap(self, filename):
-        extension = '.json'
-        if not filename.endswith(extension):
-            filename = filename + extension
-
-        print("Saving map to " + filename)
-        with open(filename, "w") as writeFile:
-            json.dump(self.toSerializableObj(), writeFile, indent=4)
-
-    def openMap(self, filename):
-        extension = '.json'
-        if not filename.endswith(extension):
-            filename = filename + extension
-
-        print("Loading map to " + filename)
-
-        with open(filename, "r") as readFile:
-            jsObj = json.load(readFile)
-            self.restoreFromJson(jsObj)
-
+        self.setUpdatedCallback(self._updateeEntireMap)
+        
+    def _updateeEntireMap(self):
         self.updatedEntireMap.emit()
-
