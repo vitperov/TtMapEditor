@@ -2,7 +2,7 @@ from enum import Enum
 
 import json
 
-       
+
 class MapModelGeneral():
     def __init__(self, squareModel):
         self._sqareModel = squareModel
@@ -11,7 +11,7 @@ class MapModelGeneral():
         self._squares = dict()
         self._objects = list()
         self._updatedCallback = None
-        
+
     def setUpdatedCallback(self, callback):
         self._updateCallback = callback
 
@@ -39,7 +39,7 @@ class MapModelGeneral():
 
     def size(self):
         return [self.height, self.width]
-        
+
     def addMapObject(self, obj):
         self._objects.append(obj)
 
@@ -47,7 +47,7 @@ class MapModelGeneral():
         squares = list()
         for id, square in self._squares.items():
             squares.append(square.toSerializableObj())
-            
+
         objects = list()
         for obj in self._objects:
             objects.append(obj.toSerializableObj())
@@ -93,5 +93,5 @@ class MapModelGeneral():
             self.restoreFromJson(jsObj)
 
         if self._updateCallback is not None:
-            self._updateCallback() 
+            self._updateCallback()
 

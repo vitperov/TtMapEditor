@@ -35,12 +35,12 @@ class ActionsPanel(QWidget):
         self.newMap.emit(8, 8)
 
     def _saveFile(self):
-        name = QtGui.QFileDialog.getSaveFileName(self, 'Save File', filter='*.house')
+        name = QtGui.QFileDialog.getSaveFileName(self, 'Save File', filter='*.json')
         name = name[0]
         print(name)
         self.saveMap.emit(name)
 
     def _openFile(self):
-        name = QtGui.QFileDialog.getOpenFileName(self, 'Open File', filter='*.house')
+        name = QtGui.QFileDialog.getOpenFileName(self, 'Open File', filter='*.json')
         name = name[0]
         self.openMap.emit(name)
