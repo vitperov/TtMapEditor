@@ -1,9 +1,14 @@
 import math
+from copy import copy
 from random import randrange, random
 
 from modules.TerrainMapModel import *
 from modules.GeometryPrimitives import *
 
+def genRandomObjPlace(zoneRect, objSize):
+        x = randrange(zoneRect.pt.x, zoneRect.pt.x + zoneRect.sz.w - objSize.w)
+        y = randrange(zoneRect.pt.y, zoneRect.pt.y + zoneRect.sz.h - objSize.h)
+        return Point(x, y)
 
 class MapEditor():
     def __init__(self, model):
@@ -14,7 +19,7 @@ class MapEditor():
             for column in range(startPt.x, startPt.x + size.w):
                 square = self._model.getSquareXY(row, column)
                 square.setProperty(property, value)
-                
+
     def fillAreaBorder(self, startPt, size, type, width=1):
         self.fillArea(startPt,                                      AreaSize(size.w, width), 'type', type)
         self.fillArea(Point(startPt.x ,startPt.y + size.h - width), AreaSize(size.w, width), 'type', type)
@@ -28,10 +33,10 @@ class ZoneSettings():
 
         # TODO: randomly choose house
         self.houseSize = AreaSize(7, 7)
-        self.houseProb = 0.9
+        self.houseProbability = 0.9
 
         self.shedSize = AreaSize(2, 2)
-        self.shedProb = 0.5
+        self.shedProbability = 0.5
 
 class MapGenerator():
     def __init__(self, model):
@@ -92,65 +97,93 @@ class MapGenerator():
                 self._currentZoneId += 1
 
     def genZone(self, startPt):
-        zone = ZoneGenerator(self._model, startPt)
-        zone.generate(self._zoneSettings)
+        zone = ZoneGenerator(self._model, self._zoneSettings, startPt)
+        zone.generate()
 
-                        
 
-class ZoneGenerator:
-    def __init__(self, model, startPt):
-        self._model = model
-        self._editor = MapEditor(model)
+class ZoneObject():
+    def __init__(self, zone):
+        self.zone = zone
+        self.objKeepout = 1
+        self.localPos = None
+        self.size = None
+
+    def generate(self, size, squareType, mapObjType):
+        self.size = size
+
+        attempts = 500
+        placeOk = False
+        while (not placeOk) and attempts > 0:
+            attempts -= 1
+            self.localPos = genRandomObjPlace(self.zone.allowedRect, size)
+            placeOk = self.zone.canPlaceObjectAt(self.localRect())
+
+        if attempts == 0:
+            print("!!!! Error: you are trying to put an object where is no place for it")
+            return False
+
+        print("    Obj placed at: " + str(self.localPos))
+        self.zone.editor.fillArea(self.globalPosition(),
+            size, 'type', squareType)
+
+        obj = MapObjectModel(self.localPos.x, self.localPos.y, mapObjType)
+        self.zone.model.addMapObject(obj)
+        return True
+
+
+    def localPosition(self):
+        return self.localPos
+
+    def localRect(self):
+        return Rectangle(copy(self.localPos), copy(self.size))
+
+    def localRectWithKeepout(self):
+        return self.localRect().expand(self.objKeepout)
+
+    def globalPosition(self):
+        return self.localPos + self.zone.startPt
+
+class ZoneGenerator():
+    def __init__(self, model, settings, startPt):
+        self.model = model
+        self.settings = settings
+        self.editor = MapEditor(model)
         self.startPt = startPt
+        self.zoneRect = Rectangle(Point(0,0), settings.size)
+        self.zoneKeepout = 1
+        self.allowedRect = self.zoneRect.shrink(self.zoneKeepout)
+        print("    Shrinked rect=" + str(self.allowedRect))
 
-    def generate(self, settings):
+        self.placedObjects = []
+
+    def canPlaceObjectAt(self, objRect):
+        for obj in self.placedObjects:
+            objKeepout = obj.localRectWithKeepout()
+            placeFail = objKeepout.isRectPartiallyInside(objRect)
+            if placeFail:
+                return False
+
+        return True
+
+    def generate(self):
         # Debug zone location
         #self.fillAreaBorder(startPt, self._zoneSize, SquareType.Empty)
 
-        generateHouse = (random() < settings.houseProb)
+        generateHouse = (random() < self.settings.houseProbability)
+        if generateHouse:
+            house = ZoneObject(self)
+            house.generate(self.settings.houseSize,
+                           SquareType.House,
+                           MapObjectType.House)
 
-        if not generateHouse:
-            return # it it's no house, no need to generate shed
+            self.placedObjects.append(house)
 
-        zoneKeepout = 1
-        houseKeepout = 1
-
-        zoneRect = Rectangle(Point(0,0), settings.size)
-        #print("    Orig rect=" + str(zoneRect))
-        zoneRect.shrink(zoneKeepout)
-        print("    Shrinked rect=" + str(zoneRect))
-
-        def genRandomObjPlace(zoneRect, objSize):
-            x = randrange(zoneRect.pt.x, zoneRect.pt.x + zoneRect.sz.w - objSize.w)
-            y = randrange(zoneRect.pt.y, zoneRect.pt.y + zoneRect.sz.h - objSize.h)
-            return Point(x, y)
-
-        houseRelative = genRandomObjPlace(zoneRect, settings.houseSize)
-        print("    House placed at: " + str(houseRelative))
-
-        houseAbs = houseRelative + self.startPt;
-
-        print("        abs position: " + str(houseAbs))
-        self._editor.fillArea(houseAbs, settings.houseSize, 'type', SquareType.House)
-
-        houseObj = MapObjectModel(houseAbs.x, houseAbs.y, MapObjectType.House)
-        self._model.addMapObject(houseObj)
-
-        generateShed = (random() < settings.shedProb)
-
+        generateShed = (random() < self.settings.shedProbability)
         if generateShed:
-            houseRectRel = Rectangle(houseRelative, settings.houseSize)
-            houseRectRel.expand(houseKeepout)
+            shed = ZoneObject(self)
+            shed.generate(self.settings.shedSize,
+                          SquareType.Shed,
+                          MapObjectType.Shed)
 
-            placeOk = False
-            while not placeOk:
-                shedRel = genRandomObjPlace(zoneRect, settings.shedSize)
-                shedRect = Rectangle(shedRel, settings.shedSize)
-                placeOk = not houseRectRel.isRectPartiallyInside(shedRect)
-
-            shedAbs = shedRel + self.startPt
-            self._editor.fillArea(shedAbs, settings.shedSize, 'type', SquareType.Shed)
-
-            shedObj = MapObjectModel(shedAbs.x, shedAbs.y, MapObjectType.Shed)
-            self._model.addMapObject(shedObj)
+            self.placedObjects.append(shed)
 

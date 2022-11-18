@@ -33,17 +33,19 @@ class Rectangle:
         return "[pt:" + str(self.pt) + ", sz:" + str(self.sz) + "]"
         
     def expand(self, value):
-        self.pt.x -= value
-        self.pt.y -= value
-        self.sz.w += value
-        self.sz.h += value
+        return Rectangle(
+            Point(self.pt.x - value,
+                  self.pt.y - value),
+            AreaSize(self.sz.w + value,
+                     self.sz.h + value))
         
     def shrink(self, value):
         # TODO check null size
-        self.pt.x += value
-        self.pt.y += value
-        self.sz.w -= value
-        self.sz.h -= value
+        return Rectangle(
+            Point(self.pt.x + value,
+                  self.pt.y + value),
+            AreaSize(self.sz.w - value,
+                     self.sz.h - value))
         
     def isRectInside(self, rect):
         return ((rect.pt.x >= self.pt.x) and
