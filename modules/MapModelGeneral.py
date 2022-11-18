@@ -2,6 +2,28 @@ from enum import Enum
 
 import json
 
+class MapObjectModel:
+    def __init__(self, x, y, type):
+        self.classnames = dict()
+        self.classnames['type']      = MapObjectType
+
+        self.properties = dict()
+        self.properties['type']      = type
+        
+        self.x = x
+        self.y = y
+
+    def toSerializableObj(self):
+        # properties are enums, they can't be directly converted to int
+        obj = dict()
+        for name, prop in self.properties.items():
+            value = prop
+            obj[name] = value
+            
+        obj['x'] =  self.x
+        obj['y'] =  self.y
+
+        return obj
 
 class MapModelGeneral():
     def __init__(self, squareModel):
