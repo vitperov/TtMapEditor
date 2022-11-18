@@ -13,7 +13,7 @@ class MapGenerator():
 
         self._zoneSize = AreaSize(15, 20)
 
-        self._forestKeepOut = 1
+        self._forestKeepOut = 3
         self._roadWidth = 2
 
         self._w = self._zoneSize.w * self._columns + 2 * self._forestKeepOut
@@ -46,14 +46,15 @@ class MapGenerator():
     def fillEverythingGrass(self):
         self.fillArea(Point(0,0), AreaSize(self._w, self._h), 'type', SquareType.Grass)
         
-    def fillAreaBorder(self, startPt, size, type):
-        self.fillArea(startPt,                                  AreaSize(size.w, 1), 'type', type)
-        self.fillArea(Point(startPt.x ,startPt.y + size.h - 1), AreaSize(size.w, 1), 'type', type)
-        self.fillArea(startPt,                                  AreaSize(1, size.h), 'type', type)
-        self.fillArea(Point(startPt.x + size.w - 1, startPt.y), AreaSize(1, size.h), 'type', type)
+    def fillAreaBorder(self, startPt, size, type, width=1):
+        self.fillArea(startPt,                                  AreaSize(size.w, width), 'type', type)
+        self.fillArea(Point(startPt.x ,startPt.y + size.h - width), AreaSize(size.w, width), 'type', type)
+        self.fillArea(startPt,                                  AreaSize(width, size.h), 'type', type)
+        self.fillArea(Point(startPt.x + size.w - width, startPt.y), AreaSize(width, size.h), 'type', type)
 
     def genKeepOutForest(self):
-        self.fillAreaBorder(Point(0,0),  AreaSize(self._w, self._h), SquareType.Forest)
+        self.fillAreaBorder(Point(0,0),  AreaSize(self._w, self._h),
+            SquareType.Forest, width=self._forestKeepOut)
 
     def genRoad(self):
         #FIXME: do road after every zone height
