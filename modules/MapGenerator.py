@@ -195,7 +195,8 @@ class ZoneGenerator():
         self.generateTrees()
         
     def generateTrees(self):
-        rc = self.allowedRect
+        #rc = self.allowedRect
+        rc = self.zoneRect
         for x in range(rc.pt.x, rc.pt.x + rc.sz.w):
             for y in range(rc.pt.y, rc.pt.y + rc.sz.h):
                 treeRect = Rectangle(Point(x,y), AreaSize(1,1))
