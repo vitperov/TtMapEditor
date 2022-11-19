@@ -171,7 +171,7 @@ class ZoneGenerator():
 
     def generate(self):
         # Debug zone location
-        #self.fillAreaBorder(startPt, self._zoneSize, SquareType.Empty)
+        #self.editor.fillAreaBorder(self.startPt, self.settings.size, SquareType.Empty)
 
         generateHouse = (random() < self.settings.houseProbability)
         if generateHouse:

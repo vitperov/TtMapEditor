@@ -36,16 +36,16 @@ class Rectangle:
         return Rectangle(
             Point(self.pt.x - value,
                   self.pt.y - value),
-            AreaSize(self.sz.w + value,
-                     self.sz.h + value))
+            AreaSize(self.sz.w + 2 * value,
+                     self.sz.h + 2 * value))
         
     def shrink(self, value):
         # TODO check null size
         return Rectangle(
             Point(self.pt.x + value,
                   self.pt.y + value),
-            AreaSize(self.sz.w - value,
-                     self.sz.h - value))
+            AreaSize(self.sz.w - 2 * value,
+                     self.sz.h - 2 * value))
         
     def isRectInside(self, rect):
         return ((rect.pt.x >= self.pt.x) and
