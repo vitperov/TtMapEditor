@@ -37,6 +37,8 @@ class ZoneSettings():
 
         self.shedSize = AreaSize(2, 2)
         self.shedProbability = 0.5
+        
+        self.treeProbability = 0.2
 
 class MapGenerator():
     def __init__(self, model):
@@ -100,13 +102,28 @@ class MapGenerator():
         zone = ZoneGenerator(self._model, self._zoneSettings, startPt)
         zone.generate()
 
-
-class ZoneObject():
-    def __init__(self, zone):
+class ZoneLwObject():
+    def __init__(self, zone, localPos=None, size=None, keepout=0):
         self.zone = zone
-        self.objKeepout = 1
-        self.localPos = None
-        self.size = None
+        self.objKeepout = keepout
+        self.localPos = localPos
+        self.size = size
+        
+    def localPosition(self):
+        return self.localPos
+
+    def localRect(self):
+        return Rectangle(copy(self.localPos), copy(self.size))
+
+    def localRectWithKeepout(self):
+        return self.localRect().expand(self.objKeepout)
+
+    def globalPosition(self):
+        return self.localPos + self.zone.startPt
+
+class ZoneObject(ZoneLwObject):
+    def __init__(self, zone):
+        ZoneLwObject.__init__(self, zone, keepout=1)
 
     def generate(self, size, squareType, mapObjType):
         self.size = size
@@ -129,19 +146,6 @@ class ZoneObject():
         obj = MapObjectModel(self.localPos.x, self.localPos.y, mapObjType)
         self.zone.model.addMapObject(obj)
         return True
-
-
-    def localPosition(self):
-        return self.localPos
-
-    def localRect(self):
-        return Rectangle(copy(self.localPos), copy(self.size))
-
-    def localRectWithKeepout(self):
-        return self.localRect().expand(self.objKeepout)
-
-    def globalPosition(self):
-        return self.localPos + self.zone.startPt
 
 class ZoneGenerator():
     def __init__(self, model, settings, startPt):
@@ -186,4 +190,20 @@ class ZoneGenerator():
                           MapObjectType.Shed)
 
             self.placedObjects.append(shed)
+            
+        
+        self.generateTrees()
+        
+    def generateTrees(self):
+        rc = self.allowedRect
+        for x in range(rc.pt.x, rc.pt.x + rc.sz.w):
+            for y in range(rc.pt.y, rc.pt.y + rc.sz.h):
+                treeRect = Rectangle(Point(x,y), AreaSize(1,1))
+                if self.canPlaceObjectAt(treeRect):
+                    generateTree = (random() < self.settings.treeProbability)
+                    if generateTree:
+                        # Should we place it to self.placedObjects?
+                        obj = ZoneLwObject(self, Point(x,y), AreaSize(1, 1), keepout=0)
+                        self.editor.fillArea(obj.globalPosition(),
+                            obj.size, 'type', SquareType.Forest)
 
