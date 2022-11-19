@@ -142,8 +142,8 @@ class ZoneObject(ZoneLwObject):
         print("    Obj placed at: " + str(self.localPos))
         self.zone.editor.fillArea(self.globalPosition(),
             size, 'type', squareType)
-
-        obj = MapObjectModel(self.localPos.x, self.localPos.y, mapObjType)
+        
+        obj = MapObjectModel(self.globalPosition().x, self.globalPosition().y, mapObjType)
         self.zone.model.addMapObject(obj)
         return True
 
