@@ -9,13 +9,12 @@ def rotIdToAngle(rotStr):
     return int(rotStr);
 
 class HouseMapItem(QWidget):
-    clicked = pyqtSignal(int)
+    clicked = pyqtSignal(int, int)
 
     def __init__(self, model):
         QWidget.__init__(self)
 
         self._model = model
-        self.id = self._model.id
         self._tilesize = 64
 
         size = QSize(self._tilesize, self._tilesize)
@@ -53,8 +52,6 @@ class HouseMapItem(QWidget):
         self.widget.setStyleSheet("background-color: lightgray")
         self._layout.addWidget(self.widget)
 
-
-
     def mousePressEvent(self, event):
-        self.clicked.emit(self.id)
+        self.clicked.emit(self._model.x, self._model.y)
 

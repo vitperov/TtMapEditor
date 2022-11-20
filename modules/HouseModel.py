@@ -30,9 +30,10 @@ class HouseSquareTerritory(str, Enum):
 class HouseMapSquareModel(QObject):
     changed = pyqtSignal()
 
-    def __init__(self, id):
+    def __init__(self):
         QObject.__init__(self)
-        self.id = id
+        self.x = 0
+        self.y = 0
 
         self.classnames = dict()
         self.classnames['type']      = HouseSquareType
@@ -44,11 +45,8 @@ class HouseMapSquareModel(QObject):
         self.properties['rotation']  = HouseSquareRotation.deg0
         self.properties['territory'] = HouseSquareTerritory.Empty
 
-    def getXY(self):
-        y = int(self.id / 1000)
-        x = self.id % 1000
-
-        return [x, y]
+    #def getXY(self):
+    #    return [self.x, self.y]
 
     def setProperty(self, name, value):
         print("setProperty " + name + ": " + str(value))
@@ -66,11 +64,14 @@ class HouseMapSquareModel(QObject):
             value = prop
             obj[name] = value
 
-        obj['id'] =  self.id
+        obj['x'] =  self.x
+        obj['y'] =  self.y
         return obj
 
     def restoreFromJson(self, js):
-        self.id = js['id']
+        self.x = js['x']
+        self.y = js['y']
+
         self.properties['type']      = HouseSquareType(js['type'])
         self.properties['rotation']  = HouseSquareRotation(js['rotation'])
         self.properties['territory'] = HouseSquareTerritory(js['territory'])
@@ -80,9 +81,9 @@ class HouseMapModel(MapModelGeneral, QObject):
     def __init__(self):
         MapModelGeneral.__init__(self, HouseMapSquareModel)
         QObject.__init__(self)
-        
+
         self.setUpdatedCallback(self._updateeEntireMap)
-        
+
     def _updateeEntireMap(self):
         self.updatedEntireMap.emit()
 

@@ -2,14 +2,12 @@ from enum import Enum
 
 import json
 
-class MapObjectModel:
-    def __init__(self, x, y, type):
+class MapObjectModelGeneral:
+    def __init__(self, x, y):
         self.classnames = dict()
-        self.classnames['type']      = MapObjectType
 
         self.properties = dict()
-        self.properties['type']      = type
-        
+
         self.x = x
         self.y = y
 
@@ -19,7 +17,7 @@ class MapObjectModel:
         for name, prop in self.properties.items():
             value = prop
             obj[name] = value
-            
+
         obj['x'] =  self.x
         obj['y'] =  self.y
 
@@ -30,7 +28,7 @@ class MapModelGeneral():
         self._sqareModel = squareModel
         self.width = 0
         self.height = 0
-        self._squares = dict()
+        self._squares = list()
         self._objects = list()
         self._updatedCallback = None
 
@@ -42,14 +40,17 @@ class MapModelGeneral():
         self.height = h
         for row in range(h):
             for column in range(w):
-                id = row*1000 + column
-                self._squares[id] = self._sqareModel(id)
+                self._squares.append(self._sqareModel())
 
         if self._updateCallback is not None:
             self._updateCallback()
 
-    def getSquare(self, id):
-        return self._squares[id]
+    def getSquare(self, x, y):
+        for square in self._squares:
+            if square.x == x and square.y == y:
+                return square
+
+        return None
 
 
     def getSquareXY(self, row, column):
@@ -67,7 +68,7 @@ class MapModelGeneral():
 
     def toSerializableObj(self):
         squares = list()
-        for id, square in self._squares.items():
+        for square in self._squares:
             squares.append(square.toSerializableObj())
 
         objects = list()
@@ -87,12 +88,11 @@ class MapModelGeneral():
         self.width  = js['width']
         self.height = js['height']
 
-        self._squares = dict()
+        self._squares = list()
         for square in js['squares']:
-            id = int(square['id'])
-            obj = self._sqareModel(id)
+            obj = self._sqareModel()
             obj.restoreFromJson(square)
-            self._squares[id] = obj
+            self._squares.append(obj)
 
     def saveMap(self, filename):
         extension = '.json'
