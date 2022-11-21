@@ -22,6 +22,16 @@ class MapObjectModelGeneral:
         obj['y'] =  self.y
 
         return obj
+        
+    def getProperty(self, name):
+        return self.properties[name]
+        
+    def restoreFromJson(self, js):
+        self.x = js['x']
+        self.y = js['y']
+        
+        for propName, propClass in self.classnames.items():
+            self.properties[propName] = propClass(js[propName])
 
 class MapModelGeneral():
     def __init__(self, squareModel):

@@ -27,20 +27,17 @@ class HouseSquareTerritory(str, Enum):
     StoreRoom   = 'StoreRoom'
 
 
-class HouseMapSquareModel(QObject):
+class HouseMapSquareModel(MapObjectModelGeneral, QObject):
     changed = pyqtSignal()
 
     def __init__(self):
+        MapObjectModelGeneral.__init__(self, 0, 0)
         QObject.__init__(self)
-        self.x = 0
-        self.y = 0
-
-        self.classnames = dict()
+        
         self.classnames['type']      = HouseSquareType
         self.classnames['rotation']  = HouseSquareRotation
         self.classnames['territory'] = HouseSquareTerritory
 
-        self.properties = dict()
         self.properties['type']      = HouseSquareType.Empty
         self.properties['rotation']  = HouseSquareRotation.deg0
         self.properties['territory'] = HouseSquareTerritory.Empty
@@ -51,27 +48,13 @@ class HouseMapSquareModel(QObject):
         self.properties[name] = variableClass(value);
         self.changed.emit()
 
-    def getProperty(self, name):
-        return self.properties[name]
-
-    def toSerializableObj(self):
-        # properties are enums, they can't be directly converted to int
-        obj = dict()
-        for name, prop in self.properties.items():
-            value = prop
-            obj[name] = value
-
-        obj['x'] =  self.x
-        obj['y'] =  self.y
-        return obj
-
-    def restoreFromJson(self, js):
-        self.x = js['x']
-        self.y = js['y']
-
-        self.properties['type']      = HouseSquareType(js['type'])
-        self.properties['rotation']  = HouseSquareRotation(js['rotation'])
-        self.properties['territory'] = HouseSquareTerritory(js['territory'])
+    #def restoreFromJson(self, js):
+    #    self.x = js['x']
+    #    self.y = js['y']
+    #
+    #    self.properties['type']      = HouseSquareType(js['type'])
+    #    self.properties['rotation']  = HouseSquareRotation(js['rotation'])
+    #    self.properties['territory'] = HouseSquareTerritory(js['territory'])
 
 class HouseMapModel(MapModelGeneral, QObject):
     updatedEntireMap = pyqtSignal()
