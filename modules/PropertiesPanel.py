@@ -22,7 +22,9 @@ class PropertiesPanel(QWidget):
         
         
     def showSquareProperties(self, squareModel):
-        [x, y] = squareModel.getXY()
+        #[x, y] = squareModel.getXY()
+        x = squareModel.x
+        y = squareModel.y
         self.coordinatesLbl.setText("X: " + str(x) + " Y: " + str(y))
         
         for i in reversed(range(self._propertiesLayout.count())): 

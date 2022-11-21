@@ -9,7 +9,7 @@ from functools import partial
 from modules.HouseMapItem import *
 
 class HouseMapPanel(QWidget):
-    activeItemChanged = pyqtSignal(int)
+    activeItemChanged = pyqtSignal(int, int)
 
     def __init__(self):
         QWidget.__init__(self)
@@ -21,9 +21,9 @@ class HouseMapPanel(QWidget):
         self._layout.setMargin(0);
         self._layout.setSpacing(0);
 
-    def onItemClicked(self, itemId):
-        print("Item clicked Id=" + str(itemId))
-        self.activeItemChanged.emit(itemId)
+    def onItemClicked(self, x, y):
+        print("Item clicked x=" + str(x) + "; y=" + str(y))
+        self.activeItemChanged.emit(x, y)
 
 
     def setModel(self, model):
