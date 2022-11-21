@@ -36,11 +36,11 @@ class HouseMapSquareModel(MapObjectModelGeneral, QObject):
         
         self.classnames['type']      = HouseSquareType
         self.classnames['rotation']  = HouseSquareRotation
-        self.classnames['territory'] = HouseSquareTerritory
+        #self.classnames['territory'] = HouseSquareTerritory
 
         self.properties['type']      = HouseSquareType.Empty
         self.properties['rotation']  = HouseSquareRotation.deg0
-        self.properties['territory'] = HouseSquareTerritory.Empty
+        #self.properties['territory'] = HouseSquareTerritory.Empty
 
     def setProperty(self, name, value):
         print("setProperty " + name + ": " + str(value))

@@ -33,7 +33,7 @@ class HouseMapItem(QWidget):
     def updateState(self):
         sqType      = self._model.getProperty('type')
         rotation    = self._model.getProperty('rotation')
-        territory   = self._model.getProperty('territory')
+        #territory   = self._model.getProperty('territory')
 
         self.widget.setParent(None)
         self.widget = QtGui.QLabel(self)
