@@ -14,7 +14,6 @@ class MapWidget(QWidget):
     def __init__(self):
         QWidget.__init__(self)
         self._layout = QGridLayout()
-        #self._items = {}
         self._model = None
 
         self.setLayout(self._layout)
@@ -32,13 +31,11 @@ class MapWidget(QWidget):
         
     def redrawAll(self):
         [h, w] = self._model.size()
-        mapSquares = self._model.getAllSquares().items()
+        mapSquares = self._model.getAllSquares()
 
-        for id, squareModel in mapSquares:
-            [x, y] = squareModel.getXY()
+        for squareModel in mapSquares:
             widget = MapItem(squareModel)
-            self._layout.addWidget(widget, y, x)
-            #widget.setModel(squareModel)
+            self._layout.addWidget(widget, squareModel.y, squareModel.x)
             widget.clicked.connect(self.onItemClicked)
             squareModel.changed.connect(widget.updateState)
             

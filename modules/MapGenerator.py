@@ -15,9 +15,9 @@ class MapEditor():
         self._model = model
 
     def fillArea(self, startPt, size, property, value):
-        for row in range(startPt.y, startPt.y + size.h):
-            for column in range(startPt.x, startPt.x + size.w):
-                square = self._model.getSquareXY(row, column)
+        for y in range(startPt.y, startPt.y + size.h):
+            for x in range(startPt.x, startPt.x + size.w):
+                square = self._model.getSquare(x, y)
                 square.setProperty(property, value)
 
     def fillAreaBorder(self, startPt, size, type, width=1):

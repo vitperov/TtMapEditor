@@ -40,7 +40,10 @@ class MapModelGeneral():
         self.height = h
         for row in range(h):
             for column in range(w):
-                self._squares.append(self._sqareModel())
+                obj = self._sqareModel()
+                obj.y = row
+                obj.x = column
+                self._squares.append(obj)
 
         if self._updateCallback is not None:
             self._updateCallback()
@@ -51,11 +54,6 @@ class MapModelGeneral():
                 return square
 
         return None
-
-
-    def getSquareXY(self, row, column):
-        id = row*1000 + column
-        return self.getSquare(id)
 
     def getAllSquares(self):
         return self._squares

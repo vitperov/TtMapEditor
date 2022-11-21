@@ -45,9 +45,6 @@ class HouseMapSquareModel(QObject):
         self.properties['rotation']  = HouseSquareRotation.deg0
         self.properties['territory'] = HouseSquareTerritory.Empty
 
-    #def getXY(self):
-    #    return [self.x, self.y]
-
     def setProperty(self, name, value):
         print("setProperty " + name + ": " + str(value))
         variableClass = self.classnames[name]

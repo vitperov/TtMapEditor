@@ -14,7 +14,6 @@ class HouseMapPanel(QWidget):
     def __init__(self):
         QWidget.__init__(self)
         self._layout = QGridLayout()
-        #self._items = {}
         self._model = None
 
         self.setLayout(self._layout)
@@ -35,10 +34,8 @@ class HouseMapPanel(QWidget):
         mapSquares = self._model.getAllSquares()
 
         for squareModel in mapSquares:
-            #[x, y] = squareModel.getXY()
             widget = HouseMapItem(squareModel)
             self._layout.addWidget(widget, squareModel.y, squareModel.x)
-            #widget.setModel(squareModel)
             widget.clicked.connect(self.onItemClicked)
             squareModel.changed.connect(widget.updateState)
             

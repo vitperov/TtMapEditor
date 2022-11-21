@@ -4,13 +4,12 @@ from PyQt5.QtCore import *
 from pyqtgraph.Qt import QtCore, QtGui
 
 class MapItem(QWidget):
-    clicked = pyqtSignal(int)
+    clicked = pyqtSignal(int, int)
 
     def __init__(self, model):
         QWidget.__init__(self)
 
         self._model = model
-        self.id = self._model.id
         self._tilesize = 16
 
         size = QSize(self._tilesize, self._tilesize)
@@ -47,5 +46,5 @@ class MapItem(QWidget):
 
 
     def mousePressEvent(self, event):
-        self.clicked.emit(self.id)
+        self.clicked.emit(self._model.x, self._model.y)
 
