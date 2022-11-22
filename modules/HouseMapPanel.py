@@ -15,6 +15,7 @@ class HouseMapPanel(QWidget):
         QWidget.__init__(self)
         self._layout = QGridLayout()
         self._model = None
+        self.squares = dict()
 
         self.setLayout(self._layout)
         self._layout.setContentsMargins(0,0,0,0)
@@ -28,16 +29,27 @@ class HouseMapPanel(QWidget):
 
     def setModel(self, model):
         self._model = model
-        
+
     def redrawAll(self):
         [h, w] = self._model.size()
-        mapSquares = self._model.getAllSquares()
 
-        for squareModel in mapSquares:
-            widget = HouseMapItem(squareModel)
-            self._layout.addWidget(widget, squareModel.y, squareModel.x)
-            widget.clicked.connect(self.onItemClicked)
-            squareModel.changed.connect(widget.updateState)
-            
+        for x in range(w):
+            for y in range(h):
+                widget = HouseMapSquare(x, y)
+                self._layout.addWidget(widget, y, x)
+                widget.clicked.connect(self.onItemClicked)
+                key = (x, y)
+                self.squares[key] = widget
+
+        mapObjects = self._model.getAllSquares()
+        for objectModel in mapObjects:
+           x = objectModel.x
+           y = objectModel.y
+           square = self.squares[(x, y)]
+           square.addItem(objectModel)
+           objectModel.changed.connect(square.updateState)
+           square.updateState()
+
+
         self._layout.setRowStretch(h, 1)
         self._layout.setColumnStretch(w, 1)

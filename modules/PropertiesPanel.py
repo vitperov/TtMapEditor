@@ -20,6 +20,9 @@ class PropertiesPanel(QWidget):
         self._propertiesLayout = QVBoxLayout()
         layout.addLayout(self._propertiesLayout)
         
+        addBtn = QPushButton("Add object")
+        layout.addWidget(addBtn)
+        
         
     def showSquareProperties(self, squareModel):
         #[x, y] = squareModel.getXY()
