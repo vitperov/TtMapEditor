@@ -42,7 +42,7 @@ class HouseMapSquare(QWidget):
         painter = QtGui.QPainter(combinedPixmap)
         painter.fillRect(QRect(0, 0, self.size.width(), self.size.height()), QtGui.QBrush(QtGui.QColor("lightgray")));
         for item in self.items:
-            print("Getting pixmap: " + str(self.x) + ", " + str(self.y))
+            #print("Getting pixmap: " + str(self.x) + ", " + str(self.y))
             pm = item.getPixmap(self.size)
             painter.drawPixmap(QtCore.QRectF(pm.rect()), pm, QtCore.QRectF(pm.rect()))
             

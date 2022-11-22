@@ -6,36 +6,18 @@ from PyQt5.QtWidgets import *
 
 from functools import partial
 
+#FIXME turn to widget. Possible memory leak
+class PropertiesItem():
+    def __init__(self, objModel, title):
+        self._model = objModel
 
-class PropertiesPanel(QWidget):
-    def __init__(self):
-        QWidget.__init__(self)
-        
-        layout = QVBoxLayout()
-        self.setLayout(layout)
+        self.widget = QGroupBox(title)
+        self.layout = QVBoxLayout()
+        self.widget.setLayout(self.layout)
 
-        self.coordinatesLbl = QLabel("X: ? Y: ?")
-        layout.addWidget(self.coordinatesLbl)
-        
-        self._propertiesLayout = QVBoxLayout()
-        layout.addLayout(self._propertiesLayout)
-        
-        addBtn = QPushButton("Add object")
-        layout.addWidget(addBtn)
-        
-        
-    def showSquareProperties(self, squareModel):
-        #[x, y] = squareModel.getXY()
-        x = squareModel.x
-        y = squareModel.y
-        self.coordinatesLbl.setText("X: " + str(x) + " Y: " + str(y))
-        
-        for i in reversed(range(self._propertiesLayout.count())): 
-            self._propertiesLayout.itemAt(i).widget().setParent(None)
-
-        for propName, propValue in squareModel.properties.items():
+        for propName, propValue in self._model.properties.items():
             groupbox = QGroupBox(propName)
-            self._propertiesLayout.addWidget(groupbox)
+            self.layout.addWidget(groupbox)
             box = QVBoxLayout()
             groupbox.setLayout(box)
             #print(propName + "->" + str(propValue.value))
@@ -51,6 +33,43 @@ class PropertiesPanel(QWidget):
                     btn.setChecked(True)
                 #btn.setChecked(option.value == propValue)
                 box.addWidget(btn)
-                
-                btn.pressed.connect(partial(squareModel.setProperty, propName, option.value))
+
+                btn.pressed.connect(partial(self._model.setProperty, propName, option.value))
+
+
+
+class PropertiesPanel(QWidget):
+    def __init__(self):
+        QWidget.__init__(self)
+
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+        self.coordinatesLbl = QLabel("X: ? Y: ?")
+        layout.addWidget(self.coordinatesLbl)
+        
+        self.properties = QHBoxLayout()
+        layout.addLayout(self.properties)
+    
+        addBtn = QPushButton("Add object")
+        layout.addWidget(addBtn)
+
+    def setModel(self, model):
+        self.mapModel = model
+
+    def showSquareProperties(self, x, y):
+        for i in reversed(range(self.properties.count())):
+            self.properties.itemAt(i).widget().setParent(None)
+        
+        items = self.mapModel.getSquareItems(x, y)
+        num = 0;
+        for itemModel in items:
+            x = itemModel.x
+            y = itemModel.y
+            self.coordinatesLbl.setText("X: " + str(x) + " Y: " + str(y))
+
+            num += 1;
+            title = str(num)
+            itemWg = PropertiesItem(itemModel, title)
+            self.properties.addWidget(itemWg.widget)
 

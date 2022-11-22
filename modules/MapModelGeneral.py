@@ -59,11 +59,18 @@ class MapModelGeneral():
             self._updateCallback()
 
     def getSquare(self, x, y):
+        #FIXME: depricated. Should use getSquareItems instead
         for square in self._squares:
             if square.x == x and square.y == y:
                 return square
 
         return None
+        
+    def getSquareItems(self, x, y):
+        # FIXME: Multiple square items are not supported yet
+        items = list()
+        items.append(self.getSquare(x, y))
+        return items
 
     def getAllSquares(self):
         return self._squares
