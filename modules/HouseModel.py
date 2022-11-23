@@ -19,14 +19,6 @@ class HouseSquareRotation(str, Enum):
     deg180  = '180'
     deg270  = '270'
 
-class HouseSquareTerritory(str, Enum):
-    Empty       = 'Empty'
-    Kitchen     = 'Kitchen'
-    Bedroom     = 'Bedroom'
-    LivingRoom  = 'LivingRoom'
-    StoreRoom   = 'StoreRoom'
-
-
 class HouseMapSquareModel(MapObjectModelGeneral, QObject):
     changed = pyqtSignal()
 
@@ -36,25 +28,15 @@ class HouseMapSquareModel(MapObjectModelGeneral, QObject):
         
         self.classnames['type']      = HouseSquareType
         self.classnames['rotation']  = HouseSquareRotation
-        #self.classnames['territory'] = HouseSquareTerritory
 
         self.properties['type']      = HouseSquareType.Empty
         self.properties['rotation']  = HouseSquareRotation.deg0
-        #self.properties['territory'] = HouseSquareTerritory.Empty
 
     def setProperty(self, name, value):
         print("setProperty " + name + ": " + str(value))
         variableClass = self.classnames[name]
         self.properties[name] = variableClass(value);
         self.changed.emit()
-
-    #def restoreFromJson(self, js):
-    #    self.x = js['x']
-    #    self.y = js['y']
-    #
-    #    self.properties['type']      = HouseSquareType(js['type'])
-    #    self.properties['rotation']  = HouseSquareRotation(js['rotation'])
-    #    self.properties['territory'] = HouseSquareTerritory(js['territory'])
 
 class HouseMapModel(MapModelGeneral, QObject):
     updatedEntireMap = pyqtSignal()
