@@ -1,12 +1,15 @@
 from enum import Enum
 
 import json
+import uuid
 
 class MapObjectModelGeneral:
     def __init__(self, x, y):
         self.classnames = dict()
 
         self.properties = dict()
+
+        self.id = str(uuid.uuid4())
 
         self.x = x
         self.y = y
@@ -22,14 +25,14 @@ class MapObjectModelGeneral:
         obj['y'] =  self.y
 
         return obj
-        
+
     def getProperty(self, name):
         return self.properties[name]
-        
+
     def restoreFromJson(self, js):
         self.x = js['x']
         self.y = js['y']
-        
+
         for propName, propClass in self.classnames.items():
             self.properties[propName] = propClass(js[propName])
 
@@ -65,12 +68,34 @@ class MapModelGeneral():
                 return square
 
         return None
-        
+
     def getSquareItems(self, x, y):
-        # FIXME: Multiple square items are not supported yet
         items = list()
-        items.append(self.getSquare(x, y))
+        for square in self._squares:
+            if square.x == x and square.y == y:
+                items.append(square)
         return items
+
+    def getObjectById(self, id):
+        for square in self._squares:
+            if square.id == id:
+                return square
+
+    def deleteSquareById(self, id):
+        N = len(self._squares);
+        for i in range(N):
+            if self._squares[i].id == id:
+                del self._squares[i]
+                if self._updateCallback is not None:
+                    self._updateCallback()
+                return
+                
+    def createObjectAt(self, x, y):
+        obj = self._sqareModel()
+        obj.x = x
+        obj.y = y
+        self._squares.append(obj)
+        return obj
 
     def getAllSquares(self):
         return self._squares

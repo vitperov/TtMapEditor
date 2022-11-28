@@ -30,6 +30,7 @@ class HouseController:
         self._view.actionsPanel.saveMap.connect(self._houseModel.saveMap)
         
         self._houseModel.updatedEntireMap.connect(self._view.houseMapPanel.redrawAll)
+        self._view.propPanel.updatedEntireMap.connect(self._view.houseMapPanel.redrawAll)
         
     def _onHouseSquareClicked(self, x, y):
         #model = self._houseModel.getSquare(x, y)

@@ -1,8 +1,6 @@
 from enum import Enum
 from PyQt5.QtCore import *
 
-import json
-
 from modules.MapModelGeneral import *
 
 class HouseSquareType(str, Enum):
@@ -25,7 +23,7 @@ class HouseMapSquareModel(MapObjectModelGeneral, QObject):
     def __init__(self):
         MapObjectModelGeneral.__init__(self, 0, 0)
         QObject.__init__(self)
-        
+
         self.classnames['type']      = HouseSquareType
         self.classnames['rotation']  = HouseSquareRotation
 

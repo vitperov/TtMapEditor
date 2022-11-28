@@ -38,38 +38,59 @@ class PropertiesItem():
 
 
 
+
 class PropertiesPanel(QWidget):
+    updatedEntireMap = pyqtSignal()
     def __init__(self):
         QWidget.__init__(self)
+
+        self.x = None
+        self.y = None
 
         layout = QVBoxLayout()
         self.setLayout(layout)
 
         self.coordinatesLbl = QLabel("X: ? Y: ?")
         layout.addWidget(self.coordinatesLbl)
-        
+
         self.properties = QHBoxLayout()
         layout.addLayout(self.properties)
-    
+
         addBtn = QPushButton("Add object")
         layout.addWidget(addBtn)
+        addBtn.clicked.connect(self.addObject)
 
     def setModel(self, model):
         self.mapModel = model
 
     def showSquareProperties(self, x, y):
+        self.x = x
+        self.y = y
+
         for i in reversed(range(self.properties.count())):
             self.properties.itemAt(i).widget().setParent(None)
-        
+
         items = self.mapModel.getSquareItems(x, y)
         num = 0;
         for itemModel in items:
-            x = itemModel.x
-            y = itemModel.y
             self.coordinatesLbl.setText("X: " + str(x) + " Y: " + str(y))
 
             num += 1;
             title = str(num)
             itemWg = PropertiesItem(itemModel, title)
             self.properties.addWidget(itemWg.widget)
+
+            removeBtn = QPushButton("Remove")
+            self.properties.addWidget(removeBtn)
+            removeBtn.clicked.connect(partial(self.removeObject, itemModel.id))
+
+    def addObject(self):
+        if self.x is not None and self.y is not None:
+            obj = self.mapModel.createObjectAt(self.x, self.y)
+            self.showSquareProperties(self.x, self.y)
+            self.updatedEntireMap.emit()
+
+    def removeObject(self, id):
+        self.mapModel.deleteSquareById(id)
+        self.showSquareProperties(self.x, self.y)
 

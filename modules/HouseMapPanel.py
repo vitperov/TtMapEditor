@@ -4,8 +4,6 @@ from pyqtgraph.Qt import QtCore, QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from functools import partial
-
 from modules.HouseMapItem import *
 
 class HouseMapPanel(QWidget):
