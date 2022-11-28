@@ -4,12 +4,15 @@ from PyQt5.QtCore import *
 from modules.MapModelGeneral import *
 
 class HouseSquareType(str, Enum):
-    Empty   = 'Empty'
-    Corner  = 'Corner'
-    Wall    = 'Wall'
-    Door    = 'Door'
-    Window  = 'Window'
-    Floor   = 'Floor'
+    Empty       = 'Empty'
+    Corner      = 'Corner'
+    Wall        = 'Wall'
+    Door        = 'Door'
+    Window      = 'Window'
+    Floor       = 'Floor'
+    CornerInt   = 'CornerInternal'
+    WallInt     = 'WallInternal'
+    DoorInt     = 'DoorInternal'
 
 class HouseSquareRotation(str, Enum):
     deg0    = '0'
