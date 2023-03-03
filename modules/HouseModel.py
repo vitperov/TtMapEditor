@@ -13,6 +13,9 @@ class HouseSquareType(str, Enum):
     CornerInt   = 'CornerInternal'
     WallInt     = 'WallInternal'
     DoorInt     = 'DoorInternal'
+    Wardrobe    = 'Wardrobe'
+    Bed2p       = 'Bed2p'
+    Drawer      = 'Drawer'
 
 class HouseSquareRotation(str, Enum):
     deg0    = '0'
