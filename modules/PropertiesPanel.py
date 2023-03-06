@@ -12,7 +12,7 @@ class PropertiesItem():
         self._model = objModel
 
         self.widget = QGroupBox(title)
-        self.layout = QVBoxLayout()
+        self.layout = QHBoxLayout()
         self.widget.setLayout(self.layout)
 
         for propName, propValue in self._model.properties.items():
@@ -40,10 +40,6 @@ class PropertiesItem():
 
             comboBox.currentIndexChanged.connect(partial(onIndexChanged, propName))
 
-
-
-
-
 class PropertiesPanel(QWidget):
     updatedEntireMap = pyqtSignal()
     def __init__(self):
@@ -58,7 +54,7 @@ class PropertiesPanel(QWidget):
         self.coordinatesLbl = QLabel("X: ? Y: ?")
         layout.addWidget(self.coordinatesLbl)
 
-        self.properties = QHBoxLayout()
+        self.properties = QVBoxLayout()
         layout.addLayout(self.properties)
 
         addBtn = QPushButton("Add object")
