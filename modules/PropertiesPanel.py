@@ -20,21 +20,26 @@ class PropertiesItem():
             self.layout.addWidget(groupbox)
             box = QVBoxLayout()
             groupbox.setLayout(box)
-            #print(propName + "->" + str(propValue.value))
 
             valType = type(propValue)
             # assume valType is Enum
             nValues = len(valType)
+            
+            comboBox = QComboBox()
             for option in list(valType):
-                #print("    " + option.name + "->" + str(option.value))
-                btn = QRadioButton(option.name)
-                #print("    Checked = " + str(option.value == propValue.value))
+                comboBox.addItem(option.name, option.name)
                 if option.value == propValue.value:
-                    btn.setChecked(True)
-                #btn.setChecked(option.value == propValue)
-                box.addWidget(btn)
+                    comboBox.setCurrentIndex(comboBox.count() - 1)
+            box.addWidget(comboBox)
+            
+            def onIndexChanged(propName, valueIdx):
+                prop = self._model.properties[propName]
+                values = list(type(prop))
+                valueStr = values[valueIdx].value
+                self._model.setProperty(propName, valueStr)
 
-                btn.pressed.connect(partial(self._model.setProperty, propName, option.value))
+            comboBox.currentIndexChanged.connect(partial(onIndexChanged, propName))
+
 
 
 
