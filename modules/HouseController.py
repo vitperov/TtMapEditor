@@ -20,6 +20,7 @@ class HouseController:
         
     def _provideModel(self):
         self._view.houseMapPanel.setModel(self._houseModel)
+        self._view.propPanel.setModel(self._houseModel)
         
 
     def _connectSignals(self):
@@ -29,10 +30,12 @@ class HouseController:
         self._view.actionsPanel.saveMap.connect(self._houseModel.saveMap)
         
         self._houseModel.updatedEntireMap.connect(self._view.houseMapPanel.redrawAll)
+        self._view.propPanel.updatedEntireMap.connect(self._view.houseMapPanel.redrawAll)
         
-    def _onHouseSquareClicked(self, squareId):
-        model = self._houseModel.getSquare(squareId)
-        self._view.propPanel.showSquareProperties(model)
+    def _onHouseSquareClicked(self, x, y):
+        #model = self._houseModel.getSquare(x, y)
+        # TODO: delete wrapper and call directly
+        self._view.propPanel.showSquareProperties(x, y)
         
 
         
