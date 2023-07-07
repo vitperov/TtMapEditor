@@ -10,6 +10,7 @@ class SquareType(str, Enum):
     Road    = 'Road'
     House   = 'House'
     Shed    = 'Shed'
+    Respawn = 'Respawn'
 
 class MapObjectType(str, Enum):
     Empty   = 'Empty'
