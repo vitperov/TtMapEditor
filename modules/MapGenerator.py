@@ -71,6 +71,7 @@ class MapGenerator():
         s['houseProbability']   = self._zoneSettings.houseProbability
         s['shedProbability']    = self._zoneSettings.shedProbability
         s['treeProbability']    = self._zoneSettings.treeProbability
+        s['forestKeepOut']      = self._forestKeepOut
 
         return s
 
@@ -82,6 +83,7 @@ class MapGenerator():
         self._zoneSettings.houseProbability = s['houseProbability']
         self._zoneSettings.shedProbability  = s['shedProbability']
         self._zoneSettings.treeProbability  = s['treeProbability']
+        self._forestKeepOut                 = s['forestKeepOut']
 
         self._calcMapSize()
 

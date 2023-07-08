@@ -49,13 +49,13 @@ class MapSettingsPanel(QWidget):
         self.allItems = []
 
         #--- Left
-        
+
         areaW = ParamItemSingle('areaW', "Area Width:", int)
         areaH = ParamItemSingle('areaH', "Height:"    , int)
         areaSzLayout = QHBoxLayout()
         areaSzLayout.addLayout(areaW.getLayout())
         areaSzLayout.addLayout(areaH.getLayout())
-        
+
         areaRows    = ParamItemSingle('areaRows',    "Area Width:", int)
         areaColumns = ParamItemSingle('areaColumns', "Height:",     int)
         areaCntLayout = QHBoxLayout()
@@ -73,17 +73,20 @@ class MapSettingsPanel(QWidget):
 
         #---- Right
 
-        houseProb = ParamItemSingle('houseProbability', "House probability:", float)
-        shedProb  = ParamItemSingle('shedProbability',  "Shed probability:",  float)
-        treeProb  = ParamItemSingle('treeProbability',  "Tree probability:",  float)
-        
+        houseProb        = ParamItemSingle('houseProbability', "House probability:",        float)
+        shedProb         = ParamItemSingle('shedProbability',  "Shed probability:",         float)
+        treeProb         = ParamItemSingle('treeProbability',  "Tree probability:",         float)
+        forestKeepOut    = ParamItemSingle('forestKeepOut',    "Tree rows around the map:", int)
+
         self.allItems.append(houseProb)
         self.allItems.append(shedProb)
         self.allItems.append(treeProb)
+        self.allItems.append(forestKeepOut)
 
         rightLayout.addLayout(houseProb.getLayout())
         rightLayout.addLayout(shedProb.getLayout())
         rightLayout.addLayout(treeProb.getLayout())
+        rightLayout.addLayout(forestKeepOut.getLayout())
 
     def setValues(self, s):
         for item in self.allItems:
