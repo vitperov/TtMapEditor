@@ -6,11 +6,36 @@ from PyQt5.QtWidgets import *
 
 from functools import partial
 
+class ParamItemSingle():
+    def __init__(self, name, label, convertFunc):
+        self._name = name
+        self._label = label
+        self._layout = None
+        self._convertFunc = convertFunc
+
+        self._editWg = None
+
+        self._createLayout()
+
+    def _createLayout(self):
+        self._layout = QHBoxLayout()
+        label = QLabel(self._label)
+        self._editWg = QLineEdit()
+        self._layout.addWidget(label)
+        self._layout.addWidget(self._editWg)
+
+    def getLayout(self):
+        return self._layout
+
+    def saveToDict(self, d):
+        d[self._name] = self._convertFunc(self._editWg.text())
+
+    def loadFromDict(self, d):
+        self._editWg.setText(str(d[self._name]))
+
 class MapSettingsPanel(QWidget):
     def __init__(self):
         QWidget.__init__(self)
-
-        #self.widget = QGroupBox('Generator settings')
 
         mainLayout = QHBoxLayout()
         self.setLayout(mainLayout)
@@ -21,88 +46,53 @@ class MapSettingsPanel(QWidget):
         mainLayout.addStretch()
         mainLayout.addLayout(rightLayout)
 
-        #self._generateBtn   = QPushButton("1")
-        #self._saveBtn       = QPushButton("2")
-
+        self.allItems = []
 
         #--- Left
-
-        areaLayout = QHBoxLayout()
-        lbl1 = QLabel("Area size W:")
-        self.areaW = QLineEdit()
-        lbl2 = QLabel(" H:")
-        self.areaH = QLineEdit()
-        areaLayout.addWidget(lbl1)
-        areaLayout.addWidget(self.areaW)
-        areaLayout.addWidget(lbl2)
-        areaLayout.addWidget(self.areaH)
-        areaLayout.addStretch()
-
+        
+        areaW = ParamItemSingle('areaW', "Area Width:", int)
+        areaH = ParamItemSingle('areaH', "Height:"    , int)
+        areaSzLayout = QHBoxLayout()
+        areaSzLayout.addLayout(areaW.getLayout())
+        areaSzLayout.addLayout(areaH.getLayout())
+        
+        areaRows    = ParamItemSingle('areaRows',    "Area Width:", int)
+        areaColumns = ParamItemSingle('areaColumns', "Height:",     int)
         areaCntLayout = QHBoxLayout()
-        lbla1 = QLabel("Rows:")
-        self.areaRows = QLineEdit()
-        lbla2 = QLabel("Columns:")
-        self.areaColumns = QLineEdit()
-        areaCntLayout.addWidget(lbla1)
-        areaCntLayout.addWidget(self.areaRows)
-        areaCntLayout.addWidget(lbla2)
-        areaCntLayout.addWidget(self.areaColumns)
-        areaCntLayout.addStretch()
+        areaCntLayout.addLayout(areaRows.getLayout())
+        areaCntLayout.addLayout(areaColumns.getLayout())
 
-        leftLayout.addLayout(areaLayout)
+        self.allItems.append(areaW)
+        self.allItems.append(areaH)
+        self.allItems.append(areaRows)
+        self.allItems.append(areaColumns)
+
+        leftLayout.addLayout(areaSzLayout)
         leftLayout.addLayout(areaCntLayout)
 
 
         #---- Right
 
-        #FIXME: wrap in function!
-        houseProbLayout = QHBoxLayout()
-        labHp = QLabel("House probability:")
-        self.houseProbability = QLineEdit()
-        houseProbLayout.addWidget(labHp)
-        houseProbLayout.addWidget(self.houseProbability)
+        houseProb = ParamItemSingle('houseProbability', "House probability:", float)
+        shedProb  = ParamItemSingle('shedProbability',  "Shed probability:",  float)
+        treeProb  = ParamItemSingle('treeProbability',  "Tree probability:",  float)
+        
+        self.allItems.append(houseProb)
+        self.allItems.append(shedProb)
+        self.allItems.append(treeProb)
 
-        shedProbLayout = QHBoxLayout()
-        labSp = QLabel("Shed probability:")
-        self.shedProbability = QLineEdit()
-        shedProbLayout.addWidget(labSp)
-        shedProbLayout.addWidget(self.shedProbability)
-
-
-        treeProbLayout = QHBoxLayout()
-        labTp = QLabel("Shed probability:")
-        self.treeProbability = QLineEdit()
-        treeProbLayout.addWidget(labTp)
-        treeProbLayout.addWidget(self.treeProbability)
-
-        rightLayout.addLayout(houseProbLayout)
-        rightLayout.addLayout(shedProbLayout)
-        rightLayout.addLayout(treeProbLayout)
-
-
-        #self._layout.addStretch()
-
-        #self._generateBtn.clicked.connect(self._newMap)
-        #self._saveBtn.clicked.connect(self._saveFile)
+        rightLayout.addLayout(houseProb.getLayout())
+        rightLayout.addLayout(shedProb.getLayout())
+        rightLayout.addLayout(treeProb.getLayout())
 
     def setValues(self, s):
-        self.areaW.setText(           str(s['areaW']))
-        self.areaH.setText(           str(s['areaH']))
-        self.areaRows.setText(        str(s['areaRows']))
-        self.areaColumns.setText(     str(s['areaColumns']))
-        self.houseProbability.setText(str(s['houseProbability']))
-        self.shedProbability.setText( str(s['shedProbability']))
-        self.treeProbability.setText( str(s['treeProbability']))
+        for item in self.allItems:
+            item.loadFromDict(s)
 
     def getValues(self):
         s = dict()
-        s['areaW']              = int(self.areaW.text())
-        s['areaH']              = int(self.areaH.text())
-        s['areaRows']           = int(self.areaRows.text())
-        s['areaColumns']        = int(self.areaColumns.text())
-        s['houseProbability']   = float(self.houseProbability.text())
-        s['shedProbability']    = float(self.shedProbability.text())
-        s['treeProbability']    = float(self.treeProbability.text())
+        for item in self.allItems:
+            item.saveToDict(s)
 
         return s
 
