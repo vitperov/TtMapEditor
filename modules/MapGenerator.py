@@ -37,7 +37,7 @@ class ZoneSettings():
 
         self.shedSize = AreaSize(2, 2)
         self.shedProbability = 0.5
-        
+
         self.treeProbability = 0.2
 
 class MapGenerator():
@@ -60,6 +60,30 @@ class MapGenerator():
     def _calcMapSize(self):
         self._w = self._zoneSettings.size.w * self._columns + 2 * self._forestKeepOut
         self._h = self._zoneSettings.size.h * self._rows + 2 * self._forestKeepOut + self._zoneSettings.roadWidth
+
+
+    def getDefaultSettings(self):
+        s = dict()
+        s['areaW']              = self._zoneSettings.size.w
+        s['areaH']              = self._zoneSettings.size.h
+        s['areaRows']           = self._rows
+        s['areaColumns']        = self._columns
+        s['houseProbability']   = self._zoneSettings.houseProbability
+        s['shedProbability']    = self._zoneSettings.shedProbability
+        s['treeProbability']    = self._zoneSettings.treeProbability
+
+        return s
+
+    def applySettings(self, s):
+        self._zoneSettings.size.w           = s['areaW']
+        self._zoneSettings.size.h           = s['areaH']
+        self._rows                          = s['areaRows']
+        self._columns                       = s['areaColumns']
+        self._zoneSettings.houseProbability = s['houseProbability']
+        self._zoneSettings.shedProbability  = s['shedProbability']
+        self._zoneSettings.treeProbability  = s['treeProbability']
+
+        self._calcMapSize()
 
     def generateMap(self):
         print("Generating map size=" + str(self._h) + "x" + str(self._w))
@@ -108,7 +132,7 @@ class ZoneLwObject():
         self.objKeepout = keepout
         self.localPos = localPos
         self.size = size
-        
+
     def localPosition(self):
         return self.localPos
 
@@ -142,7 +166,7 @@ class ZoneObject(ZoneLwObject):
         print("    Obj placed at: " + str(self.localPos))
         self.zone.editor.fillArea(self.globalPosition(),
             size, 'type', squareType)
-        
+
         obj = MapObjectModel(self.globalPosition().x, self.globalPosition().y, mapObjType)
         self.zone.model.addMapObject(obj)
         return True
@@ -190,10 +214,10 @@ class ZoneGenerator():
                           MapObjectType.Shed)
 
             self.placedObjects.append(shed)
-            
-        
+
+
         self.generateTrees()
-        
+
     def generateTrees(self):
         #rc = self.allowedRect
         rc = self.zoneRect

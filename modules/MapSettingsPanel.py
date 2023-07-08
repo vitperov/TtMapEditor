@@ -28,16 +28,16 @@ class MapSettingsPanel(QWidget):
         #--- Left
 
         areaLayout = QHBoxLayout()
-        lbl1 = QLabel("Area size:")
-        self.areaX = QLineEdit()
-        lbl2 = QLabel("x")
-        self.areaY = QLineEdit()
+        lbl1 = QLabel("Area size W:")
+        self.areaW = QLineEdit()
+        lbl2 = QLabel(" H:")
+        self.areaH = QLineEdit()
         areaLayout.addWidget(lbl1)
-        areaLayout.addWidget(self.areaX)
+        areaLayout.addWidget(self.areaW)
         areaLayout.addWidget(lbl2)
-        areaLayout.addWidget(self.areaY)
+        areaLayout.addWidget(self.areaH)
         areaLayout.addStretch()
-        
+
         areaCntLayout = QHBoxLayout()
         lbla1 = QLabel("Rows:")
         self.areaRows = QLineEdit()
@@ -54,7 +54,7 @@ class MapSettingsPanel(QWidget):
 
 
         #---- Right
-        
+
         #FIXME: wrap in function!
         houseProbLayout = QHBoxLayout()
         labHp = QLabel("House probability:")
@@ -67,8 +67,8 @@ class MapSettingsPanel(QWidget):
         self.shedProbability = QLineEdit()
         shedProbLayout.addWidget(labSp)
         shedProbLayout.addWidget(self.shedProbability)
-        
-        
+
+
         treeProbLayout = QHBoxLayout()
         labTp = QLabel("Shed probability:")
         self.treeProbability = QLineEdit()
@@ -84,4 +84,25 @@ class MapSettingsPanel(QWidget):
 
         #self._generateBtn.clicked.connect(self._newMap)
         #self._saveBtn.clicked.connect(self._saveFile)
+
+    def setValues(self, s):
+        self.areaW.setText(           str(s['areaW']))
+        self.areaH.setText(           str(s['areaH']))
+        self.areaRows.setText(        str(s['areaRows']))
+        self.areaColumns.setText(     str(s['areaColumns']))
+        self.houseProbability.setText(str(s['houseProbability']))
+        self.shedProbability.setText( str(s['shedProbability']))
+        self.treeProbability.setText( str(s['treeProbability']))
+
+    def getValues(self):
+        s = dict()
+        s['areaW']              = int(self.areaW.text())
+        s['areaH']              = int(self.areaH.text())
+        s['areaRows']           = int(self.areaRows.text())
+        s['areaColumns']        = int(self.areaColumns.text())
+        s['houseProbability']   = float(self.houseProbability.text())
+        s['shedProbability']    = float(self.shedProbability.text())
+        s['treeProbability']    = float(self.treeProbability.text())
+
+        return s
 
