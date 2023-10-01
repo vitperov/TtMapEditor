@@ -23,6 +23,7 @@ class HouseSquareType(str, Enum):
     TableChairs = 'TableChairs'
     Bookshelf   = 'Bookshelf'
     Light       = 'Light'
+    Toilet      = 'Toilet'
 
 
 class HouseSquareRotation(str, Enum):
