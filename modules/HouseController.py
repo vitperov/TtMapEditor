@@ -17,25 +17,28 @@ class HouseController:
 
         self._provideModel()
         self._connectSignals()
-        
+
     def _provideModel(self):
         self._view.houseMapPanel.setModel(self._houseModel)
         self._view.propPanel.setModel(self._houseModel)
-        
+
 
     def _connectSignals(self):
         self._view.houseMapPanel.activeItemChanged.connect(self._onHouseSquareClicked)
         self._view.actionsPanel.newMap.connect(self._houseModel.newMap)
         self._view.actionsPanel.openMap.connect(self._houseModel.openMap)
         self._view.actionsPanel.saveMap.connect(self._houseModel.saveMap)
-        
+
         self._houseModel.updatedEntireMap.connect(self._view.houseMapPanel.redrawAll)
         self._view.propPanel.updatedEntireMap.connect(self._view.houseMapPanel.redrawAll)
-        
+
+        self._view.houseMapPanel.deleteRow.connect(self._houseModel.deleteRow)
+        self._view.houseMapPanel.deleteColumn.connect(self._houseModel.deleteColumn)
+
     def _onHouseSquareClicked(self, x, y):
         #model = self._houseModel.getSquare(x, y)
         # TODO: delete wrapper and call directly
         self._view.propPanel.showSquareProperties(x, y)
-        
 
-        
+
+

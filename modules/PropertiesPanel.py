@@ -83,6 +83,7 @@ class PropertiesPanel(QWidget):
 
             removeBtn = QPushButton("Remove")
             self.properties.addWidget(removeBtn)
+
             removeBtn.clicked.connect(partial(self.removeObject, itemModel.id))
 
     def addObject(self):

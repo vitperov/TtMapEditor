@@ -4,10 +4,14 @@ from pyqtgraph.Qt import QtCore, QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
+from functools import partial
+
 from modules.HouseMapItem import *
 
 class HouseMapPanel(QWidget):
     activeItemChanged = pyqtSignal(int, int)
+    deleteRow         = pyqtSignal(int)
+    deleteColumn      = pyqtSignal(int)
 
     def __init__(self):
         QWidget.__init__(self)
@@ -24,6 +28,14 @@ class HouseMapPanel(QWidget):
         print("Item clicked x=" + str(x) + "; y=" + str(y))
         self.activeItemChanged.emit(x, y)
 
+    def onDeleteRowClicked(self, idx):
+        print("Delete row idx=" + str(idx))
+        self.deleteRow.emit(idx)
+
+    def onDeleteColunClicked(self, idx):
+        print("Delete column idx=" + str(idx))
+        self.deleteColumn.emit(idx)
+
 
     def setModel(self, model):
         self._model = model
@@ -38,6 +50,25 @@ class HouseMapPanel(QWidget):
                 widget.clicked.connect(self.onItemClicked)
                 key = (x, y)
                 self.squares[key] = widget
+
+        deleteBtnSize = QSize(32, 32)
+        # column delete buttons
+        for x in range(w):
+            y = h + 1
+            button = QPushButton(self)
+            button.setText("X")
+            self._layout.addWidget(button, y, x)
+            button.clicked.connect(partial(self.onDeleteColunClicked, x))
+            button.setFixedSize(deleteBtnSize)
+
+        # row delete buttons
+        for y in range(h):
+            x = w + 1
+            button = QPushButton(self)
+            button.setText("X")
+            self._layout.addWidget(button, y, x)
+            button.clicked.connect(partial(self.onDeleteRowClicked, y))
+            button.setFixedSize(deleteBtnSize)
 
         mapObjects = self._model.getAllSquares()
         for objectModel in mapObjects:
