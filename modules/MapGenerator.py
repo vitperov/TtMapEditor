@@ -4,6 +4,7 @@ from random import randrange, random
 
 from modules.TerrainMapModel import *
 from modules.GeometryPrimitives import *
+from modules.GeneratorSettings import *
 
 def genRandomObjPlace(zoneRect, objSize):
         x = randrange(zoneRect.pt.x, zoneRect.pt.x + zoneRect.sz.w - objSize.w)
@@ -25,20 +26,6 @@ class MapEditor():
         self.fillArea(Point(startPt.x ,startPt.y + size.h - width), AreaSize(size.w, width), 'type', type)
         self.fillArea(startPt,                                      AreaSize(width, size.h), 'type', type)
         self.fillArea(Point(startPt.x + size.w - width, startPt.y), AreaSize(width, size.h), 'type', type)
-
-class ZoneSettings():
-    def __init__(self):
-        self.size = AreaSize(15, 20)
-        self.roadWidth = 2
-
-        # TODO: randomly choose house
-        self.houseSize = AreaSize(7, 7)
-        self.houseProbability = 0.9
-
-        self.shedSize = AreaSize(2, 2)
-        self.shedProbability = 0.5
-
-        self.treeProbability = 0.2
 
 class MapGenerator():
     def __init__(self, model):

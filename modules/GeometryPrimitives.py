@@ -8,6 +8,10 @@ class AreaSize:
     def __repr__(self):
         return "(" + str(self.w) + ", " + str(self.h) + ")"
 
+    def loadFromDict(self, settings):
+        for k, v in settings.items():
+            setattr(self, k, v)
+
 class Point:
     def __init__(self, x, y):
         self.x = x
