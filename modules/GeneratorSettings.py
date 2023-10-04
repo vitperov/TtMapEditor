@@ -17,7 +17,8 @@ class ZoneSettings():
     def loadFromDict(self, settings):
         for k, v in settings.items():
             if (k == 'houseSize') or \
-               (k == 'shedSize'):
+               (k == 'shedSize')  or \
+               (k == 'size'):
                 a = AreaSize(0, 0)
                 a.loadFromDict(v)
                 setattr(self, k, a)
