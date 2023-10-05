@@ -14,6 +14,13 @@ class GeneratorSettingsEncoder(JSONEncoder):
         def default(self, o):
             return o.__dict__
 
+def clearLayout(layout):
+    for i in reversed(range(layout.count())):
+        child = layout.itemAt(i)
+        if child.widget() is not None:
+            child.widget().deleteLater()
+        elif child.layout() is not None:
+            clearLayout(child.layout())
 
 class GeneratorSettingsDlg(QtGui.QDialog):
     def __init__(self):
@@ -72,15 +79,14 @@ class GeneratorSettingsDlg(QtGui.QDialog):
     def onSavePressed(self):
         self.saveToFile('testSettings.json')
 
-
     def onLoadPressed(self):
         self.loadFromFile('testSettings.json')
         #print(self.settings.__dict__)
         #print(self.settings.zoneSettings.__dict__)
         #print("----------")
+        clearLayout(self.dynamicLayout)
         edt = ClassVariablesGuiEditor();
         edt.createControls(self.settings, "", self.dynamicLayout)
-
 
     @staticmethod
     def runDlg():
