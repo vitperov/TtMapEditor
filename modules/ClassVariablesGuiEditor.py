@@ -42,21 +42,23 @@ class ClassVariablesGuiEditor():
 
         def getLayout(self):
             return self._layout
- 
+
     # NOTE: we do not store anything iside the class, but let it be
     # the class method insted of just functin (perhaps we will need it in the future)
-    
+
     # FIXME: prefix parameter is needed only for the debug purposes. It can be deleted
     def createControls(self, cls, prefix, layout):
         for attr in dir(cls):
             if attr.startswith("__"):
+                continue
+            if attr.startswith("_"):
                 continue
             val = getattr(cls, attr)
             if callable(val):
                 continue
 
             if is_class(val):
-                print(prefix + attr + "->");
+                #print(prefix + attr + "->");
                 nestedLayout = QVBoxLayout()
                 box = QGroupBox(attr)
                 box.setLayout(nestedLayout)
@@ -65,6 +67,6 @@ class ClassVariablesGuiEditor():
                 self.createControls(val, prefix + "    ", nestedLayout)
                 continue
 
-            print(prefix + attr + "->" + str(val))
+            #print(prefix + attr + "->" + str(val))
             item = self.DynamicItem(attr, attr, type(val), cls)
             layout.addLayout(item.getLayout())

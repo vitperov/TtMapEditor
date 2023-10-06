@@ -7,17 +7,22 @@ from abc import ABC, abstractmethod
 class SerializableSettings(ABC):
     class SettingsEncoder(JSONEncoder):
         def default(self, o):
-            return o.__dict__
-        
+            d = dict(o.__dict__) # copy because we delete items
+            keysToDelete = ['_filename', '_abc_impl']
+
+            for key in keysToDelete:
+                d.pop(key, None)
+
+            return d;
+
     def __init__(self, filename):
-        # This varible shouldn't be written to json, but I don't
-        #   know how to hide it from json.dumps
         self._filename = filename
 
     def saveToFile(self):
         print("Saving data to " + self._filename)
         with open(self._filename, "w+") as writeFile:
             jsonObj = json.dumps(self, indent=4, cls=self.SettingsEncoder)
+            jsonObj
             writeFile.write(jsonObj)
 
     def loadFromFile(self):
@@ -26,6 +31,7 @@ class SerializableSettings(ABC):
         with open(self._filename, "r") as readFile:
             jsStr = readFile.read()
             settingsDict = json.loads(jsStr)
+
             self.loadFromDict(settingsDict)
 
     @abstractmethod
