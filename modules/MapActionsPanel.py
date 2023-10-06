@@ -6,9 +6,8 @@ from PyQt5.QtWidgets import *
 
 from functools import partial
 
-from modules.GeneratorSettingsDlg import *
-
 class MapActionsPanel(QWidget):
+    mapSettings  = pyqtSignal()
     generateMap  = pyqtSignal()
     saveMap      = pyqtSignal(str)
 
@@ -33,7 +32,7 @@ class MapActionsPanel(QWidget):
         self._saveBtn.clicked.connect(self._saveFile)
 
     def _settingsDlg(self):
-        GeneratorSettingsDlg.runDlg()
+        self.mapSettings.emit()
 
     def _newMap(self):
         self.generateMap.emit()

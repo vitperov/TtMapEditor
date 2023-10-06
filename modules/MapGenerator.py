@@ -11,6 +11,7 @@ def genRandomObjPlace(zoneRect, objSize):
         y = randrange(zoneRect.pt.y, zoneRect.pt.y + zoneRect.sz.h - objSize.h)
         return Point(x, y)
 
+# Helper functions to edit map regions
 class MapEditor():
     def __init__(self, model):
         self._model = model
@@ -29,50 +30,25 @@ class MapEditor():
 
 class MapGenerator():
     def __init__(self, model):
+        self.settings = GeneratorSettings()
+
         self._model = model
         self._editor = MapEditor(model)
-
-        self._rows = 2
-        self._columns = 5
-
-        self._zoneSettings = ZoneSettings()
-
-        self._forestKeepOut = 3
-        self._roadWidth = 2
 
         self._calcMapSize()
 
         self._currentZoneId = 0
+        
+        self._w = None
+        self._h = None
+        
+    def loadSettings(self):
+        self.settings.loadFromFile()
+        self._calcMapSize()
 
     def _calcMapSize(self):
-        self._w = self._zoneSettings.size.w * self._columns + 2 * self._forestKeepOut
-        self._h = self._zoneSettings.size.h * self._rows + 2 * self._forestKeepOut + self._zoneSettings.roadWidth
-
-
-    def getDefaultSettings(self):
-        s = dict()
-        s['areaW']              = self._zoneSettings.size.w
-        s['areaH']              = self._zoneSettings.size.h
-        s['areaRows']           = self._rows
-        s['areaColumns']        = self._columns
-        s['houseProbability']   = self._zoneSettings.houseProbability
-        s['shedProbability']    = self._zoneSettings.shedProbability
-        s['treeProbability']    = self._zoneSettings.treeProbability
-        s['forestKeepOut']      = self._forestKeepOut
-
-        return s
-
-    def applySettings(self, s):
-        self._zoneSettings.size.w           = s['areaW']
-        self._zoneSettings.size.h           = s['areaH']
-        self._rows                          = s['areaRows']
-        self._columns                       = s['areaColumns']
-        self._zoneSettings.houseProbability = s['houseProbability']
-        self._zoneSettings.shedProbability  = s['shedProbability']
-        self._zoneSettings.treeProbability  = s['treeProbability']
-        self._forestKeepOut                 = s['forestKeepOut']
-
-        self._calcMapSize()
+        self._w = self.settings.zoneSettings.size.w * self.settings.columns + 2 * self.settings.forestKeepOut
+        self._h = self.settings.zoneSettings.size.h * self.settings.rows + 2 * self.settings.forestKeepOut + self.settings.zoneSettings.roadWidth
 
     def generateMap(self):
         print("Generating map size=" + str(self._h) + "x" + str(self._w))
@@ -88,7 +64,7 @@ class MapGenerator():
 
     def genKeepOutForest(self):
         self._editor.fillAreaBorder(Point(0,0),  AreaSize(self._w, self._h),
-            SquareType.Forest, width=self._forestKeepOut)
+            SquareType.Forest, width=self.settings.forestKeepOut)
 
     def genRoad(self):
         #FIXME: do road after every zone height
@@ -96,15 +72,15 @@ class MapGenerator():
         self._editor.fillArea(Point(0, halfHeight - 1), AreaSize(self._w, 2), 'type', SquareType.Road)
 
     def genZones(self):
-        for row in range(self._rows):
-            for column in range(self._columns):
+        for row in range(self.settings.rows):
+            for column in range(self.settings.columns):
                 print("Generating zone. Row=" + str(row) + " column=" + str(column))
-                startPt = Point(column * self._zoneSettings.size.w + self._forestKeepOut,
-                                row * self._zoneSettings.size.h + self._forestKeepOut)
+                startPt = Point(column * self.settings.zoneSettings.size.w + self.settings.forestKeepOut,
+                                row * self.settings.zoneSettings.size.h + self.settings.forestKeepOut)
 
                 #if (row != 0) and (row != self._rows - 1):
                 if row != 0:
-                    startPt.y += self._zoneSettings.roadWidth;
+                    startPt.y += self.settings.zoneSettings.roadWidth;
                     print("    -->Add road offset")
 
                 print("    startPt=" + str(startPt))
@@ -112,7 +88,7 @@ class MapGenerator():
                 self._currentZoneId += 1
 
     def genZone(self, startPt):
-        zone = ZoneGenerator(self._model, self._zoneSettings, startPt)
+        zone = ZoneGenerator(self._model, self.settings.zoneSettings, startPt)
         zone.generate()
 
 class ZoneLwObject():

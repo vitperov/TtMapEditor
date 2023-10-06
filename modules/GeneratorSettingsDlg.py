@@ -10,10 +10,6 @@ from json import JSONEncoder
 from modules.GeneratorSettings       import *
 from modules.ClassVariablesGuiEditor import *
 
-class GeneratorSettingsEncoder(JSONEncoder):
-        def default(self, o):
-            return o.__dict__
-
 def clearLayout(layout):
     for i in reversed(range(layout.count())):
         child = layout.itemAt(i)
@@ -23,12 +19,12 @@ def clearLayout(layout):
             clearLayout(child.layout())
 
 class GeneratorSettingsDlg(QtGui.QDialog):
-    def __init__(self):
+    def __init__(self, title, dataPtrRW):
         super().__init__()
 
-        self.settings = GeneratorSettings()
+        self._data = dataPtrRW
 
-        self.setWindowTitle("Terrain generator settings")
+        self.setWindowTitle(title)
 
         layout = QVBoxLayout()
 
@@ -37,7 +33,7 @@ class GeneratorSettingsDlg(QtGui.QDialog):
         loadButton = QPushButton()
         saveButton = QPushButton()
 
-        loadButton.setText("Load settings")
+        loadButton.setText("Reset settings")
         saveButton.setText("Save settings")
 
         loadButton.clicked.connect(self.onLoadPressed)
@@ -53,44 +49,18 @@ class GeneratorSettingsDlg(QtGui.QDialog):
 
         self.setLayout(layout)
 
-
-    def saveToFile(self, filename):
-        extension = '.json'
-        if not filename.endswith(extension):
-            filename = filename + extension
-
-        print("Saving settings to " + filename)
-        with open(filename, "w+") as writeFile:
-            jsonObj = json.dumps(self.settings, indent=4, cls=GeneratorSettingsEncoder)
-            writeFile.write(jsonObj)
-
-    def loadFromFile(self, filename):
-        extension = '.json'
-        if not filename.endswith(extension):
-            filename = filename + extension
-
-        print("Loading map to " + filename)
-
-        with open(filename, "r") as readFile:
-            jsStr = readFile.read()
-            settingsDict = json.loads(jsStr)
-            self.settings.loadFromDict(settingsDict)
-
     def onSavePressed(self):
-        self.saveToFile('testSettings.json')
+        self._data.saveToFile()
 
     def onLoadPressed(self):
-        self.loadFromFile('testSettings.json')
-        #print(self.settings.__dict__)
-        #print(self.settings.zoneSettings.__dict__)
-        #print("----------")
+        self._data.loadFromFile()
         clearLayout(self.dynamicLayout)
         edt = ClassVariablesGuiEditor();
-        edt.createControls(self.settings, "", self.dynamicLayout)
+        edt.createControls(self._data, "", self.dynamicLayout)
 
     @staticmethod
-    def runDlg():
-        dlg = GeneratorSettingsDlg()
-        dlg.setModal(True)
+    def runDlg(title, dataPtrRW, modal=True):
+        dlg = GeneratorSettingsDlg(title, dataPtrRW)
+        dlg.setModal(modal)
         dlg.exec_()
 

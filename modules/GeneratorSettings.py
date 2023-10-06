@@ -1,4 +1,5 @@
 from modules.GeometryPrimitives import *
+from modules.SerializableSettings import *
 
 class ZoneSettings():
     def __init__(self):
@@ -25,8 +26,10 @@ class ZoneSettings():
             else:
                 setattr(self, k, v)
 
-class GeneratorSettings:
+class GeneratorSettings(SerializableSettings):
     def __init__(self):
+        super().__init__("settings/terrainGenerator.json")
+
         self.zoneSettings = ZoneSettings()
         self.rows = 2
         self.columns = 5

@@ -8,7 +8,6 @@ from PyQt5.QtCore import *
 
 from modules.MapWidget import *
 from modules.MapActionsPanel import *
-from modules.MapSettingsPanel import *
 
 
 class MapView(QMainWindow):
@@ -25,14 +24,12 @@ class MapView(QMainWindow):
 
     def _createWidgets(self):
         self.actionsPanel = MapActionsPanel()
-        self.mapGeneratorSettings = MapSettingsPanel()
         self.mapWidget = MapWidget()
 
     def _createLayout(self):
         layout = QVBoxLayout()
 
         layout.addWidget(self.actionsPanel)
-        layout.addWidget(self.mapGeneratorSettings)
         layout.addWidget(self.mapWidget)
 
         return layout
