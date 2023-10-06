@@ -1,7 +1,7 @@
 from modules.GeometryPrimitives import *
 from modules.SerializableSettings import *
 
-class ZoneSettings():
+class LandLotSettings():
     def __init__(self):
         self.size = AreaSize(15, 20)
         self.roadWidth = 2
@@ -30,19 +30,18 @@ class GeneratorSettings(SerializableSettings):
     def __init__(self):
         super().__init__("settings/terrainGenerator.json")
 
-        self.zoneSettings = ZoneSettings()
         self.rows = 2
         self.columns = 5
 
-        self.zoneSettings = ZoneSettings()
+        self.landLotSettings = LandLotSettings()
 
         self.forestKeepOut = 3
         self.roadWidth = 2
 
     def loadFromDict(self, settings):
         for k, v in settings.items():
-            if k == 'zoneSettings':
-                z = ZoneSettings()
+            if k == 'landLotSettings':
+                z = LandLotSettings()
                 z.loadFromDict(v)
                 setattr(self, k, z)
             else:
