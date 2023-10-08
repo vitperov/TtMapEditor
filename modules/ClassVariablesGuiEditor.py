@@ -46,8 +46,7 @@ class ClassVariablesGuiEditor():
     # NOTE: we do not store anything iside the class, but let it be
     # the class method insted of just functin (perhaps we will need it in the future)
 
-    # FIXME: prefix parameter is needed only for the debug purposes. It can be deleted
-    def createControls(self, cls, prefix, layout):
+    def createControls(self, cls, layout):
         for attr in dir(cls):
             if attr.startswith("__"):
                 continue
@@ -69,7 +68,7 @@ class ClassVariablesGuiEditor():
                     itemBox.setLayout(itemLayout)
                     listLayout.addWidget(itemBox)
                     item = val[itemId]
-                    self.createControls(item, prefix + "    ", itemLayout)
+                    self.createControls(item, itemLayout)
 
                 continue
 
@@ -80,9 +79,9 @@ class ClassVariablesGuiEditor():
                 box.setLayout(nestedLayout)
                 layout.addWidget(box)
                 #print("Adding class control: " + str(val))
-                self.createControls(val, prefix + "    ", nestedLayout)
+                self.createControls(val, nestedLayout)
                 continue
 
-            #print(prefix + attr + " (" + str(type(attr)) + ")->" + str(val))
+            #print(attr + "->" + str(val))
             item = self.DynamicItem(attr, attr, type(val), cls)
             layout.addLayout(item.getLayout())

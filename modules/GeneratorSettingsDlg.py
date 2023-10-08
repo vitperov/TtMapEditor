@@ -56,7 +56,7 @@ class GeneratorSettingsDlg(QtGui.QDialog):
         self._data.loadFromFile()
         clearLayout(self.dynamicLayout)
         edt = ClassVariablesGuiEditor();
-        edt.createControls(self._data, "", self.dynamicLayout)
+        edt.createControls(self._data, self.dynamicLayout)
 
     @staticmethod
     def runDlg(title, dataPtrRW, modal=True):
