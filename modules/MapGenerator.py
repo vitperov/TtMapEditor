@@ -166,10 +166,10 @@ class LandLotGenerator():
         # Debug landLot location
         #self.editor.fillAreaBorder(self.startPt, self.settings.size, SquareType.Empty)
 
-        generateHouse = (random() < self.settings.house.probability)
+        generateHouse = (random() < self.settings.house.variants[0].probability)
         if generateHouse:
             house = LandLotObject(self)
-            house.generate(self.settings.house.size,
+            house.generate(self.settings.house.variants[0].size,
                            SquareType.House,
                            MapObjectType.House)
 

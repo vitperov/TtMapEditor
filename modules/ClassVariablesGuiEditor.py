@@ -34,6 +34,7 @@ class ClassVariablesGuiEditor():
             def onTextChanged(txt):
                 try:
                     value = self._convertFunc(txt)
+                    #value = txt
                     setattr(self._varStoragePtr, self._name, value)
                 except:
                     pass
@@ -53,8 +54,23 @@ class ClassVariablesGuiEditor():
                 continue
             if attr.startswith("_"):
                 continue
+
             val = getattr(cls, attr)
             if callable(val):
+                continue
+
+            print(str(val) + "->" + str(type(val)))
+
+            if isinstance(val, list):
+                print("LIST! creating layout")
+                nestedLayout = QVBoxLayout()
+                box = QGroupBox(attr)
+                box.setLayout(nestedLayout)
+                for item in val:
+                    print("List item =" + str(item))
+                    layout.addWidget(box)
+                    self.createControls(item, prefix + "    ", nestedLayout)
+                    
                 continue
 
             if is_class(val):
@@ -64,9 +80,10 @@ class ClassVariablesGuiEditor():
                 box.setLayout(nestedLayout)
                 #layout.addLayout(nestedLayout)
                 layout.addWidget(box)
+                #print("Adding class control: " + str(val))
                 self.createControls(val, prefix + "    ", nestedLayout)
                 continue
 
-            #print(prefix + attr + "->" + str(val))
+            print(prefix + attr + " (" + str(type(attr)) + ")->" + str(val))
             item = self.DynamicItem(attr, attr, type(val), cls)
             layout.addLayout(item.getLayout())
