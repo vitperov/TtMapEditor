@@ -7,7 +7,6 @@ from PyQt5.QtWidgets import *
 import json
 from json import JSONEncoder
 
-from modules.GeneratorSettings       import *
 from modules.ClassVariablesGuiEditor import *
 
 def clearLayout(layout):
@@ -18,7 +17,7 @@ def clearLayout(layout):
         elif child.layout() is not None:
             clearLayout(child.layout())
 
-class GeneratorSettingsDlg(QtGui.QDialog):
+class TerrainGeneratorSettingsDlg(QtGui.QDialog):
     def __init__(self, title, dataPtrRW, parent=None):
         super().__init__(parent)
 
@@ -61,7 +60,7 @@ class GeneratorSettingsDlg(QtGui.QDialog):
     # Set parentWnd=None for modal dialogue
     @staticmethod
     def runDlg(title, dataPtrRW, parentWnd=None):
-        dlg = GeneratorSettingsDlg(title, dataPtrRW, parentWnd)
+        dlg = TerrainGeneratorSettingsDlg(title, dataPtrRW, parentWnd)
 
         if parentWnd is None:
             dlg.setModal(True)

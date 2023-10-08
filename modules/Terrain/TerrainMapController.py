@@ -10,9 +10,9 @@ import numpy
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
-from modules.GeneratorSettingsDlg import *
+from modules.Terrain.TerrainGeneratorSettingsDlg import *
 
-class MapController:
+class TerrainMapController:
     def __init__(self, view, model, generator):
         self._view = view
         self._mapModel = model
@@ -35,5 +35,5 @@ class MapController:
         self._generator.generateMap()
 
     def _onSettingsClick(self):
-        GeneratorSettingsDlg.runDlg("Terrain generator settings", \
+        TerrainGeneratorSettingsDlg.runDlg("Terrain generator settings", \
             self._generator.settings, self._view)

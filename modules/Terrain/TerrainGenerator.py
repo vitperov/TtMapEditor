@@ -4,7 +4,7 @@ from random import randrange, random
 
 from modules.TerrainMapModel import *
 from modules.GeometryPrimitives import *
-from modules.GeneratorSettings import *
+from modules.Terrain.TerrainGeneratorSettings import *
 
 def genRandomObjPlace(landLotRect, objSize):
         x = randrange(landLotRect.pt.x, landLotRect.pt.x + landLotRect.sz.w - objSize.w)
@@ -28,9 +28,9 @@ class MapEditor():
         self.fillArea(startPt,                                      AreaSize(width, size.h), 'type', type)
         self.fillArea(Point(startPt.x + size.w - width, startPt.y), AreaSize(width, size.h), 'type', type)
 
-class MapGenerator():
+class TerrainGenerator():
     def __init__(self, model):
-        self.settings = GeneratorSettings()
+        self.settings = TerrainGeneratorSettings()
 
         self._model = model
         self._editor = MapEditor(model)

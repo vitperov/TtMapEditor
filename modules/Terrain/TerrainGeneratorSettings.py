@@ -32,7 +32,7 @@ class LandLotSettings(LandObject):
         self.treeProbability = 0.2
 
 
-class GeneratorSettings(SerializableSettings):
+class TerrainGeneratorSettings(SerializableSettings):
     def __init__(self):
         super().__init__("settings/terrainGenerator.json")
 

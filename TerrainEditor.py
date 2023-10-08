@@ -5,8 +5,8 @@ from PyQt5.QtCore import *
 
 from modules.TerrainMapModel import *
 from modules.MapView import *
-from modules.MapController import *
-from modules.MapGenerator import *
+from modules.Terrain.TerrainMapController import *
+from modules.Terrain.TerrainGenerator import *
 
 def main():
     app = QApplication(sys.argv)
@@ -15,9 +15,9 @@ def main():
     view.show()
 
     model = TerrainMapModel()
-    generator = MapGenerator(model)
+    generator = TerrainGenerator(model)
 
-    controller = MapController(view, model, generator)
+    controller = TerrainMapController(view, model, generator)
 
     exitcode = app.exec_()
 
