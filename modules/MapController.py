@@ -23,16 +23,12 @@ class MapController:
 
     def _provideModel(self):
         self._view.mapWidget.setModel(self._mapModel)
-
-        #self._view.actionsPanel.generateMap.connect(self._generator.generateMap)
         self._view.actionsPanel.generateMap.connect(self._onGenerateClick)
         self._view.actionsPanel.saveMap.connect(self._mapModel.saveMap)
         self._view.actionsPanel.mapSettings.connect(self._onSettingsClick)
 
     def _connectSignals(self):
-        #self._view.mapWidget.activeItemChanged.connect(self._onHouseSquareClicked)
         self._mapModel.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
-        print("Stub")
 
     def _onGenerateClick(self):
         self._generator.loadSettings()
@@ -40,4 +36,4 @@ class MapController:
 
     def _onSettingsClick(self):
         GeneratorSettingsDlg.runDlg("Terrain generator settings", \
-            self._generator.settings, modal=False)
+            self._generator.settings, self._view)

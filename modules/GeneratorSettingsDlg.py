@@ -19,8 +19,8 @@ def clearLayout(layout):
             clearLayout(child.layout())
 
 class GeneratorSettingsDlg(QtGui.QDialog):
-    def __init__(self, title, dataPtrRW):
-        super().__init__()
+    def __init__(self, title, dataPtrRW, parent=None):
+        super().__init__(parent)
 
         self._data = dataPtrRW
 
@@ -58,9 +58,14 @@ class GeneratorSettingsDlg(QtGui.QDialog):
         edt = ClassVariablesGuiEditor();
         edt.createControls(self._data, self.dynamicLayout)
 
+    # Set parentWnd=None for modal dialogue
     @staticmethod
-    def runDlg(title, dataPtrRW, modal=True):
-        dlg = GeneratorSettingsDlg(title, dataPtrRW)
-        dlg.setModal(modal)
-        dlg.exec_()
+    def runDlg(title, dataPtrRW, parentWnd=None):
+        dlg = GeneratorSettingsDlg(title, dataPtrRW, parentWnd)
+
+        if parentWnd is None:
+            dlg.setModal(True)
+            dlg.exec_()
+        else:
+            dlg.show()
 
