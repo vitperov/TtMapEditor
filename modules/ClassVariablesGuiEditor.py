@@ -34,7 +34,6 @@ class ClassVariablesGuiEditor():
             def onTextChanged(txt):
                 try:
                     value = self._convertFunc(txt)
-                    #value = txt
                     setattr(self._varStoragePtr, self._name, value)
                 except:
                     pass
@@ -59,31 +58,31 @@ class ClassVariablesGuiEditor():
             if callable(val):
                 continue
 
-            print(str(val) + "->" + str(type(val)))
-
             if isinstance(val, list):
-                print("LIST! creating layout")
-                nestedLayout = QVBoxLayout()
+                listLayout = QVBoxLayout()
                 box = QGroupBox(attr)
-                box.setLayout(nestedLayout)
-                for item in val:
-                    print("List item =" + str(item))
-                    layout.addWidget(box)
-                    self.createControls(item, prefix + "    ", nestedLayout)
-                    
+                box.setLayout(listLayout)
+                layout.addWidget(box)
+                for itemId in range(len(val)):
+                    itemLayout = QVBoxLayout()
+                    itemBox = QGroupBox(str(itemId+1))
+                    itemBox.setLayout(itemLayout)
+                    listLayout.addWidget(itemBox)
+                    item = val[itemId]
+                    self.createControls(item, prefix + "    ", itemLayout)
+
                 continue
 
             if is_class(val):
-                #print(prefix + attr + "->");
+                print(attr + "-> class");
                 nestedLayout = QVBoxLayout()
                 box = QGroupBox(attr)
                 box.setLayout(nestedLayout)
-                #layout.addLayout(nestedLayout)
                 layout.addWidget(box)
                 #print("Adding class control: " + str(val))
                 self.createControls(val, prefix + "    ", nestedLayout)
                 continue
 
-            print(prefix + attr + " (" + str(type(attr)) + ")->" + str(val))
+            #print(prefix + attr + " (" + str(type(attr)) + ")->" + str(val))
             item = self.DynamicItem(attr, attr, type(val), cls)
             layout.addLayout(item.getLayout())

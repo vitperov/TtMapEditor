@@ -7,7 +7,7 @@ class LandObject():
     def __init__(self, size=AreaSize(0.0,0.0), probability=0.0):
         self.size = AreaSize(size.w, size.h)
         self.probability = probability
-        
+
     def loadFromDict(self, settings):
         for k, v in settings.items():
             if k == 'size':
@@ -16,13 +16,13 @@ class LandObject():
                 setattr(self, k, a)
             else:
                 setattr(self, k, v)
-                
+
 class ObjectVariant():
     def __init__(self):
         self.name = ""
         self.size = AreaSize(0.0, 0.0)
         self.probability = 0.0
-        
+
     def loadFromDict(self, settings):
         for k, v in settings.items():
             if k == 'size':
@@ -31,15 +31,15 @@ class ObjectVariant():
                 setattr(self, k, a)
             else:
                 setattr(self, k, v)
-        
-                
+
+
 class LandObjectWithVariants(LandObject):
     def __init__(self, probability=0.0):
         self.variants = list()
         # one empty variant to add new object in the properties editor
         self.variants.append(ObjectVariant())
         self.probability = probability
-        
+
     def loadFromDict(self, settings):
         for k, v in settings.items():
             if k == 'variants':
@@ -48,14 +48,19 @@ class LandObjectWithVariants(LandObject):
                     a = ObjectVariant()
                     a.loadFromDict(item)
                     self.variants.append(a)
+                lastItem = self.variants[-1]
+                if len(lastItem.name):
+                    # one empty variant to add new object in the properties editor
+                    self.variants.append(ObjectVariant())
+
             elif k == 'size':
                 a = AreaSize(0.0, 0.0)
                 a.loadFromDict(v)
                 setattr(self, k, a)
             else:
                 setattr(self, k, v)
-        
-       
+
+
 
 class LandLotSettings():
     def __init__(self):
