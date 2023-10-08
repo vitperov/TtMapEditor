@@ -1,15 +1,44 @@
 import json
 from json import JSONEncoder
-from abc import ABC, abstractmethod
 
-# Derive from AbstractBaseClass to have abstract method
-#   that must be redifined in a child class
-class SerializableSettings(ABC):
+class DictLoadableObject():
+    def loadFromDict(self, settings):
+        for k, v in settings.items():
+            storedVal = getattr(self, k)
+
+            if hasattr(storedVal, 'loadFromDict') and callable(storedVal.loadFromDict):
+                valClass = type(storedVal)
+                newObj = valClass()
+                newObj.loadFromDict(v)
+                setattr(self, k, newObj)
+            elif isinstance(storedVal, list):
+                newList = list()
+                # NOTE: it must be at least one empty object in the list
+                # to determine type of it.
+                ItemClass = type(storedVal[0])
+                for item in v:
+                    a = ItemClass()
+                    a.loadFromDict(item)
+                    newList.append(a)
+                lastItem = newList[-1]
+                if len(lastItem.name): #FIXME: add method .isEmpty()
+                    # Insert one empty value to be able to
+                    # 1) determine type of it (see above)
+                    # 2) It's used in an editor to create new item
+                    #      in the list.
+                    newList.append(ItemClass())
+
+                setattr(self, k, newList)
+            else:
+                setattr(self, k, v)
+
+class SerializableSettings(DictLoadableObject):
     class SettingsEncoder(JSONEncoder):
         def default(self, o):
             d = dict(o.__dict__) # copy because we delete items
-            keysToDelete = ['_filename', '_abc_impl']
+            keysToDelete = ['_filename']
 
+            # FIXME: delete all private keys
             for key in keysToDelete:
                 d.pop(key, None)
 
@@ -33,9 +62,4 @@ class SerializableSettings(ABC):
             settingsDict = json.loads(jsStr)
 
             self.loadFromDict(settingsDict)
-
-    @abstractmethod
-    def loadFromDict(self):
-        pass
-
 
