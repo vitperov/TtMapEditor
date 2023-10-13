@@ -21,7 +21,7 @@ class DictLoadableObject():
                     a.loadFromDict(item)
                     newList.append(a)
                 lastItem = newList[-1]
-                if len(lastItem.name): #FIXME: add method .isEmpty()
+                if not lastItem.isEmpty():
                     # Insert one empty value to be able to
                     # 1) determine type of it (see above)
                     # 2) It's used in an editor to create new item

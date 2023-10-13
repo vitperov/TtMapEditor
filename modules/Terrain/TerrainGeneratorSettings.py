@@ -8,9 +8,12 @@ class LandObject(DictLoadableObject):
 
 class ObjectVariant(DictLoadableObject):
     def __init__(self):
-        self.name = ""
+        self.modelName = ""
         self.size = AreaSize()
         self.probability = 0.0
+        
+    def isEmpty(self):
+        return len(self.modelName) < 1
 
 class LandObjectWithVariants(LandObject):
     def __init__(self, probability=0.0):
@@ -19,7 +22,20 @@ class LandObjectWithVariants(LandObject):
         #   to determine it's type later
         self.variants.append(ObjectVariant())
         self.probability = probability
-
+        
+    def nVariants(self):
+        sz = 0;
+        for variant in self.variants:
+            if not variant.isEmpty():
+                sz = sz + 1
+        return sz
+        
+    def sumProbability(self):
+        sumProb = 0;
+        for variant in self.variants:
+            if not variant.isEmpty():
+                sumProb = sumProb + variant.probability
+        return sumProb
 
 class LandLotSettings(LandObject):
     def __init__(self):

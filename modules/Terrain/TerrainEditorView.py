@@ -10,7 +10,7 @@ from modules.MapWidget import *
 from modules.MapActionsPanel import *
 
 
-class MapView(QMainWindow):
+class TerrainEditorView(QMainWindow):
     """Main Window."""
     def __init__(self):
         super().__init__()

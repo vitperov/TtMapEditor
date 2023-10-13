@@ -118,7 +118,8 @@ class LandLotObject(LandLotLwObject):
     def __init__(self, landLot):
         LandLotLwObject.__init__(self, landLot, keepout=1)
 
-    def generate(self, size, squareType, mapObjType):
+    def generate(self, size, squareType, objModelName):
+        # can we pass landObj and get it's size?
         self.size = size
 
         attempts = 500
@@ -132,13 +133,34 @@ class LandLotObject(LandLotLwObject):
             print("!!!! Error: you are trying to put an object where is no place for it")
             return False
 
-        print("    Obj placed at: " + str(self.localPos))
+        print("    Obj placed at: " + str(self.localPos) + "; size=" + str(size))
         self.landLot.editor.fillArea(self.globalPosition(),
             size, 'type', squareType)
 
-        obj = MapObjectModel(self.globalPosition().x, self.globalPosition().y, mapObjType)
+        obj = MapObjectModel(self.globalPosition().x, self.globalPosition().y, objModelName)
         self.landLot.model.addMapObject(obj)
         return True
+        
+    def _chooseObjVariant(self, landObj):
+        nVariants = landObj.nVariants()
+        sumProbability = landObj.sumProbability()
+
+        normalizationF = 1.0 / sumProbability
+
+        rnd = random()
+        accumulatedProbability = 0
+        for variantIdx in range(nVariants):
+            variant = landObj.variants[variantIdx]
+            accumulatedProbability += variant.probability * normalizationF
+            #print(str(rnd) + "-> [" + variant.modelName + "] = "+ str(variant.probability) + "/" + str(accumulatedProbability))
+            if rnd < accumulatedProbability:
+                return variantIdx
+
+    def generateObjVariant(self, landObj, squareType):
+        variantIdx = self._chooseObjVariant(landObj)
+        variant = landObj.variants[variantIdx]
+        self.generate(variant.size, squareType, variant.modelName)
+
 
 class LandLotGenerator():
     def __init__(self, model, settings, startPt):
@@ -166,12 +188,11 @@ class LandLotGenerator():
         # Debug landLot location
         #self.editor.fillAreaBorder(self.startPt, self.settings.size, SquareType.Empty)
 
-        generateHouse = (random() < self.settings.house.variants[0].probability)
+        generateHouse = (random() < self.settings.house.probability)
         if generateHouse:
             house = LandLotObject(self)
-            house.generate(self.settings.house.variants[0].size,
-                           SquareType.House,
-                           MapObjectType.House)
+            house.generateObjVariant(self.settings.house,
+                           SquareType.House)
 
             self.placedObjects.append(house)
 
@@ -180,7 +201,7 @@ class LandLotGenerator():
             shed = LandLotObject(self)
             shed.generate(self.settings.shed.size,
                           SquareType.Shed,
-                          MapObjectType.Shed)
+                          "shed")
 
             self.placedObjects.append(shed)
 

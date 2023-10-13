@@ -4,14 +4,14 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 from modules.TerrainMapModel import *
-from modules.MapView import *
+from modules.Terrain.TerrainEditorView import *
 from modules.Terrain.TerrainMapController import *
 from modules.Terrain.TerrainGenerator import *
 
 def main():
     app = QApplication(sys.argv)
 
-    view = MapView()
+    view = TerrainEditorView()
     view.show()
 
     model = TerrainMapModel()
