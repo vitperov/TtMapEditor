@@ -46,7 +46,21 @@ class ClassVariablesGuiEditor():
     # NOTE: we do not store anything iside the class, but let it be
     # the class method insted of just functin (perhaps we will need it in the future)
 
-    def createControls(self, cls, layout):
+    def createControls(self, cls, title, layout):
+        box = QGroupBox(title)
+        layout.addWidget(box)
+        
+        insideLayout = QHBoxLayout()
+        box.setLayout(insideLayout)
+
+        varsLayout = QVBoxLayout()
+        insideLayout.addLayout(varsLayout)
+        
+
+        objsLayout = QHBoxLayout()
+        insideLayout.addLayout(objsLayout)
+       
+                
         for attr in dir(cls):
             if attr.startswith("__"):
                 continue
@@ -58,30 +72,21 @@ class ClassVariablesGuiEditor():
                 continue
 
             if isinstance(val, list):
-                listLayout = QVBoxLayout()
-                box = QGroupBox(attr)
-                box.setLayout(listLayout)
-                layout.addWidget(box)
+                listItemsLayout = QVBoxLayout()
+                itemBox = QGroupBox(attr)
+                itemBox.setLayout(listItemsLayout)
+                objsLayout.addWidget(itemBox)
                 for itemId in range(len(val)):
-                    itemLayout = QVBoxLayout()
-                    itemBox = QGroupBox(str(itemId+1))
-                    itemBox.setLayout(itemLayout)
-                    listLayout.addWidget(itemBox)
                     item = val[itemId]
-                    self.createControls(item, itemLayout)
+                    title = str(itemId+1)
+                    self.createControls(item, title, listItemsLayout)
 
                 continue
 
             if is_class(val):
-                print(attr + "-> class");
-                nestedLayout = QVBoxLayout()
-                box = QGroupBox(attr)
-                box.setLayout(nestedLayout)
-                layout.addWidget(box)
-                #print("Adding class control: " + str(val))
-                self.createControls(val, nestedLayout)
+                self.createControls(val, attr, objsLayout)
                 continue
 
             #print(attr + "->" + str(val))
             item = self.DynamicItem(attr, attr, type(val), cls)
-            layout.addLayout(item.getLayout())
+            varsLayout.addLayout(item.getLayout())

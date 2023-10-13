@@ -55,7 +55,7 @@ class TerrainGeneratorSettingsDlg(QtGui.QDialog):
         self._data.loadFromFile()
         clearLayout(self.dynamicLayout)
         edt = ClassVariablesGuiEditor();
-        edt.createControls(self._data, self.dynamicLayout)
+        edt.createControls(self._data, "Settings:", self.dynamicLayout)
 
     # Set parentWnd=None for modal dialogue
     @staticmethod
