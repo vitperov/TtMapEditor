@@ -26,12 +26,6 @@ class HouseSquareType(str, Enum):
     Toilet      = 'Toilet'
 
 
-class HouseSquareRotation(str, Enum):
-    deg0    = '0'
-    deg90   = '90'
-    deg180  = '180'
-    deg270  = '270'
-
 class HouseMapSquareModel(MapObjectModelGeneral, QObject):
     changed = pyqtSignal()
 
@@ -40,10 +34,7 @@ class HouseMapSquareModel(MapObjectModelGeneral, QObject):
         QObject.__init__(self)
 
         self.classnames['type']      = HouseSquareType
-        self.classnames['rotation']  = HouseSquareRotation
-
         self.properties['type']      = HouseSquareType.Empty
-        self.properties['rotation']  = HouseSquareRotation.deg0
 
     def setProperty(self, name, value):
         print("setProperty " + name + ": " + str(value))
