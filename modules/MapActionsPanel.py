@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import *
 from functools import partial
 
 class MapActionsPanel(QWidget):
+    mapSettings  = pyqtSignal()
     generateMap  = pyqtSignal()
     saveMap      = pyqtSignal(str)
 
@@ -16,16 +17,22 @@ class MapActionsPanel(QWidget):
 
         self.setLayout(self._layout)
 
+        self._settingsBtn   = QPushButton("Generator settings");
         self._generateBtn   = QPushButton("Generate map");
         self._saveBtn       = QPushButton("Save")
         
+        self._layout.addWidget(self._settingsBtn)
         self._layout.addWidget(self._generateBtn)
         self._layout.addWidget(self._saveBtn)
 
         self._layout.addStretch()
 
+        self._settingsBtn.clicked.connect(self._settingsDlg)
         self._generateBtn.clicked.connect(self._newMap)
         self._saveBtn.clicked.connect(self._saveFile)
+
+    def _settingsDlg(self):
+        self.mapSettings.emit()
 
     def _newMap(self):
         self.generateMap.emit()

@@ -3,11 +3,19 @@ from enum import Enum
 import json
 import uuid
 
+class ObjectRotation(str, Enum):
+    deg0    = '0'
+    deg90   = '90'
+    deg180  = '180'
+    deg270  = '270'
+
 class MapObjectModelGeneral:
     def __init__(self, x, y):
         self.classnames = dict()
-
         self.properties = dict()
+
+        self.classnames['rotation']  = ObjectRotation
+        self.properties['rotation']  = ObjectRotation.deg0
 
         self.id = str(uuid.uuid4())
 
@@ -86,7 +94,7 @@ class MapModelGeneral():
     #            return square
 
     # TODO: used only for house square and deletes object, not sqare
-    # We should rename it, or better refactor everything and use only objects 
+    # We should rename it, or better refactor everything and use only objects
     def deleteSquareById(self, id):
         print("Deleting entire square, id=" + str(id))
         N = len(self._squares);
@@ -96,14 +104,14 @@ class MapModelGeneral():
                 if self._updateCallback is not None:
                     self._updateCallback()
                 return
-                
+
     def createObjectAt(self, x, y):
         obj = self._sqareModel()
         obj.x = x
         obj.y = y
         self._squares.append(obj)
         return obj
-        
+
     def deleteRow(self, rowId):
         # delete row
         self._squares[:] = filter(lambda item: item.y != rowId, self._squares)
@@ -115,10 +123,10 @@ class MapModelGeneral():
 
         # add empy row at the end
         for column in range(self.width):
-            self.createEmpySquareAt(self.height - 1, column) 
+            self.createEmpySquareAt(self.height - 1, column)
 
         self._updateCallback()
-        
+
     def deleteColumn(self, columnId):
         #delete column
         self._squares[:] = filter(lambda item: item.x != columnId, self._squares)
@@ -130,8 +138,8 @@ class MapModelGeneral():
 
         # add empy column at the end
         for row in range(self.height):
-            self.createEmpySquareAt(row, self.width - 1) 
-        
+            self.createEmpySquareAt(row, self.width - 1)
+
         self._updateCallback()
 
 
