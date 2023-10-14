@@ -130,7 +130,7 @@ class LandLotObject(LandLotLwObject):
             placeOk = self.landLot.canPlaceObjectAt(self.localRect())
 
         if attempts == 0:
-            print("!!!! Error: you are trying to put an object where is no place for it")
+            print("!!!! Error: you are trying to put an object where there is no place for it")
             return False
 
         print("    Obj placed at: " + str(self.localPos) + "; size=" + str(size))
@@ -138,6 +138,7 @@ class LandLotObject(LandLotLwObject):
             size, 'type', squareType)
 
         obj = MapObjectModel(self.globalPosition().x, self.globalPosition().y, objModelName)
+        self._randomizeProperty(obj, 'rotation')
         self.landLot.model.addMapObject(obj)
         return True
         
@@ -155,6 +156,17 @@ class LandLotObject(LandLotLwObject):
             #print(str(rnd) + "-> [" + variant.modelName + "] = "+ str(variant.probability) + "/" + str(accumulatedProbability))
             if rnd < accumulatedProbability:
                 return variantIdx
+                
+    def _randomizeProperty(self, obj, propertyName):
+        prop = obj.properties[propertyName]
+        propClass = type(prop)
+
+        newValueIdx = randrange(len(propClass))
+        allPossibleValues = list(propClass)
+        newValueStr = allPossibleValues[newValueIdx].value
+        print("Rotation = " + str(newValueIdx) + "/" + str(len(propClass)))
+        newValue = propClass(newValueStr)
+        obj.properties[propertyName] = newValue
 
     def generateObjVariant(self, landObj, squareType):
         variantIdx = self._chooseObjVariant(landObj)
