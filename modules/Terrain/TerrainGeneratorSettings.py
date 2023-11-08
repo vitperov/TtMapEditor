@@ -46,6 +46,12 @@ class LandLotSettings(LandObject):
         self.shed  = LandObject(AreaSize(2,2), probability = 0.5);
 
         self.treeProbability = 0.2
+        
+class RespawnSettings(DictLoadableObject):
+    def __init__(self):
+        # Boolean variables not supported yet, use integers
+        self.generatePlayerRespawns = 0
+        self.generateOpponentsRespawns = 1;
 
 
 class TerrainGeneratorSettings(SerializableSettings):
@@ -59,4 +65,6 @@ class TerrainGeneratorSettings(SerializableSettings):
 
         self.forestKeepOut = 3
         self.roadWidth = 2
+        
+        self.respawn = RespawnSettings();
 
