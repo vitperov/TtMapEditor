@@ -65,6 +65,7 @@ class TerrainGeneratorSettings(SerializableSettings):
 
         self.forestKeepOut = 3
         self.roadWidth = 2
+        self.fogInterval = 1
         
         self.respawn = RespawnSettings();
 

@@ -6,6 +6,9 @@ from modules.Terrain.TerrainMapModel import *
 from modules.GeometryPrimitives import *
 from modules.Terrain.TerrainGeneratorSettings import *
 
+from modules.Terrain.RespawnGenerator import *
+from modules.Terrain.FogGenerator import *
+
 def genRandomObjPlace(landLotRect, objSize):
         x = randrange(landLotRect.pt.x, landLotRect.pt.x + landLotRect.sz.w - objSize.w)
         y = randrange(landLotRect.pt.y, landLotRect.pt.y + landLotRect.sz.h - objSize.h)
@@ -65,6 +68,9 @@ class TerrainGenerator():
         
         opponentsResp = RespawnGenerator(self._model, self.settings, 'opponentRespawn')
         opponentsResp.generateHiddenRespawns();
+        
+        fogGen = FogGenerator(self._model, self.settings, 'Fog')
+        fogGen.generate();
 
     def fillEverythingGrass(self):
         self._editor.fillArea(Point(0,0), AreaSize(self._w, self._h), 'type', SquareType.Grass)
