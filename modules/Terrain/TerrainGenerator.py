@@ -143,12 +143,17 @@ class LandLotObject(LandLotLwObject):
             return False
 
         print("    Obj placed at: " + str(self.localPos) + "; size=" + str(size))
-        self.landLot.editor.fillArea(self.globalPosition(),
-            size, 'type', squareType)
-
+        
         obj = MapObjectModel(self.globalPosition().x, self.globalPosition().y, objModelName)
         self._randomizeProperty(obj, 'rotation')
         self.landLot.model.addMapObject(obj)
+        
+        rotation = int(obj.properties['rotation'].value);
+        rotatedSize = size.rotated(rotation)
+        
+        self.landLot.editor.fillArea(self.globalPosition(),
+            rotatedSize, 'type', squareType)
+
         return True
 
     def _chooseObjVariant(self, landObj):

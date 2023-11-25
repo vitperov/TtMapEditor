@@ -1,4 +1,5 @@
 from copy import copy
+import math
 
 from modules.SerializableSettings import *
 
@@ -6,6 +7,13 @@ class AreaSize(DictLoadableObject):
     def __init__(self, w=0, h=0):
         self.w = w
         self.h = h
+    
+    def rotated(self, angle):
+        angleRad = math.radians(angle)
+        newW = int(abs(self.w * math.cos(angleRad) - self.h * math.sin(angleRad)))
+        newH = int(abs(self.w * math.sin(angleRad) + self.h * math.cos(angleRad)))
+        
+        return AreaSize(newW, newH)
 
     def __repr__(self):
         return "(" + str(self.w) + ", " + str(self.h) + ")"
