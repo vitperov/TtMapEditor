@@ -10,8 +10,8 @@ class AreaSize(DictLoadableObject):
     
     def rotated(self, angle):
         angleRad = math.radians(angle)
-        newW = int(abs(self.w * math.cos(angleRad) - self.h * math.sin(angleRad)))
-        newH = int(abs(self.w * math.sin(angleRad) + self.h * math.cos(angleRad)))
+        newW = int(round(abs(self.w * math.cos(angleRad) - self.h * math.sin(angleRad))))
+        newH = int(round(abs(self.w * math.sin(angleRad) + self.h * math.cos(angleRad))))
         
         return AreaSize(newW, newH)
 

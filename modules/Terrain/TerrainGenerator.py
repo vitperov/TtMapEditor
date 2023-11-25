@@ -150,6 +150,7 @@ class LandLotObject(LandLotLwObject):
         
         rotation = int(obj.properties['rotation'].value);
         rotatedSize = size.rotated(rotation)
+        print("Rotation " + str(rotation) + ": size=" + str(size) + " -> " + str(rotatedSize))
         
         self.landLot.editor.fillArea(self.globalPosition(),
             rotatedSize, 'type', squareType)
