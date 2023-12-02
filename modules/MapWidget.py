@@ -19,9 +19,6 @@ class MapWidget(QWidget):
         self._model = None
 
         self.setLayout(self._layout)
-        #self._layout.setContentsMargins(0,0,0,0)
-        #self._layout.setMargin(0);
-        #self._layout.setSpacing(0);
         
         self.label = QtWidgets.QLabel()
         canvas = QtGui.QPixmap(640, 480)
@@ -52,11 +49,7 @@ class MapWidget(QWidget):
         canvas = QtGui.QPixmap(cols*pixPerSquare, rows*pixPerSquare)
         canvas.fill(Qt.blue)
         self.label.setPixmap(canvas)
-        
-        #cv = self.label.pixmap()
-        #cv.fill(Qt.red)
-        #self.update()
-        
+
         return pixPerSquare
         
     def redrawAll(self):
@@ -74,12 +67,7 @@ class MapWidget(QWidget):
 
         for squareModel in mapSquares:
             item = MapItem(squareModel, cv, tilesize, squareModel.x, squareModel.y)
-            #self._layout.addWidget(widget, squareModel.y, squareModel.x)
             
-            # TODO: restore click
-            #widget.clicked.connect(self.onItemClicked)
             squareModel.changed.connect(item.updateState)
             items.append(item)
-            
-        #self._layout.setRowStretch(h, 1)
-        #self._layout.setColumnStretch(w, 1)
+
