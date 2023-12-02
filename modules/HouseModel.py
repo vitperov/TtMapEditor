@@ -47,6 +47,9 @@ class HouseMapModel(MapModelGeneral, QObject):
     def __init__(self):
         MapModelGeneral.__init__(self, HouseMapSquareModel)
         QObject.__init__(self)
+        
+        self.editorWidth = 8;
+        self.editorHeight = 8;
 
         self.setUpdatedCallback(self._updateeEntireMap)
 

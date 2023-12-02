@@ -49,6 +49,8 @@ class MapModelGeneral():
         self._sqareModel = squareModel
         self.width = 0
         self.height = 0
+        self.editorWidth = 0
+        self.editorHeight = 0;
         self._squares = list()
         self._objects = list()
         self._updatedCallback = None
@@ -171,8 +173,8 @@ class MapModelGeneral():
         return obj
 
     def restoreFromJson(self, js):
-        self.width  = js['width']
-        self.height = js['height']
+        self.width  = max(js['width'], self.editorWidth)
+        self.height = max(js['height'], self.editorHeight)
 
         self._squares = list()
         for square in js['squares']:
@@ -194,7 +196,7 @@ class MapModelGeneral():
         if not filename.endswith(extension):
             filename = filename + extension
 
-        print("Loading map to " + filename)
+        print("Loading map from " + filename)
 
         with open(filename, "r") as readFile:
             jsObj = json.load(readFile)
