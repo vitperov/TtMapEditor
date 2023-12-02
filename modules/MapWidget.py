@@ -6,6 +6,8 @@ from PyQt5.QtWidgets import *
 
 from functools import partial
 
+import math
+
 from modules.MapItem import *
 
 class MapWidget(QWidget):
@@ -13,13 +15,19 @@ class MapWidget(QWidget):
 
     def __init__(self):
         QWidget.__init__(self)
-        self._layout = QGridLayout()
+        self._layout = QVBoxLayout()
         self._model = None
 
         self.setLayout(self._layout)
-        self._layout.setContentsMargins(0,0,0,0)
-        self._layout.setMargin(0);
-        self._layout.setSpacing(0);
+        #self._layout.setContentsMargins(0,0,0,0)
+        #self._layout.setMargin(0);
+        #self._layout.setSpacing(0);
+        
+        self.label = QtWidgets.QLabel()
+        canvas = QtGui.QPixmap(640, 480)
+        canvas.fill(Qt.white)
+        self.label.setPixmap(canvas)
+        self._layout.addWidget(self.label)
 
     def onItemClicked(self, itemId):
         print("Item clicked Id=" + str(itemId))
@@ -29,15 +37,49 @@ class MapWidget(QWidget):
     def setModel(self, model):
         self._model = model
         
+    def _createNewCanvas(self):
+        [rows, cols] = self._model.size()
+
+        maxWidth = 1200;
+        maxHeight = 1000;
+        
+        wPixPerSquare = math.floor(maxWidth / cols)
+        hPixPerSquare = math.floor(maxHeight / rows)
+        pixPerSquare = min(wPixPerSquare, hPixPerSquare)
+        
+        print("---> SIZE = " + str(cols*pixPerSquare) + " x " +  str(rows*pixPerSquare) + "; px= " + str(pixPerSquare))
+        
+        canvas = QtGui.QPixmap(cols*pixPerSquare, rows*pixPerSquare)
+        canvas.fill(Qt.blue)
+        self.label.setPixmap(canvas)
+        
+        #cv = self.label.pixmap()
+        #cv.fill(Qt.red)
+        #self.update()
+        
+        return pixPerSquare
+        
     def redrawAll(self):
         [h, w] = self._model.size()
         mapSquares = self._model.getAllSquares()
+        
+        print("=============== NEW CANVAS==============+")
+        tilesize = self._createNewCanvas()
+        
+        # TODO: delete previous items here
+       
+        items = []
+        
+        cv = self.label.pixmap()
 
         for squareModel in mapSquares:
-            widget = MapItem(squareModel)
-            self._layout.addWidget(widget, squareModel.y, squareModel.x)
-            widget.clicked.connect(self.onItemClicked)
-            squareModel.changed.connect(widget.updateState)
+            item = MapItem(squareModel, cv, tilesize, squareModel.x, squareModel.y)
+            #self._layout.addWidget(widget, squareModel.y, squareModel.x)
             
-        self._layout.setRowStretch(h, 1)
-        self._layout.setColumnStretch(w, 1)
+            # TODO: restore click
+            #widget.clicked.connect(self.onItemClicked)
+            squareModel.changed.connect(item.updateState)
+            items.append(item)
+            
+        #self._layout.setRowStretch(h, 1)
+        #self._layout.setColumnStretch(w, 1)
