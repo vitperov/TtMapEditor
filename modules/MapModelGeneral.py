@@ -147,6 +147,9 @@ class MapModelGeneral():
 
     def getAllSquares(self):
         return self._squares
+        
+    def getAllObjects(self):
+        return self._objects
 
     def size(self):
         return [self.height, self.width]

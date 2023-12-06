@@ -3,7 +3,10 @@ from PyQt5.QtCore import *
 
 from pyqtgraph.Qt import QtCore, QtGui
 
-class MapItem(QObject):
+import os.path
+
+# FIXME: it's copypaste of MapItem. Refactoring needed
+class MapObjectItem(QObject):
     def __init__(self, model, canvas, tilesize, col, row):
         QObject.__init__(self)
 
@@ -19,10 +22,14 @@ class MapItem(QObject):
 
 
     def updateState(self):
-        sqType      = self._model.getProperty('type')
+        sqType      = self._model.getProperty('model')
         sqTypeName = sqType
 
         imgFile = "resources/MapSquare/" + sqTypeName + ".png"
+        if not os.path.isfile(imgFile):
+            print("type " + sqTypeName + " not found")
+            return
+
         pixmap = QtGui.QPixmap(imgFile)
         size = QSize(self._tilesize, self._tilesize)
 

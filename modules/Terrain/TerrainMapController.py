@@ -33,6 +33,7 @@ class TerrainMapController:
     def _onGenerateClick(self):
         self._generator.loadSettings()
         self._generator.generateMap()
+        self._view.mapWidget.redrawAll()
 
     def _onSettingsClick(self):
         TerrainGeneratorSettingsDlg.runDlg("Terrain generator settings", \
