@@ -9,6 +9,7 @@ from functools import partial
 import math
 
 from modules.MapItem import *
+from modules.MapObjectItem import *
 
 class MapWidget(QWidget):
     activeItemChanged = pyqtSignal(int)
@@ -54,7 +55,6 @@ class MapWidget(QWidget):
         
     def redrawAll(self):
         [h, w] = self._model.size()
-        mapSquares = self._model.getAllSquares()
         
         print("=============== NEW CANVAS==============+")
         tilesize = self._createNewCanvas()
@@ -65,9 +65,16 @@ class MapWidget(QWidget):
         
         cv = self.label.pixmap()
 
+        mapSquares = self._model.getAllSquares()
         for squareModel in mapSquares:
             item = MapItem(squareModel, cv, tilesize, squareModel.x, squareModel.y)
             
             squareModel.changed.connect(item.updateState)
             items.append(item)
 
+        mapObjects = self._model.getAllObjects()
+        for mapObject in mapObjects:
+            item = MapObjectItem(mapObject, cv, tilesize, mapObject.x, mapObject.y)
+            
+            squareModel.changed.connect(item.updateState)
+            items.append(item)
