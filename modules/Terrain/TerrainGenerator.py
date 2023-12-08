@@ -55,7 +55,7 @@ class TerrainGenerator():
 
     def _calcMapSize(self):
         self._w = self.settings.landLotSettings.size.w * self.settings.columns + 2 * self.settings.forestKeepOut
-        self._h = self.settings.landLotSettings.size.h * self.settings.rows + 2 * self.settings.forestKeepOut + self.settings.landLotSettings.roadWidth
+        self._h = self.settings.landLotSettings.size.h * self.settings.rows + 2 * self.settings.forestKeepOut + self.settings.roadWidth
 
     def generateMap(self):
         print("Generating map size=" + str(self._h) + "x" + str(self._w))
@@ -65,10 +65,10 @@ class TerrainGenerator():
         self.genKeepOutForest()
         self.genRoad()
         self.genLandLots()
-        
+
         opponentsResp = RespawnGenerator(self._model, self.settings, 'opponentRespawn')
         opponentsResp.generateHiddenRespawns();
-        
+
         fogGen = FogGenerator(self._model, self.settings, 'Fog')
         fogGen.generate();
 
@@ -82,7 +82,12 @@ class TerrainGenerator():
     def genRoad(self):
         #FIXME: do road after every landLot height
         halfHeight = math.ceil(self._h / 2)
-        self._editor.fillArea(Point(0, halfHeight - 1), AreaSize(self._w, 2), 'type', SquareType.Road)
+
+        startEndMargin = 0
+        if self.settings.roadExitsArea == 0: # generate map without exits
+            startEndMargin = self.settings.forestKeepOut
+
+        self._editor.fillArea(Point(startEndMargin, halfHeight - 1), AreaSize(self._w-startEndMargin*2, 2), 'type', SquareType.Road)
 
     def genLandLots(self):
         for row in range(self.settings.rows):
@@ -93,8 +98,7 @@ class TerrainGenerator():
 
                 #if (row != 0) and (row != self._rows - 1):
                 if row != 0:
-                    startPt.y += self.settings.landLotSettings.roadWidth;
-                    print("    -->Add road offset")
+                    startPt.y += self.settings.roadWidth;
 
                 print("    startPt=" + str(startPt))
                 self.genLandLot(startPt)
@@ -143,15 +147,15 @@ class LandLotObject(LandLotLwObject):
             return False
 
         print("    Obj placed at: " + str(self.localPos) + "; size=" + str(size))
-        
+
         obj = MapObjectModel(self.globalPosition().x, self.globalPosition().y, objModelName)
         self._randomizeProperty(obj, 'rotation')
         self.landLot.model.addMapObject(obj)
-        
+
         rotation = int(obj.properties['rotation'].value);
         rotatedSize = size.rotated(rotation)
         print("Rotation " + str(rotation) + ": size=" + str(size) + " -> " + str(rotatedSize))
-        
+
         self.landLot.editor.fillArea(self.globalPosition(),
             rotatedSize, 'type', squareType)
 
@@ -271,29 +275,29 @@ class RespawnGenerator():
 
             square = self.model.getSquare(col, row)
             sqType = square.getProperty('type')
-            
+
             return sqType == SquareType.Forest
-            
+
 
         def isHiddenSquare(row, col):
             if isForest(row, col):
                 return False; # respawn can't be in the square with a tree
-                
+
             forestSquares = 0;
             for r in [row-1, row, row+1]:
                 for c in [col-1, col, col+1]:
                     if isForest(r, c):
                         forestSquares += 1
-                        
+
             return (forestSquares >= minForest) and (forestSquares <= maxForest)
-            
+
         #FIXME: we can reduce available area excluding forest border
         for col in range(self.model.width):
             for row in range(self.model.height):
                 if isHiddenSquare(row, col):
                     self.placeRespawn(row,col)
-                    
-                    
+
+
     def placeRespawn(self, row, col):
         obj = MapObjectModel(col, row, self.respawnModel)
         self.model.addMapObject(obj)

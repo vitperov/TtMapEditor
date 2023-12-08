@@ -40,7 +40,6 @@ class LandObjectWithVariants(LandObject):
 class LandLotSettings(LandObject):
     def __init__(self):
         self.size = AreaSize(15, 20)
-        self.roadWidth = 2
 
         self.house = LandObjectWithVariants(probability = 0.8);
         self.shed  = LandObject(AreaSize(2,2), probability = 0.5);
@@ -66,6 +65,7 @@ class TerrainGeneratorSettings(SerializableSettings):
         self.forestKeepOut = 3
         self.roadWidth = 2
         self.fogInterval = 1
+        self.roadExitsArea = 1;
         
         self.respawn = RespawnSettings();
 
