@@ -258,7 +258,7 @@ class RespawnGenerator():
 
     # Find squares surrounded by trees. There can be 8 squares of forest maximum,
     # and don't forget to have at least one square to get out.
-    def generateHiddenRespawns(self, minForest=6, maxForest=7):
+    def generateHiddenRespawns(self, minForest=5, maxForest=7):
         def isForest(row, col):
             if row < 0:
                 return False
@@ -287,7 +287,7 @@ class RespawnGenerator():
                         
             return (forestSquares >= minForest) and (forestSquares <= maxForest)
             
-        #FIXME: we can reduce available area excuding forest border
+        #FIXME: we can reduce available area excluding forest border
         for col in range(self.model.width):
             for row in range(self.model.height):
                 if isHiddenSquare(row, col):
