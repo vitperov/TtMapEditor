@@ -44,7 +44,8 @@ class LandLotSettings(LandObject):
         self.house = LandObjectWithVariants(probability = 0.8);
         self.shed  = LandObject(AreaSize(2,2), probability = 0.5);
 
-        self.treeProbability = 0.2
+        self.treeProbability    = 0.2
+        self.berriesProbability = 0.0
         
 class RespawnSettings(DictLoadableObject):
     def __init__(self):

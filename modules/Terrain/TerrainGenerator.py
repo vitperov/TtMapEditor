@@ -8,6 +8,7 @@ from modules.Terrain.TerrainGeneratorSettings import *
 
 from modules.Terrain.RespawnGenerator import *
 from modules.Terrain.FogGenerator import *
+from modules.Terrain.BerriesGenerator import *
 
 def genRandomObjPlace(landLotRect, objSize):
         x = randrange(landLotRect.pt.x, landLotRect.pt.x + landLotRect.sz.w - objSize.w)
@@ -71,6 +72,9 @@ class TerrainGenerator():
 
         fogGen = FogGenerator(self._model, self.settings, 'Fog')
         fogGen.generate();
+        
+        berriesGen = BerriesGenerator(self._model, 'Berries')
+        berriesGen.generate(self.settings.landLotSettings.berriesProbability)
 
     def fillEverythingGrass(self):
         self._editor.fillArea(Point(0,0), AreaSize(self._w, self._h), 'type', SquareType.Grass)
