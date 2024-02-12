@@ -31,6 +31,8 @@ class MapObjectModelGeneral:
 
         obj['x'] =  self.x
         obj['y'] =  self.y
+        
+        obj['id'] = self.id
 
         return obj
 
@@ -40,6 +42,11 @@ class MapObjectModelGeneral:
     def restoreFromJson(self, js):
         self.x = js['x']
         self.y = js['y']
+        
+        if len(js['id']) > 0:
+            self.id = js['id']
+        else :
+            self.id = str(uuid.uuid4())
 
         for propName, propClass in self.classnames.items():
             self.properties[propName] = propClass(js[propName])
