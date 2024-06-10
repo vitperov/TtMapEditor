@@ -43,7 +43,7 @@ class MapObjectModelGeneral:
         self.x = js['x']
         self.y = js['y']
         
-        if len(js['id']) > 0:
+        if ('id' in js) and (len(js['id'])) > 0:
             self.id = js['id']
         else :
             self.id = str(uuid.uuid4())
