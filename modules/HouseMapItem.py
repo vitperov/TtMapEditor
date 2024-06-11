@@ -72,7 +72,6 @@ class HouseMapItem():
         rotation    = self._model.getProperty('rotation')
         
         imgFile = self._objCollection.getIcon(sqType)
-        print(imgFile + "; rot=" + str(rotation))
 
         pixmap = QtGui.QPixmap(imgFile)
         transform = QtGui.QTransform().rotate(rotIdToAngle(rotation))
