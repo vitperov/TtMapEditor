@@ -75,7 +75,7 @@ class HouseMapPanel(QWidget):
            x = objectModel.x
            y = objectModel.y
            square = self.squares[(x, y)]
-           square.addItem(objectModel)
+           square.addItem(objectModel, self._model._objCollection)
            objectModel.changed.connect(square.updateState)
            square.updateState()
 

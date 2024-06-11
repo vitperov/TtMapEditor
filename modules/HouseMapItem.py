@@ -55,24 +55,25 @@ class HouseMapSquare(QWidget):
         self._layout.addWidget(self.widget)
 
 
-    def addItem(self, model):
-        item = HouseMapItem(model)
+    def addItem(self, model, objCollection):
+        item = HouseMapItem(model, objCollection)
         self.items.append(item)
 
     def mousePressEvent(self, event):
         self.clicked.emit(self.x, self.y)
 
 class HouseMapItem():
-    def __init__(self, model):
+    def __init__(self, model, objCollection):
         self._model = model
+        self._objCollection = objCollection
 
     def getPixmap(self, size):
         sqType      = self._model.getProperty('type')
         rotation    = self._model.getProperty('rotation')
-        #territory   = self._model.getProperty('territory')
+        
+        imgFile = self._objCollection.getIcon(sqType)
+        print(imgFile + "; rot=" + str(rotation))
 
-        sqTypeName = sqType
-        imgFile = "resources/SquareType/" + sqTypeName + ".png"
         pixmap = QtGui.QPixmap(imgFile)
         transform = QtGui.QTransform().rotate(rotIdToAngle(rotation))
 
