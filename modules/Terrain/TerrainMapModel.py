@@ -61,8 +61,8 @@ class MapSquareModel(QObject):
 
 class TerrainMapModel(MapModelGeneral, QObject):
     updatedEntireMap = pyqtSignal()
-    def __init__(self):
-        MapModelGeneral.__init__(self, MapSquareModel)
+    def __init__(self, objCollection):
+        MapModelGeneral.__init__(self, MapSquareModel, objCollection)
         QObject.__init__(self)
         
         self.setUpdatedCallback(self._updateEntireMap)

@@ -52,8 +52,9 @@ class MapObjectModelGeneral:
             self.properties[propName] = propClass(js[propName])
 
 class MapModelGeneral():
-    def __init__(self, squareModel):
+    def __init__(self, squareModel, objCollection):
         self._sqareModel = squareModel
+        self._objCollection = objCollection
         self.width = 0
         self.height = 0
         self.editorWidth = 0

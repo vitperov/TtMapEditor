@@ -6,14 +6,20 @@ from PyQt5.QtCore import *
 from modules.HouseModel import *
 from modules.HouseView import *
 from modules.HouseController import *
+from modules.ObjectsCollection import *
 
 def main():
     app = QApplication(sys.argv)
+    
+    nativeMapObjectsDir   = os.path.join(os.path.dirname(__file__), 'mapObjects/native')
+    externalMapObjectsDir = os.path.join(os.path.dirname(__file__), 'mapObjects/external')
+    objCollection = ObjectsCollection([nativeMapObjectsDir, externalMapObjectsDir])
+    print("Map objects found: " + str(objCollection.allObjectTypes()))
 
     view = HouseView()
     view.show()
 
-    model = HouseMapModel()
+    model = HouseMapModel(objCollection)
 
     controller = HouseController(view=view, houseModel=model)
 

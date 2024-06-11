@@ -44,8 +44,8 @@ class HouseMapSquareModel(MapObjectModelGeneral, QObject):
 
 class HouseMapModel(MapModelGeneral, QObject):
     updatedEntireMap = pyqtSignal()
-    def __init__(self):
-        MapModelGeneral.__init__(self, HouseMapSquareModel)
+    def __init__(self, objCollection):
+        MapModelGeneral.__init__(self, HouseMapSquareModel, objCollection)
         QObject.__init__(self)
         
         self.editorWidth = 8;
