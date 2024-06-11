@@ -7,15 +7,14 @@ class MapObject:
         self.name = name
         self.categories = categories
         self.iconFile = iconFile
-        self.mapFile = mapFile
 
     @classmethod
-    def from_json(cls, json_data: Dict):
+    def from_json(cls, json_data: Dict, base_path: str):
         return cls(
             name=json_data.get('name', ''),
             categories=json_data.get('categories', ''),
-            iconFile=json_data.get('iconFile', ''),
-            mapFile=json_data.get('mapFile', '')
+            iconFile=os.path.join(base_path, json_data.get('iconFile', '')),
+            mapFile=os.path.join(base_path, json_data.get('mapFile', ''))
         )
 
 class ObjectsCollection:
@@ -30,7 +29,7 @@ class ObjectsCollection:
                 if 'object.json' in files:
                     with open(os.path.join(root, 'object.json'), 'r') as file:
                         data = json.load(file)
-                        map_object = MapObject.from_json(data)
+                        map_object = MapObject.from_json(data, root)
                         self.objects[map_object.name] = map_object
 
     def allObjectCategories(self) -> List[str]:
@@ -49,3 +48,10 @@ class ObjectsCollection:
             if category in map_object.categories.split(','):
                 types_in_category.append(map_object.name)
         return types_in_category
+
+    def getIcon(self, objname: str) -> str:
+        map_object = self.objects.get(objname)
+        if map_object:
+            return map_object.iconFile
+        else:
+            return None
