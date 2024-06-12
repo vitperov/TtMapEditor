@@ -68,7 +68,7 @@ class HouseMapItem():
         self._objCollection = objCollection
 
     def getPixmap(self, size):
-        sqType      = self._model.getProperty('type')
+        sqType      = self._model.getProperty('model')
         rotation    = self._model.getProperty('rotation')
         
         imgFile = self._objCollection.getIcon(sqType)

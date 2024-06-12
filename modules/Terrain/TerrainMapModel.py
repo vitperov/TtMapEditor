@@ -9,13 +9,6 @@ class MapObjectType(str, Enum):
     Shed    = 'Shed'
     
 
-class MapObjectModel(MapObjectModelGeneral):
-    def __init__(self, x, y, type):
-        MapObjectModelGeneral.__init__(self, x, y)
-
-        self.classnames['model'] = str
-        self.properties['model'] = type
-
 class MapSquareModel(QObject):
     changed = pyqtSignal()
 

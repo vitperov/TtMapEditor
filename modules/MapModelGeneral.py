@@ -25,9 +25,12 @@ class MapObjectModelGeneral(QObject):
         self.properties['model']      = "Empty"
 
         self.id = str(uuid.uuid4())
-
-        #self.x = x
-        #self.y = y
+        
+    def init(self, x, y, model, rotation=ObjectRotation.deg0):
+        self.x = x
+        self.y = y
+        self.properties['model']    = model
+        self.properties['rotation'] = rotation
 
     def toSerializableObj(self):
         # properties are enums, they can't be directly converted to int

@@ -37,6 +37,7 @@ class BerriesGenerator():
                     
                     
     def placeBerries(self, row, col):
-        obj = MapObjectModel(col, row, self.berriesModel)
+        obj = MapObjectModelGeneral()
+        obj.init(col, row, self.berriesModel)
         self.model.addMapObject(obj)
 

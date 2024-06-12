@@ -157,7 +157,8 @@ class LandLotObject(LandLotLwObject):
 
         print("    Obj placed at: " + str(self.localPos) + "; size=" + str(size))
 
-        obj = MapObjectModel(self.globalPosition().x, self.globalPosition().y, objModelName)
+        obj = MapObjectModelGeneral()
+        obj.init(self.globalPosition().x, self.globalPosition().y, objModelName)
         self._randomizeProperty(obj, 'rotation')
         self.landLot.model.addMapObject(obj)
 
@@ -308,6 +309,7 @@ class RespawnGenerator():
 
 
     def placeRespawn(self, row, col):
-        obj = MapObjectModel(col, row, self.respawnModel)
+        obj = MapObjectModelGeneral()
+        obj.init(col, row, self.respawnModel)
         self.model.addMapObject(obj)
 

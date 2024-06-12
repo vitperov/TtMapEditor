@@ -16,6 +16,7 @@ class FogGenerator():
                     
                     
     def placeFog(self, row, col):
-        obj = MapObjectModel(col, row, self.fogModel)
+        obj = MapObjectModelGeneral()
+        obj.init(col, row, self.fogModel)
         self.model.addMapObject(obj)
 
