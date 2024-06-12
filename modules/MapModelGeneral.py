@@ -1,4 +1,5 @@
 from enum import Enum
+from PyQt5.QtCore import *
 
 import json
 import uuid
@@ -9,8 +10,10 @@ class ObjectRotation(str, Enum):
     deg180  = '180'
     deg270  = '270'
 
-class MapObjectModelGeneral:
+class MapObjectModelGeneral(QObject):
+    changed = pyqtSignal()
     def __init__(self, x, y):
+        QObject.__init__(self)
         self.classnames = dict()
         self.properties = dict()
 
@@ -38,6 +41,12 @@ class MapObjectModelGeneral:
 
     def getProperty(self, name):
         return self.properties[name]
+
+    def setProperty(self, name, value):
+        print("setProperty " + name + ": " + str(value))
+        variableClass = self.classnames[name]
+        self.properties[name] = variableClass(value);
+        self.changed.emit()
 
     def restoreFromJson(self, js):
         self.x = js['x']

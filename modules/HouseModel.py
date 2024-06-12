@@ -1,23 +1,14 @@
-from enum import Enum
 from PyQt5.QtCore import *
 
 from modules.MapModelGeneral import *
 
-class HouseMapSquareModel(MapObjectModelGeneral, QObject):
-    changed = pyqtSignal()
+class HouseMapSquareModel(MapObjectModelGeneral):
 
     def __init__(self):
         MapObjectModelGeneral.__init__(self, 0, 0)
-        QObject.__init__(self)
 
         self.classnames['type']      = str
         self.properties['type']      = "Empty"
-
-    def setProperty(self, name, value):
-        print("setProperty " + name + ": " + str(value))
-        variableClass = self.classnames[name]
-        self.properties[name] = variableClass(value);
-        self.changed.emit()
 
 class HouseMapModel(MapModelGeneral, QObject):
     updatedEntireMap = pyqtSignal()
