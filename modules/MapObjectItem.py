@@ -7,10 +7,11 @@ import os.path
 
 # FIXME: it's copypaste of MapItem. Refactoring needed
 class MapObjectItem(QObject):
-    def __init__(self, model, canvas, tilesize, col, row):
+    def __init__(self, model, canvas, tilesize, col, row, objCollection):
         QObject.__init__(self)
 
         self._model = model
+        self._objCollection = objCollection
         self._canvas = canvas
         self._tilesize = tilesize
         self._col = col
@@ -23,9 +24,9 @@ class MapObjectItem(QObject):
 
     def updateState(self):
         sqType      = self._model.getProperty('model')
-        sqTypeName = sqType
 
-        imgFile = "resources/MapSquare/" + sqTypeName + ".png"
+        #imgFile = "resources/MapSquare/" + sqTypeName + ".png"
+        imgFile = self._objCollection.getIcon(sqType)
         if not os.path.isfile(imgFile):
             print("type " + sqTypeName + " not found")
             return

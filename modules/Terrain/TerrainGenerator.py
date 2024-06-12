@@ -10,6 +10,11 @@ from modules.Terrain.RespawnGenerator import *
 from modules.Terrain.FogGenerator import *
 from modules.Terrain.BerriesGenerator import *
 
+TypeForest = "Forest"
+TypeRoad   = "Road"
+TypeGrass  = "Grass"
+TypeHouse  = "House"
+
 def genRandomObjPlace(landLotRect, objSize):
         x = randrange(landLotRect.pt.x, landLotRect.pt.x + landLotRect.sz.w - objSize.w)
         y = randrange(landLotRect.pt.y, landLotRect.pt.y + landLotRect.sz.h - objSize.h)
@@ -77,11 +82,11 @@ class TerrainGenerator():
         berriesGen.generate(self.settings.landLotSettings.berriesProbability)
 
     def fillEverythingGrass(self):
-        self._editor.fillArea(Point(0,0), AreaSize(self._w, self._h), 'type', SquareType.Grass)
+        self._editor.fillArea(Point(0,0), AreaSize(self._w, self._h), 'type', TypeGrass)
 
     def genKeepOutForest(self):
         self._editor.fillAreaBorder(Point(0,0),  AreaSize(self._w, self._h),
-            SquareType.Forest, width=self.settings.forestKeepOut)
+            TypeForest, width=self.settings.forestKeepOut)
 
     def genRoad(self):
         #FIXME: do road after every landLot height
@@ -91,7 +96,7 @@ class TerrainGenerator():
         if self.settings.roadExitsArea == 0: # generate map without exits
             startEndMargin = self.settings.forestKeepOut
 
-        self._editor.fillArea(Point(startEndMargin, halfHeight - 1), AreaSize(self._w-startEndMargin*2, 2), 'type', SquareType.Road)
+        self._editor.fillArea(Point(startEndMargin, halfHeight - 1), AreaSize(self._w-startEndMargin*2, 2), 'type', TypeRoad)
 
     def genLandLots(self):
         for row in range(self.settings.rows):
@@ -227,7 +232,7 @@ class LandLotGenerator():
         if generateHouse:
             house = LandLotObject(self)
             house.generateObjVariant(self.settings.house,
-                           SquareType.House)
+                           TypeHouse)
 
             self.placedObjects.append(house)
 
@@ -255,7 +260,7 @@ class LandLotGenerator():
                         # Should we place it to self.placedObjects?
                         obj = LandLotLwObject(self, Point(x,y), AreaSize(1, 1), keepout=0)
                         self.editor.fillArea(obj.globalPosition(),
-                            obj.size, 'type', SquareType.Forest)
+                            obj.size, 'type', TypeForest)
 
 class RespawnGenerator():
     def __init__(self, model, settings, objModelName):
@@ -280,7 +285,7 @@ class RespawnGenerator():
             square = self.model.getSquare(col, row)
             sqType = square.getProperty('type')
 
-            return sqType == SquareType.Forest
+            return sqType == TypeForest
 
 
         def isHiddenSquare(row, col):

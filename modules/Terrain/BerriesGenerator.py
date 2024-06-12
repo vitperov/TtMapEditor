@@ -2,6 +2,8 @@ from modules.Terrain.TerrainMapModel import *
 
 from random import random
 
+TypeGrass  = "Grass"
+
 class BerriesGenerator():
     def __init__(self, model, objModelName):
         self.model = model
@@ -22,7 +24,7 @@ class BerriesGenerator():
             square = self.model.getSquare(col, row)
             sqType = square.getProperty('type')
             
-            return sqType == SquareType.Grass
+            return sqType == TypeGrass
             
             
         #FIXME: we can reduce available area excuding forest border

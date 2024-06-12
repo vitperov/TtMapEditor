@@ -67,14 +67,14 @@ class MapWidget(QWidget):
 
         mapSquares = self._model.getAllSquares()
         for squareModel in mapSquares:
-            item = MapItem(squareModel, cv, tilesize, squareModel.x, squareModel.y)
+            item = MapItem(squareModel, cv, tilesize, squareModel.x, squareModel.y, self._model._objCollection)
             
             squareModel.changed.connect(item.updateState)
             items.append(item)
 
         mapObjects = self._model.getAllObjects()
         for mapObject in mapObjects:
-            item = MapObjectItem(mapObject, cv, tilesize, mapObject.x, mapObject.y)
+            item = MapObjectItem(mapObject, cv, tilesize, mapObject.x, mapObject.y, self._model._objCollection)
             
             squareModel.changed.connect(item.updateState)
             items.append(item)

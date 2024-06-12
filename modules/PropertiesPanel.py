@@ -8,37 +8,44 @@ from functools import partial
 
 #FIXME turn to widget. Possible memory leak
 class PropertiesItem():
-    def __init__(self, objModel, title):
+    def __init__(self, objModel, title, objCollection):
         self._model = objModel
 
         self.widget = QGroupBox(title)
         self.layout = QHBoxLayout()
         self.widget.setLayout(self.layout)
 
-        for propName, propValue in self._model.properties.items():
+        category = 'indoor'
+        availableObjects = objCollection.getTypesInCategory(category)
+
+        def addBoxParameter(propName, propValue, possibleValues):
             groupbox = QGroupBox(propName)
             self.layout.addWidget(groupbox)
             box = QVBoxLayout()
             groupbox.setLayout(box)
 
             valType = type(propValue)
-            # assume valType is Enum
-            nValues = len(valType)
+            print(valType)
+            if valType == 'Enum':
+                nValues = len(valType)
+            else:
+                nValues = len(availableObjects) 
             
             comboBox = QComboBox()
-            for option in list(valType):
-                comboBox.addItem(option.name, option.name)
-                if option.value == propValue.value:
-                    comboBox.setCurrentIndex(comboBox.count() - 1)
+            for optionName in possibleValues:
+                comboBox.addItem(optionName, optionName)
+            
+            comboBox.setCurrentIndex(possibleValues.index(propValue))
             box.addWidget(comboBox)
             
             def onIndexChanged(propName, valueIdx):
-                prop = self._model.properties[propName]
-                values = list(type(prop))
-                valueStr = values[valueIdx].value
+                valueStr = possibleValues[valueIdx]
                 self._model.setProperty(propName, valueStr)
 
             comboBox.currentIndexChanged.connect(partial(onIndexChanged, propName))
+
+        addBoxParameter('type',     self._model.properties['type'], availableObjects)
+        addBoxParameter('rotation', self._model.properties['rotation'], list(self._model.classnames['rotation']))
 
 class PropertiesPanel(QWidget):
     updatedEntireMap = pyqtSignal()
@@ -78,7 +85,7 @@ class PropertiesPanel(QWidget):
 
             num += 1;
             title = str(num)
-            itemWg = PropertiesItem(itemModel, title)
+            itemWg = PropertiesItem(itemModel, title, self.mapModel._objCollection)
             self.properties.addWidget(itemWg.widget)
 
             removeBtn = QPushButton("Remove")

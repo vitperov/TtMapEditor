@@ -3,29 +3,6 @@ from PyQt5.QtCore import *
 
 from modules.MapModelGeneral import *
 
-class HouseSquareType(str, Enum):
-    Empty       = 'Empty'
-    Corner      = 'Corner'
-    Wall        = 'Wall'
-    Door        = 'Door'
-    Window      = 'Window'
-    Floor       = 'Floor'
-    CornerInt   = 'CornerInternal'
-    WallInt     = 'WallInternal'
-    DoorInt     = 'DoorInternal'
-    Wardrobe    = 'Wardrobe'
-    Bed2p       = 'Bed2p'
-    Drawer      = 'Drawer'
-    SinkOven    = 'SinkOven'
-    Fridge      = 'Fridge'
-    Counter     = 'Counter'
-    Sofa        = 'Sofa'
-    TableChairs = 'TableChairs'
-    Bookshelf   = 'Bookshelf'
-    Light       = 'Light'
-    Toilet      = 'Toilet'
-
-
 class HouseMapSquareModel(MapObjectModelGeneral, QObject):
     changed = pyqtSignal()
 
@@ -33,8 +10,8 @@ class HouseMapSquareModel(MapObjectModelGeneral, QObject):
         MapObjectModelGeneral.__init__(self, 0, 0)
         QObject.__init__(self)
 
-        self.classnames['type']      = HouseSquareType
-        self.properties['type']      = HouseSquareType.Empty
+        self.classnames['type']      = str
+        self.properties['type']      = "Empty"
 
     def setProperty(self, name, value):
         print("setProperty " + name + ": " + str(value))
@@ -44,8 +21,8 @@ class HouseMapSquareModel(MapObjectModelGeneral, QObject):
 
 class HouseMapModel(MapModelGeneral, QObject):
     updatedEntireMap = pyqtSignal()
-    def __init__(self):
-        MapModelGeneral.__init__(self, HouseMapSquareModel)
+    def __init__(self, objCollection):
+        MapModelGeneral.__init__(self, HouseMapSquareModel, objCollection)
         QObject.__init__(self)
         
         self.editorWidth = 8;

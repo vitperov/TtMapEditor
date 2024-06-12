@@ -3,15 +3,6 @@ from PyQt5.QtCore import *
 
 from modules.MapModelGeneral import *
 
-class SquareType(str, Enum):
-    Empty   = 'Empty'
-    Grass   = 'Grass'
-    Forest  = 'Forest'
-    Road    = 'Road'
-    House   = 'House'
-    Shed    = 'Shed'
-    Respawn = 'Respawn'
-
 class MapObjectType(str, Enum):
     Empty   = 'Empty'
     House   = 'House'
@@ -34,10 +25,10 @@ class MapSquareModel(QObject):
         self.y = 0
 
         self.classnames = dict()
-        self.classnames['type']      = SquareType
+        self.classnames['type']      = str
 
         self.properties = dict()
-        self.properties['type']      = SquareType.Empty
+        self.properties['type']      = "Empty"
 
     def setProperty(self, name, value):
         variableClass = self.classnames[name]
@@ -61,8 +52,8 @@ class MapSquareModel(QObject):
 
 class TerrainMapModel(MapModelGeneral, QObject):
     updatedEntireMap = pyqtSignal()
-    def __init__(self):
-        MapModelGeneral.__init__(self, MapSquareModel)
+    def __init__(self, objCollection):
+        MapModelGeneral.__init__(self, MapSquareModel, objCollection)
         QObject.__init__(self)
         
         self.setUpdatedCallback(self._updateEntireMap)
