@@ -7,8 +7,8 @@ class HouseMapSquareModel(MapObjectModelGeneral):
     def __init__(self):
         MapObjectModelGeneral.__init__(self, 0, 0)
 
-        self.classnames['type']      = str
-        self.properties['type']      = "Empty"
+        self.classnames['model']      = str
+        self.properties['model']      = "Empty"
 
 class HouseMapModel(MapModelGeneral, QObject):
     updatedEntireMap = pyqtSignal()

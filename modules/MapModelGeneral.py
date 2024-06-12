@@ -12,7 +12,8 @@ class ObjectRotation(str, Enum):
 
 class MapObjectModelGeneral(QObject):
     changed = pyqtSignal()
-    def __init__(self, x, y):
+    #def __init__(self, x, y):
+    def __init__(self):
         QObject.__init__(self)
         self.classnames = dict()
         self.properties = dict()
@@ -20,10 +21,13 @@ class MapObjectModelGeneral(QObject):
         self.classnames['rotation']  = ObjectRotation
         self.properties['rotation']  = ObjectRotation.deg0
 
+        self.classnames['model']      = str
+        self.properties['model']      = "Empty"
+
         self.id = str(uuid.uuid4())
 
-        self.x = x
-        self.y = y
+        #self.x = x
+        #self.y = y
 
     def toSerializableObj(self):
         # properties are enums, they can't be directly converted to int
