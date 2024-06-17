@@ -70,7 +70,7 @@ class MapWidget(QWidget):
             cols = cols + 1
 
         maxWidth = 1400;
-        maxHeight = 1000;
+        maxHeight = 900;
 
         wPixPerSquare = math.floor(maxWidth / cols)
         hPixPerSquare = math.floor(maxHeight / rows)
@@ -79,7 +79,7 @@ class MapWidget(QWidget):
         print("---> SIZE = " + str(cols*self.pixPerTile) + " x " +  str(rows*self.pixPerTile) + "; px= " + str(self.pixPerTile))
 
         self._canvas = QtGui.QPixmap(cols*self.pixPerTile, rows*self.pixPerTile)
-        self._canvas.fill(Qt.blue)
+        self._canvas.fill(QtGui.QColor('#ADD8E6')) # light blue
         self.updateCanvas()
 
     def redrawAll(self):
@@ -112,7 +112,6 @@ class MapWidget(QWidget):
         #try :
         mapObjects = self._model.getAllObjects()
         for mapObject in mapObjects:
-            #item = MapObjectItem(mapObject, cv, tilesize, mapObject.x, mapObject.y, self._model._objCollection)
             item = MapItem(mapObject, self._canvas, self.pixPerTile, mapObject.x, mapObject.y, self._model._objCollection, self.updateCanvas)
 
             mapObject.changed.connect(item.updateState)
