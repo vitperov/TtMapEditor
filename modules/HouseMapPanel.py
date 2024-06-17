@@ -6,7 +6,11 @@ from PyQt5.QtWidgets import *
 
 from functools import partial
 
-from modules.HouseMapItem import *
+#from modules.HouseMapItem import *
+from modules.MapItem import *
+from modules.DeleteButtonItem import *
+
+import math
 
 class HouseMapPanel(QWidget):
     activeItemChanged = pyqtSignal(int, int)
@@ -15,70 +19,98 @@ class HouseMapPanel(QWidget):
 
     def __init__(self):
         QWidget.__init__(self)
-        self._layout = QGridLayout()
         self._model = None
-        self.squares = dict()
+        #self.squares = dict()
+        self.items = []
+
+        self._layout = QVBoxLayout()
+        self._model = None
 
         self.setLayout(self._layout)
-        self._layout.setContentsMargins(0,0,0,0)
-        self._layout.setMargin(0);
-        self._layout.setSpacing(0);
+        
+        self.label = QtWidgets.QLabel()
+        self.label.mousePressEvent = self.onMouseClick
+        canvas = QtGui.QPixmap(640, 480)
+        canvas.fill(Qt.white)
 
-    def onItemClicked(self, x, y):
-        print("Item clicked x=" + str(x) + "; y=" + str(y))
-        self.activeItemChanged.emit(x, y)
-
-    def onDeleteRowClicked(self, idx):
-        print("Delete row idx=" + str(idx))
-        self.deleteRow.emit(idx)
-
-    def onDeleteColunClicked(self, idx):
-        print("Delete column idx=" + str(idx))
-        self.deleteColumn.emit(idx)
-
+        self._layout.addWidget(self.label)
+        
+    def onMouseClick(self, event):
+        x = event.pos().x()
+        y = event.pos().y() 
+        print("Clicked X=" + str(x) + "; Y=" + str(y))
+        col = int(x / self.pixPerTile)
+        row = int(y / self.pixPerTile)
+        print("Clicked row=" + str(row) + "; col=" + str(col))
+        
+        [rows, cols] = self._model.size()
+        if row < rows and col < cols:
+            self.activeItemChanged.emit(col, row)
+        elif row == rows:
+            print("Delete column idx=" + str(col))
+            self.deleteColumn.emit(col)
+        elif cols == cols:
+            print("Delete row idx=" + str(row))
+            self.deleteRow.emit(row)
+        else:
+            print("Error click outside canvas")
 
     def setModel(self, model):
         self._model = model
 
+    def _createNewCanvas(self, editMode=False):
+        [rows, cols] = self._model.size()
+        
+        if editMode:
+            rows = rows + 1
+            cols = cols + 1
+
+        maxWidth = 1200;
+        maxHeight = 800;
+
+        wPixPerSquare = math.floor(maxWidth / cols)
+        hPixPerSquare = math.floor(maxHeight / rows)
+        self.pixPerTile = min(wPixPerSquare, hPixPerSquare)
+        
+        print("---> SIZE = " + str(cols*self.pixPerTile) + " x " +  str(rows*self.pixPerTile) + "; px= " + str(self.pixPerTile))
+        
+        canvas = QtGui.QPixmap(cols*self.pixPerTile, rows*self.pixPerTile)
+        canvas.fill(Qt.blue)
+        self.label.setPixmap(canvas)
+        
     def redrawAll(self):
         [h, w] = self._model.size()
+        
+        print("=============== NEW CANVAS==============+")
+        self._createNewCanvas(editMode=True)
+        
+        # TODO: delete previous items here
+       
+        self.items = []
+        
+        cv = self.label.pixmap()
 
-        for x in range(w):
-            for y in range(h):
-                widget = HouseMapSquare(x, y)
-                self._layout.addWidget(widget, y, x)
-                widget.clicked.connect(self.onItemClicked)
-                key = (x, y)
-                self.squares[key] = widget
-
-        deleteBtnSize = QSize(32, 32)
+        mapSquares = self._model.getAllSquares()
+        for squareModel in mapSquares:
+            item = MapItem(squareModel, cv, self.pixPerTile, squareModel.x, squareModel.y, self._model._objCollection)
+            
+            squareModel.changed.connect(item.updateState)
+            self.items.append(item)
+            
         # column delete buttons
         for x in range(w):
-            y = h + 1
-            button = QPushButton(self)
-            button.setText("X")
-            self._layout.addWidget(button, y, x)
-            button.clicked.connect(partial(self.onDeleteColunClicked, x))
-            button.setFixedSize(deleteBtnSize)
-
+            item = DeleteButtonItem(cv, self.pixPerTile, x, h)
+            # no need to store, will be garbage-collected
+            
         # row delete buttons
         for y in range(h):
-            x = w + 1
-            button = QPushButton(self)
-            button.setText("X")
-            self._layout.addWidget(button, y, x)
-            button.clicked.connect(partial(self.onDeleteRowClicked, y))
-            button.setFixedSize(deleteBtnSize)
-
-        mapObjects = self._model.getAllSquares()
-        for objectModel in mapObjects:
-           x = objectModel.x
-           y = objectModel.y
-           square = self.squares[(x, y)]
-           square.addItem(objectModel, self._model._objCollection)
-           objectModel.changed.connect(square.updateState)
-           square.updateState()
+            item = DeleteButtonItem(cv, self.pixPerTile, w, y)
+            # no need to store, will be garbage-collected
 
 
-        self._layout.setRowStretch(h, 1)
-        self._layout.setColumnStretch(w, 1)
+        #mapObjects = self._model.getAllObjects()
+        #for mapObject in mapObjects:
+        #    item = MapObjectItem(mapObject, cv, tilesize, mapObject.x, mapObject.y, self._model._objCollection)
+        #    
+        #    squareModel.changed.connect(item.updateState)
+        #    items.append(item)
