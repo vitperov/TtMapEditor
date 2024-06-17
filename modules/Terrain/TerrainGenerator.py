@@ -2,7 +2,7 @@ import math
 from copy import copy
 from random import randrange, random
 
-from modules.Terrain.TerrainMapModel import *
+from modules.MapModelGeneral import *
 from modules.GeometryPrimitives import *
 from modules.Terrain.TerrainGeneratorSettings import *
 

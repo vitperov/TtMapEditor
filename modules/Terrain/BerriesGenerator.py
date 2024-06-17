@@ -1,4 +1,4 @@
-from modules.Terrain.TerrainMapModel import *
+from modules.MapModelGeneral import *
 
 from random import random
 
