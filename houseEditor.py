@@ -4,8 +4,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 from modules.MapModelGeneral import *
-from modules.HouseView import *
-from modules.HouseController import *
+from modules.House.HouseView import *
+from modules.House.HouseController import *
 from modules.ObjectsCollection import *
 
 def main():
