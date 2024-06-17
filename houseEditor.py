@@ -3,7 +3,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
-from modules.HouseModel import *
+from modules.MapModelGeneral import *
 from modules.HouseView import *
 from modules.HouseController import *
 from modules.ObjectsCollection import *
@@ -19,7 +19,7 @@ def main():
     view = HouseView()
     view.show()
 
-    model = HouseMapModel(objCollection)
+    model = MapModelGeneral(MapObjectModelGeneral, objCollection)
 
     controller = HouseController(view=view, houseModel=model)
 
