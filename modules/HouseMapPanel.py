@@ -6,7 +6,6 @@ from PyQt5.QtWidgets import *
 
 from functools import partial
 
-#from modules.HouseMapItem import *
 from modules.MapItem import *
 from modules.DeleteButtonItem import *
 
@@ -20,14 +19,13 @@ class HouseMapPanel(QWidget):
     def __init__(self):
         QWidget.__init__(self)
         self._model = None
-        #self.squares = dict()
         self.items = []
 
         self._layout = QVBoxLayout()
         self._model = None
 
         self.setLayout(self._layout)
-        
+
         self.label = QtWidgets.QLabel()
         self.label.mousePressEvent = self.onMouseClick
 
@@ -37,18 +35,18 @@ class HouseMapPanel(QWidget):
         self._layout.addWidget(self.label)
 
         self.updateCanvas()
-        
+
     def updateCanvas(self):
         self.label.setPixmap(self._canvas)
 
     def onMouseClick(self, event):
         x = event.pos().x()
-        y = event.pos().y() 
+        y = event.pos().y()
         print("Clicked X=" + str(x) + "; Y=" + str(y))
         col = int(x / self.pixPerTile)
         row = int(y / self.pixPerTile)
         print("Clicked row=" + str(row) + "; col=" + str(col))
-        
+
         [rows, cols] = self._model.size()
         if row < rows and col < cols:
             self.activeItemChanged.emit(col, row)
@@ -68,7 +66,7 @@ class HouseMapPanel(QWidget):
 
     def _createNewCanvas(self, editMode=False):
         [rows, cols] = self._model.size()
-        
+
         if editMode:
             rows = rows + 1
             cols = cols + 1
@@ -79,48 +77,48 @@ class HouseMapPanel(QWidget):
         wPixPerSquare = math.floor(maxWidth / cols)
         hPixPerSquare = math.floor(maxHeight / rows)
         self.pixPerTile = min(wPixPerSquare, hPixPerSquare)
-        
+
         print("---> SIZE = " + str(cols*self.pixPerTile) + " x " +  str(rows*self.pixPerTile) + "; px= " + str(self.pixPerTile))
-        
+
         self._canvas = QtGui.QPixmap(cols*self.pixPerTile, rows*self.pixPerTile)
         self._canvas.fill(Qt.blue)
         self.updateCanvas()
-        
+
     def redrawAll(self):
         [h, w] = self._model.size()
-        
+
         print("=============== NEW CANVAS==============+")
         self._createNewCanvas(editMode=True)
-        
-        # TODO: delete previous items here
-       
+
         self.items = []
-        
-        #cv = self.label.pixmap()
 
         mapSquares = self._model.getAllSquares()
         for squareModel in mapSquares:
             item = MapItem(squareModel, self._canvas, self.pixPerTile, squareModel.x, squareModel.y, self._model._objCollection, self.updateCanvas)
-            
+
             squareModel.changed.connect(item.updateState)
             self.items.append(item)
-            
+
         # column delete buttons
         for x in range(w):
             item = DeleteButtonItem(self._canvas, self.pixPerTile, x, h)
             # no need to store, will be garbage-collected
-            
+
         # row delete buttons
         for y in range(h):
             item = DeleteButtonItem(self._canvas, self.pixPerTile, w, y)
             # no need to store, will be garbage-collected
 
 
-        #mapObjects = self._model.getAllObjects()
-        #for mapObject in mapObjects:
-        #    item = MapObjectItem(mapObject, cv, tilesize, mapObject.x, mapObject.y, self._model._objCollection)
-        #    
-        #    squareModel.changed.connect(item.updateState)
-        #    items.append(item)
-        
+        try :
+            mapObjects = self._model.getAllObjects()
+            for mapObject in mapObjects:
+                item = MapObjectItem(mapObject, cv, tilesize, mapObject.x, mapObject.y, self._model._objCollection)
+
+                squareModel.changed.connect(item.updateState)
+                items.append(item)
+        except:
+            print("Unable to load map objects (maybe there is no objects, only squares)")
+
+
         self.updateCanvas()

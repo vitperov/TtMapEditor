@@ -4,77 +4,121 @@ from pyqtgraph.Qt import QtCore, QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from functools import partial
+from modules.MapItem import *
+from modules.DeleteButtonItem import *
 
 import math
 
-from modules.MapItem import *
-from modules.MapObjectItem import *
-
 class MapWidget(QWidget):
-    activeItemChanged = pyqtSignal(int)
+    activeItemChanged = pyqtSignal(int, int)
+    deleteRow         = pyqtSignal(int)
+    deleteColumn      = pyqtSignal(int)
 
     def __init__(self):
         QWidget.__init__(self)
+        self._model = None
+        self.items = []
+
         self._layout = QVBoxLayout()
         self._model = None
 
         self.setLayout(self._layout)
-        
+
         self.label = QtWidgets.QLabel()
-        canvas = QtGui.QPixmap(640, 480)
-        canvas.fill(Qt.white)
-        self.label.setPixmap(canvas)
+        self.label.mousePressEvent = self.onMouseClick
+
+        self._canvas = QtGui.QPixmap(640, 480)
+        self._canvas.fill(Qt.white)
+
         self._layout.addWidget(self.label)
 
-    def onItemClicked(self, itemId):
-        print("Item clicked Id=" + str(itemId))
-        self.activeItemChanged.emit(itemId)
+        self.updateCanvas()
 
+    def updateCanvas(self):
+        self.label.setPixmap(self._canvas)
+
+    def onMouseClick(self, event):
+        x = event.pos().x()
+        y = event.pos().y()
+        print("Clicked X=" + str(x) + "; Y=" + str(y))
+        col = int(x / self.pixPerTile)
+        row = int(y / self.pixPerTile)
+        print("Clicked row=" + str(row) + "; col=" + str(col))
+
+        [rows, cols] = self._model.size()
+        if row < rows and col < cols:
+            self.activeItemChanged.emit(col, row)
+        elif row == rows and col == cols:
+            print("Clicked corner. No actions")
+        elif row == rows:
+            print("Delete column idx=" + str(col))
+            self.deleteColumn.emit(col)
+        elif cols == cols:
+            print("Delete row idx=" + str(row))
+            self.deleteRow.emit(row)
+        else:
+            print("Error click outside canvas")
 
     def setModel(self, model):
         self._model = model
-        
-    def _createNewCanvas(self):
+
+    def _createNewCanvas(self, editMode=False):
         [rows, cols] = self._model.size()
 
-        maxWidth = 1200;
+        if editMode:
+            rows = rows + 1
+            cols = cols + 1
+
+        maxWidth = 1400;
         maxHeight = 1000;
-        
+
         wPixPerSquare = math.floor(maxWidth / cols)
         hPixPerSquare = math.floor(maxHeight / rows)
-        pixPerSquare = min(wPixPerSquare, hPixPerSquare)
-        
-        print("---> SIZE = " + str(cols*pixPerSquare) + " x " +  str(rows*pixPerSquare) + "; px= " + str(pixPerSquare))
-        
-        canvas = QtGui.QPixmap(cols*pixPerSquare, rows*pixPerSquare)
-        canvas.fill(Qt.blue)
-        self.label.setPixmap(canvas)
+        self.pixPerTile = min(wPixPerSquare, hPixPerSquare)
 
-        return pixPerSquare
-        
+        print("---> SIZE = " + str(cols*self.pixPerTile) + " x " +  str(rows*self.pixPerTile) + "; px= " + str(self.pixPerTile))
+
+        self._canvas = QtGui.QPixmap(cols*self.pixPerTile, rows*self.pixPerTile)
+        self._canvas.fill(Qt.blue)
+        self.updateCanvas()
+
     def redrawAll(self):
         [h, w] = self._model.size()
-        
+
         print("=============== NEW CANVAS==============+")
-        tilesize = self._createNewCanvas()
-        
-        # TODO: delete previous items here
-       
-        items = []
-        
-        cv = self.label.pixmap()
+        self._createNewCanvas(editMode=True)
+
+        self.items = []
 
         mapSquares = self._model.getAllSquares()
         for squareModel in mapSquares:
-            item = MapItem(squareModel, cv, tilesize, squareModel.x, squareModel.y, self._model._objCollection)
-            
-            squareModel.changed.connect(item.updateState)
-            items.append(item)
+            item = MapItem(squareModel, self._canvas, self.pixPerTile, squareModel.x, squareModel.y, self._model._objCollection, self.updateCanvas)
 
+            squareModel.changed.connect(item.updateState)
+            self.items.append(item)
+
+
+        # column delete buttons
+        for x in range(w):
+            item = DeleteButtonItem(self._canvas, self.pixPerTile, x, h)
+            # no need to store, will be garbage-collected
+
+        # row delete buttons
+        for y in range(h):
+            item = DeleteButtonItem(self._canvas, self.pixPerTile, w, y)
+            # no need to store, will be garbage-collected
+
+
+        #try :
         mapObjects = self._model.getAllObjects()
         for mapObject in mapObjects:
-            item = MapObjectItem(mapObject, cv, tilesize, mapObject.x, mapObject.y, self._model._objCollection)
-            
-            squareModel.changed.connect(item.updateState)
-            items.append(item)
+            #item = MapObjectItem(mapObject, cv, tilesize, mapObject.x, mapObject.y, self._model._objCollection)
+            item = MapItem(mapObject, self._canvas, self.pixPerTile, mapObject.x, mapObject.y, self._model._objCollection, self.updateCanvas)
+
+            mapObject.changed.connect(item.updateState)
+            self.items.append(item)
+        #except:
+        #    print("Unable to load map objects (maybe there is no objects, only squares)")
+
+
+        self.updateCanvas()

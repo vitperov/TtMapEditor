@@ -22,7 +22,7 @@ class BerriesGenerator():
                 return False
 
             square = self.model.getSquare(col, row)
-            sqType = square.getProperty('type')
+            sqType = square.getProperty('model')
             
             return sqType == TypeGrass
             

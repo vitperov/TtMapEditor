@@ -12,7 +12,6 @@ class ObjectRotation(str, Enum):
 
 class MapObjectModelGeneral(QObject):
     changed = pyqtSignal()
-    #def __init__(self, x, y):
     def __init__(self):
         QObject.__init__(self)
         self.classnames = dict()
@@ -50,7 +49,6 @@ class MapObjectModelGeneral(QObject):
         return self.properties[name]
 
     def setProperty(self, name, value):
-        print("setProperty " + name + ": " + str(value))
         variableClass = self.classnames[name]
         self.properties[name] = variableClass(value);
         self.changed.emit()
@@ -67,8 +65,10 @@ class MapObjectModelGeneral(QObject):
         for propName, propClass in self.classnames.items():
             self.properties[propName] = propClass(js[propName])
 
-class MapModelGeneral():
+class MapModelGeneral(QObject):
+    updatedEntireMap = pyqtSignal()
     def __init__(self, squareModel, objCollection):
+        QObject.__init__(self)
         self._sqareModel = squareModel
         self._objCollection = objCollection
         self.width = 0
@@ -77,7 +77,7 @@ class MapModelGeneral():
         self.editorHeight = 0;
         self._squares = list()
         self._objects = list()
-        self._updatedCallback = None
+        self._updateCallback = self._updateEntireMap
 
     def setUpdatedCallback(self, callback):
         self._updateCallback = callback
@@ -231,4 +231,7 @@ class MapModelGeneral():
 
         if self._updateCallback is not None:
             self._updateCallback()
+            
+    def _updateEntireMap(self):
+        self.updatedEntireMap.emit()
 
