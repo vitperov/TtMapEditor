@@ -21,15 +21,17 @@ class MapItem(QObject):
 
     def updateState(self):
         sqType      = self._model.getProperty('model')
-        #sqTypeName = sqType
+        rotation    = self._model.getProperty('rotation')
 
-        #imgFile = "resources/MapSquare/" + sqTypeName + ".png"
         imgFile = self._objCollection.getIcon(sqType)
         pixmap = QtGui.QPixmap(imgFile)
-        size = QSize(self._tilesize, self._tilesize)
 
-        scaledPixmap = pixmap.scaled(size, QtCore.Qt.KeepAspectRatio)
-       
+        transform = QtGui.QTransform().rotate(int(rotation))
+        rotatedPixmap = pixmap.transformed(transform, QtCore.Qt.SmoothTransformation)
+
+        size = QSize(self._tilesize, self._tilesize)
+        scaledPixmap = rotatedPixmap.scaled(size, QtCore.Qt.KeepAspectRatio)
+
         x = self._col * self._tilesize
         y = self._row * self._tilesize
         
