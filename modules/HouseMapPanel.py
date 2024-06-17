@@ -30,11 +30,17 @@ class HouseMapPanel(QWidget):
         
         self.label = QtWidgets.QLabel()
         self.label.mousePressEvent = self.onMouseClick
-        canvas = QtGui.QPixmap(640, 480)
-        canvas.fill(Qt.white)
+
+        self._canvas = QtGui.QPixmap(640, 480)
+        self._canvas.fill(Qt.white)
 
         self._layout.addWidget(self.label)
+
+        self.updateCanvas()
         
+    def updateCanvas(self):
+        self.label.setPixmap(self._canvas)
+
     def onMouseClick(self, event):
         x = event.pos().x()
         y = event.pos().y() 
@@ -46,6 +52,8 @@ class HouseMapPanel(QWidget):
         [rows, cols] = self._model.size()
         if row < rows and col < cols:
             self.activeItemChanged.emit(col, row)
+        elif row == rows and col == cols:
+            print("Clicked corner. No actions")
         elif row == rows:
             print("Delete column idx=" + str(col))
             self.deleteColumn.emit(col)
@@ -74,9 +82,9 @@ class HouseMapPanel(QWidget):
         
         print("---> SIZE = " + str(cols*self.pixPerTile) + " x " +  str(rows*self.pixPerTile) + "; px= " + str(self.pixPerTile))
         
-        canvas = QtGui.QPixmap(cols*self.pixPerTile, rows*self.pixPerTile)
-        canvas.fill(Qt.blue)
-        self.label.setPixmap(canvas)
+        self._canvas = QtGui.QPixmap(cols*self.pixPerTile, rows*self.pixPerTile)
+        self._canvas.fill(Qt.blue)
+        self.updateCanvas()
         
     def redrawAll(self):
         [h, w] = self._model.size()
@@ -88,23 +96,23 @@ class HouseMapPanel(QWidget):
        
         self.items = []
         
-        cv = self.label.pixmap()
+        #cv = self.label.pixmap()
 
         mapSquares = self._model.getAllSquares()
         for squareModel in mapSquares:
-            item = MapItem(squareModel, cv, self.pixPerTile, squareModel.x, squareModel.y, self._model._objCollection)
+            item = MapItem(squareModel, self._canvas, self.pixPerTile, squareModel.x, squareModel.y, self._model._objCollection, self.updateCanvas)
             
             squareModel.changed.connect(item.updateState)
             self.items.append(item)
             
         # column delete buttons
         for x in range(w):
-            item = DeleteButtonItem(cv, self.pixPerTile, x, h)
+            item = DeleteButtonItem(self._canvas, self.pixPerTile, x, h)
             # no need to store, will be garbage-collected
             
         # row delete buttons
         for y in range(h):
-            item = DeleteButtonItem(cv, self.pixPerTile, w, y)
+            item = DeleteButtonItem(self._canvas, self.pixPerTile, w, y)
             # no need to store, will be garbage-collected
 
 
@@ -114,3 +122,5 @@ class HouseMapPanel(QWidget):
         #    
         #    squareModel.changed.connect(item.updateState)
         #    items.append(item)
+        
+        self.updateCanvas()

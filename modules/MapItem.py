@@ -4,7 +4,7 @@ from PyQt5.QtCore import *
 from pyqtgraph.Qt import QtCore, QtGui
 
 class MapItem(QObject):
-    def __init__(self, model, canvas, tilesize, col, row, objCollection):
+    def __init__(self, model, canvas, tilesize, col, row, objCollection, redrawClbk):
         QObject.__init__(self)
 
         self._model = model
@@ -13,6 +13,7 @@ class MapItem(QObject):
         self._tilesize = tilesize
         self._col = col
         self._row = row
+        self._redrawClbk = redrawClbk;
 
         size = QSize(self._tilesize, self._tilesize)
 
@@ -39,4 +40,5 @@ class MapItem(QObject):
         painter.drawPixmap(x, y, scaledPixmap)
         
         painter.end()
+        self._redrawClbk()
 
