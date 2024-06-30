@@ -4,7 +4,7 @@ from PyQt5.QtCore import *
 from pyqtgraph.Qt import QtCore, QtGui
 
 class MapItem(QObject):
-    def __init__(self, model, canvas, tilesize, col, row, objCollection):
+    def __init__(self, model, canvas, tilesize, col, row, objCollection, redrawClbk):
         QObject.__init__(self)
 
         self._model = model
@@ -13,6 +13,7 @@ class MapItem(QObject):
         self._tilesize = tilesize
         self._col = col
         self._row = row
+        self._redrawClbk = redrawClbk;
 
         size = QSize(self._tilesize, self._tilesize)
 
@@ -20,16 +21,18 @@ class MapItem(QObject):
 
 
     def updateState(self):
-        sqType      = self._model.getProperty('type')
-        #sqTypeName = sqType
+        sqType      = self._model.getProperty('model')
+        rotation    = self._model.getProperty('rotation')
 
-        #imgFile = "resources/MapSquare/" + sqTypeName + ".png"
         imgFile = self._objCollection.getIcon(sqType)
         pixmap = QtGui.QPixmap(imgFile)
-        size = QSize(self._tilesize, self._tilesize)
 
-        scaledPixmap = pixmap.scaled(size, QtCore.Qt.KeepAspectRatio)
-       
+        transform = QtGui.QTransform().rotate(int(rotation))
+        rotatedPixmap = pixmap.transformed(transform, QtCore.Qt.SmoothTransformation)
+
+        size = QSize(self._tilesize, self._tilesize)
+        scaledPixmap = rotatedPixmap.scaled(size, QtCore.Qt.KeepAspectRatio)
+
         x = self._col * self._tilesize
         y = self._row * self._tilesize
         
@@ -37,4 +40,5 @@ class MapItem(QObject):
         painter.drawPixmap(x, y, scaledPixmap)
         
         painter.end()
+        self._redrawClbk()
 

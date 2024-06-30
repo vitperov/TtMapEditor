@@ -44,7 +44,7 @@ class PropertiesItem():
 
             comboBox.currentIndexChanged.connect(partial(onIndexChanged, propName))
 
-        addBoxParameter('type',     self._model.properties['type'], availableObjects)
+        addBoxParameter('model',    self._model.properties['model'], availableObjects)
         addBoxParameter('rotation', self._model.properties['rotation'], list(self._model.classnames['rotation']))
 
 class PropertiesPanel(QWidget):

@@ -1,4 +1,5 @@
 from enum import Enum
+from PyQt5.QtCore import *
 
 import json
 import uuid
@@ -9,18 +10,26 @@ class ObjectRotation(str, Enum):
     deg180  = '180'
     deg270  = '270'
 
-class MapObjectModelGeneral:
-    def __init__(self, x, y):
+class MapObjectModelGeneral(QObject):
+    changed = pyqtSignal()
+    def __init__(self):
+        QObject.__init__(self)
         self.classnames = dict()
         self.properties = dict()
 
         self.classnames['rotation']  = ObjectRotation
         self.properties['rotation']  = ObjectRotation.deg0
 
-        self.id = str(uuid.uuid4())
+        self.classnames['model']      = str
+        self.properties['model']      = "Empty"
 
+        self.id = str(uuid.uuid4())
+        
+    def init(self, x, y, model, rotation=ObjectRotation.deg0):
         self.x = x
         self.y = y
+        self.properties['model']    = model
+        self.properties['rotation'] = rotation
 
     def toSerializableObj(self):
         # properties are enums, they can't be directly converted to int
@@ -39,6 +48,11 @@ class MapObjectModelGeneral:
     def getProperty(self, name):
         return self.properties[name]
 
+    def setProperty(self, name, value):
+        variableClass = self.classnames[name]
+        self.properties[name] = variableClass(value);
+        self.changed.emit()
+
     def restoreFromJson(self, js):
         self.x = js['x']
         self.y = js['y']
@@ -51,8 +65,10 @@ class MapObjectModelGeneral:
         for propName, propClass in self.classnames.items():
             self.properties[propName] = propClass(js[propName])
 
-class MapModelGeneral():
+class MapModelGeneral(QObject):
+    updatedEntireMap = pyqtSignal()
     def __init__(self, squareModel, objCollection):
+        QObject.__init__(self)
         self._sqareModel = squareModel
         self._objCollection = objCollection
         self.width = 0
@@ -61,7 +77,7 @@ class MapModelGeneral():
         self.editorHeight = 0;
         self._squares = list()
         self._objects = list()
-        self._updatedCallback = None
+        self._updateCallback = self._updateEntireMap
 
     def setUpdatedCallback(self, callback):
         self._updateCallback = callback
@@ -215,4 +231,7 @@ class MapModelGeneral():
 
         if self._updateCallback is not None:
             self._updateCallback()
+            
+    def _updateEntireMap(self):
+        self.updatedEntireMap.emit()
 

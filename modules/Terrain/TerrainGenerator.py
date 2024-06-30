@@ -2,7 +2,7 @@ import math
 from copy import copy
 from random import randrange, random
 
-from modules.Terrain.TerrainMapModel import *
+from modules.MapModelGeneral import *
 from modules.GeometryPrimitives import *
 from modules.Terrain.TerrainGeneratorSettings import *
 
@@ -32,10 +32,10 @@ class MapEditor():
                 square.setProperty(property, value)
 
     def fillAreaBorder(self, startPt, size, type, width=1):
-        self.fillArea(startPt,                                      AreaSize(size.w, width), 'type', type)
-        self.fillArea(Point(startPt.x ,startPt.y + size.h - width), AreaSize(size.w, width), 'type', type)
-        self.fillArea(startPt,                                      AreaSize(width, size.h), 'type', type)
-        self.fillArea(Point(startPt.x + size.w - width, startPt.y), AreaSize(width, size.h), 'type', type)
+        self.fillArea(startPt,                                      AreaSize(size.w, width), 'model', type)
+        self.fillArea(Point(startPt.x ,startPt.y + size.h - width), AreaSize(size.w, width), 'model', type)
+        self.fillArea(startPt,                                      AreaSize(width, size.h), 'model', type)
+        self.fillArea(Point(startPt.x + size.w - width, startPt.y), AreaSize(width, size.h), 'model', type)
 
 class TerrainGenerator():
     def __init__(self, model):
@@ -82,7 +82,7 @@ class TerrainGenerator():
         berriesGen.generate(self.settings.landLotSettings.berriesProbability)
 
     def fillEverythingGrass(self):
-        self._editor.fillArea(Point(0,0), AreaSize(self._w, self._h), 'type', TypeGrass)
+        self._editor.fillArea(Point(0,0), AreaSize(self._w, self._h), 'model', TypeGrass)
 
     def genKeepOutForest(self):
         self._editor.fillAreaBorder(Point(0,0),  AreaSize(self._w, self._h),
@@ -96,7 +96,7 @@ class TerrainGenerator():
         if self.settings.roadExitsArea == 0: # generate map without exits
             startEndMargin = self.settings.forestKeepOut
 
-        self._editor.fillArea(Point(startEndMargin, halfHeight - 1), AreaSize(self._w-startEndMargin*2, 2), 'type', TypeRoad)
+        self._editor.fillArea(Point(startEndMargin, halfHeight - 1), AreaSize(self._w-startEndMargin*2, 2), 'model', TypeRoad)
 
     def genLandLots(self):
         for row in range(self.settings.rows):
@@ -157,7 +157,8 @@ class LandLotObject(LandLotLwObject):
 
         print("    Obj placed at: " + str(self.localPos) + "; size=" + str(size))
 
-        obj = MapObjectModel(self.globalPosition().x, self.globalPosition().y, objModelName)
+        obj = MapObjectModelGeneral()
+        obj.init(self.globalPosition().x, self.globalPosition().y, objModelName)
         self._randomizeProperty(obj, 'rotation')
         self.landLot.model.addMapObject(obj)
 
@@ -166,7 +167,7 @@ class LandLotObject(LandLotLwObject):
         print("Rotation " + str(rotation) + ": size=" + str(size) + " -> " + str(rotatedSize))
 
         self.landLot.editor.fillArea(self.globalPosition(),
-            rotatedSize, 'type', squareType)
+            rotatedSize, 'model', squareType)
 
         return True
 
@@ -260,7 +261,7 @@ class LandLotGenerator():
                         # Should we place it to self.placedObjects?
                         obj = LandLotLwObject(self, Point(x,y), AreaSize(1, 1), keepout=0)
                         self.editor.fillArea(obj.globalPosition(),
-                            obj.size, 'type', TypeForest)
+                            obj.size, 'model', TypeForest)
 
 class RespawnGenerator():
     def __init__(self, model, settings, objModelName):
@@ -283,7 +284,7 @@ class RespawnGenerator():
                 return False
 
             square = self.model.getSquare(col, row)
-            sqType = square.getProperty('type')
+            sqType = square.getProperty('model')
 
             return sqType == TypeForest
 
@@ -308,6 +309,7 @@ class RespawnGenerator():
 
 
     def placeRespawn(self, row, col):
-        obj = MapObjectModel(col, row, self.respawnModel)
+        obj = MapObjectModelGeneral()
+        obj.init(col, row, self.respawnModel)
         self.model.addMapObject(obj)
 

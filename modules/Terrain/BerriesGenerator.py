@@ -1,4 +1,4 @@
-from modules.Terrain.TerrainMapModel import *
+from modules.MapModelGeneral import *
 
 from random import random
 
@@ -22,7 +22,7 @@ class BerriesGenerator():
                 return False
 
             square = self.model.getSquare(col, row)
-            sqType = square.getProperty('type')
+            sqType = square.getProperty('model')
             
             return sqType == TypeGrass
             
@@ -37,6 +37,7 @@ class BerriesGenerator():
                     
                     
     def placeBerries(self, row, col):
-        obj = MapObjectModel(col, row, self.berriesModel)
+        obj = MapObjectModelGeneral()
+        obj.init(col, row, self.berriesModel)
         self.model.addMapObject(obj)
 

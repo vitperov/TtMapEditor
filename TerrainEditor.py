@@ -3,7 +3,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
-from modules.Terrain.TerrainMapModel import *
+from modules.MapModelGeneral import *
 from modules.Terrain.TerrainEditorView import *
 from modules.Terrain.TerrainMapController import *
 from modules.Terrain.TerrainGenerator import *
@@ -20,7 +20,7 @@ def main():
     view = TerrainEditorView()
     view.show()
 
-    model = TerrainMapModel(objCollection)
+    model = MapModelGeneral(MapObjectModelGeneral, objCollection)
     generator = TerrainGenerator(model)
 
     controller = TerrainMapController(view, model, generator)

@@ -1,4 +1,4 @@
-from modules.Terrain.TerrainMapModel import *
+from modules.MapModelGeneral import *
 
 class FogGenerator():
     def __init__(self, model, settings, objModelName):
@@ -16,6 +16,7 @@ class FogGenerator():
                     
                     
     def placeFog(self, row, col):
-        obj = MapObjectModel(col, row, self.fogModel)
+        obj = MapObjectModelGeneral()
+        obj.init(col, row, self.fogModel)
         self.model.addMapObject(obj)
 

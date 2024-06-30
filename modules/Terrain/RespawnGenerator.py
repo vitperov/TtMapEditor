@@ -1,4 +1,4 @@
-from modules.Terrain.TerrainMapModel import *
+from modules.MapModelGeneral import *
 
 class RespawnGenerator():
     def __init__(self, model, settings, objModelName):

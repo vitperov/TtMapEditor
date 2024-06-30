@@ -6,7 +6,7 @@ import random
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
-from modules.HouseMapPanel import *
+from modules.MapWidget import *
 from modules.PropertiesPanel import *
 from modules.ActionsPanel import *
 
@@ -24,7 +24,7 @@ class HouseView(QMainWindow):
         self._centralWidget.setLayout(self._createLayout())
 
     def _createWidgets(self):
-        self.houseMapPanel = HouseMapPanel()
+        self.mapWidget = MapWidget()
         self.propPanel = PropertiesPanel()
         self.actionsPanel = ActionsPanel()
 
@@ -35,7 +35,7 @@ class HouseView(QMainWindow):
         mapLayout = QHBoxLayout()
         layout.addLayout(mapLayout)
 
-        mapLayout.addWidget(self.houseMapPanel)
+        mapLayout.addWidget(self.mapWidget)
         mapLayout.addWidget(self.propPanel)
 
         return layout
