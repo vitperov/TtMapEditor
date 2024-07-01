@@ -8,7 +8,7 @@ from PyQt5.QtCore import *
 
 from modules.MapWidget import *
 from modules.MapActionsPanel import *
-
+from modules.PropertiesPanel import *
 
 class TerrainEditorView(QMainWindow):
     """Main Window."""
@@ -25,12 +25,18 @@ class TerrainEditorView(QMainWindow):
     def _createWidgets(self):
         self.actionsPanel = MapActionsPanel()
         self.mapWidget = MapWidget()
+        category = 'outdoor'
+        self.propPanel = PropertiesPanel(category)
 
     def _createLayout(self):
         layout = QVBoxLayout()
 
         layout.addWidget(self.actionsPanel)
-        layout.addWidget(self.mapWidget)
+        mapLayout = QHBoxLayout()
+        layout.addLayout(mapLayout)
+
+        mapLayout.addWidget(self.mapWidget)
+        mapLayout.addWidget(self.propPanel)
 
         return layout
 

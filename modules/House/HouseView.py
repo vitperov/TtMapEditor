@@ -25,7 +25,8 @@ class HouseView(QMainWindow):
 
     def _createWidgets(self):
         self.mapWidget = MapWidget()
-        self.propPanel = PropertiesPanel()
+        category = 'indoor'
+        self.propPanel = PropertiesPanel(category)
         self.actionsPanel = ActionsPanel()
 
     def _createLayout(self):

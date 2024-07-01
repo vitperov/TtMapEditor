@@ -8,14 +8,13 @@ from functools import partial
 
 #FIXME turn to widget. Possible memory leak
 class PropertiesItem():
-    def __init__(self, objModel, title, objCollection):
+    def __init__(self, objModel, title, objCollection, category):
         self._model = objModel
 
         self.widget = QGroupBox(title)
         self.layout = QHBoxLayout()
         self.widget.setLayout(self.layout)
 
-        category = 'indoor'
         availableObjects = objCollection.getTypesInCategory(category)
 
         def addBoxParameter(propName, propValue, possibleValues):
@@ -49,11 +48,12 @@ class PropertiesItem():
 
 class PropertiesPanel(QWidget):
     updatedEntireMap = pyqtSignal()
-    def __init__(self):
+    def __init__(self, category):
         QWidget.__init__(self)
 
         self.x = None
         self.y = None
+        self._category = category
 
         layout = QVBoxLayout()
         self.setLayout(layout)
@@ -85,7 +85,7 @@ class PropertiesPanel(QWidget):
 
             num += 1;
             title = str(num)
-            itemWg = PropertiesItem(itemModel, title, self.mapModel._objCollection)
+            itemWg = PropertiesItem(itemModel, title, self.mapModel._objCollection, self._category)
             self.properties.addWidget(itemWg.widget)
 
             removeBtn = QPushButton("Remove")

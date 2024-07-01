@@ -23,12 +23,14 @@ class TerrainMapController:
 
     def _provideModel(self):
         self._view.mapWidget.setModel(self._mapModel)
+        self._view.propPanel.setModel(self._mapModel)
         self._view.actionsPanel.generateMap.connect(self._onGenerateClick)
         self._view.actionsPanel.saveMap.connect(self._mapModel.saveMap)
         self._view.actionsPanel.mapSettings.connect(self._onSettingsClick)
 
     def _connectSignals(self):
         self._mapModel.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
+        self._view.mapWidget.activeItemChanged.connect(self._onSquareClicked)
 
     def _onGenerateClick(self):
         self._generator.loadSettings()
@@ -38,3 +40,8 @@ class TerrainMapController:
     def _onSettingsClick(self):
         TerrainGeneratorSettingsDlg.runDlg("Terrain generator settings", \
             self._generator.settings, self._view)
+
+    def _onSquareClicked(self, x, y):
+        #model = self._houseModel.getSquare(x, y)
+        # TODO: delete wrapper and call directly
+        self._view.propPanel.showSquareProperties(x, y)
