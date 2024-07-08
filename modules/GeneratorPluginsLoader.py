@@ -19,6 +19,7 @@ class GeneratorPluginsLoader:
             fullModuleName = f'{modulePath}.{name}'
 
             if not is_pkg:
+                print("Importing: " + fullModuleName)
                 module = importlib.import_module(fullModuleName)
                 found_plugin = False
                 for attr in dir(module):
