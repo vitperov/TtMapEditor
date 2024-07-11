@@ -19,7 +19,7 @@ def main():
 
     generator = TerrainGenerator(model.map)
 
-    controller = TerrainMapController(view, model.map, generator)
+    controller = TerrainMapController(view, model, generator)
 
     exitcode = app.exec_()
 
