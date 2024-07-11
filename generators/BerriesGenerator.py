@@ -10,7 +10,7 @@ class BerriesGenerator(GeneratorPluginBase):
         self.berriesModel = 'Berries'
 
 
-    def generate(self):
+    def generate(self, settings):
         probability = 0.1
         def isGrassSquare(row, col):
             if row < 0:

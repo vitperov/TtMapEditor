@@ -12,11 +12,11 @@ class Model:
         self.objCollection = ObjectsCollection([nativeMapObjectsDir, externalMapObjectsDir])
         print("Map objects found: " + str(self.objCollection.allObjectTypes()))
 
+        self.map = MapModelGeneral(MapObjectModelGeneral, self.objCollection)
+        
         pluginsDir = 'generators'
-        self.generators = GeneratorPluginsLoader()
+        self.generators = GeneratorPluginsLoader(self.map)
         self.generators.loadPluginsFrom(pluginsDir)
         print("Generator plugins found: " + str(self.generators.generators))
-
-        self.map = MapModelGeneral(MapObjectModelGeneral, self.objCollection)
    
 

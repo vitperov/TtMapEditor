@@ -37,6 +37,8 @@ class EverythingGenerator(GeneratorPluginBase):
 
         self._w = None
         self._h = None
+        
+        self.loadSettings()
 
     def loadSettings(self):
         try:
@@ -50,7 +52,7 @@ class EverythingGenerator(GeneratorPluginBase):
         self._w = self.settings.landLotSettings.size.w * self.settings.columns + 2 * self.settings.forestKeepOut
         self._h = self.settings.landLotSettings.size.h * self.settings.rows + 2 * self.settings.forestKeepOut + self.settings.roadWidth
 
-    def generate(self):
+    def generate(self, settings):
         print("Generating map size=" + str(self._h) + "x" + str(self._w))
         self._model.newMap(self._w, self._h)
 

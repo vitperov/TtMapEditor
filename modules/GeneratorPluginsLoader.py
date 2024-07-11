@@ -6,9 +6,9 @@ import warnings
 from modules.GeneratorPluginBase import *
 
 class GeneratorPluginsLoader:
-    def __init__(self):
+    def __init__(self, mapModel):
         self.generators = {}
-        self.mapModel = {}
+        self.mapModel = mapModel
 
     def loadPluginsFrom(self, directory):
         modulePath = directory.replace(os.sep, '.')
