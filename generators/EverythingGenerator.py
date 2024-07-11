@@ -1,3 +1,5 @@
+from modules.GeneratorPluginBase import *
+
 import math
 from copy import copy
 from random import randrange, random
@@ -21,12 +23,13 @@ def genRandomObjPlace(landLotRect, objSize):
         y = randrange(landLotRect.pt.y, landLotRect.pt.y + landLotRect.sz.h - objSize.h)
         return Point(x, y)
 
-class TerrainGenerator():
-    def __init__(self, model):
+class EverythingGenerator(GeneratorPluginBase):
+    def __init__(self, mapModel):
+        super().__init__(mapModel)
         self.settings = TerrainGeneratorSettings()
 
-        self._model = model
-        self._editor = MapEditHelper(model)
+        self._model = mapModel
+        self._editor = MapEditHelper(mapModel)
 
         self._calcMapSize()
 
@@ -47,7 +50,7 @@ class TerrainGenerator():
         self._w = self.settings.landLotSettings.size.w * self.settings.columns + 2 * self.settings.forestKeepOut
         self._h = self.settings.landLotSettings.size.h * self.settings.rows + 2 * self.settings.forestKeepOut + self.settings.roadWidth
 
-    def generateMap(self):
+    def generate(self):
         print("Generating map size=" + str(self._h) + "x" + str(self._w))
         self._model.newMap(self._w, self._h)
 
