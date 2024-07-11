@@ -8,8 +8,6 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from functools import partial
 
 class GeneratorItem(QWidget):
-    generateSignal = pyqtSignal(str, dict)
-
     def __init__(self, name, model):
         QWidget.__init__(self)
         self.name = name
@@ -25,14 +23,8 @@ class GeneratorItem(QWidget):
         generateBtn = QPushButton("Generate")
         layout.addWidget(generateBtn)
         generateBtn.clicked.connect(partial(model.generate, self.settings))
-        
-    @pyqtSlot()
-    def onGenerateClicked(self):
-        self.generateSignal.emit(self.name, self.properties)
-
 
 class GeneratorsPanel(QWidget):
-    updatedEntireMap = pyqtSignal()
     generateSignal = pyqtSignal(str, dict)
     def __init__(self):
         QWidget.__init__(self)
@@ -43,5 +35,4 @@ class GeneratorsPanel(QWidget):
         for name, model in generatorsModels.items():
             genItem = GeneratorItem(name, model);
             self.layout.addWidget(genItem)
-            genItem.generateSignal.connect(self.generateSignal)
 
