@@ -65,9 +65,9 @@ class GeneratorSettings(QWidget):
             elif isinstance(control, QCheckBox):
                 self.settings[key]['value'] = control.isChecked()
 
-class GeneratorItem(QWidget):
-    def __init__(self, name, model):
-        QWidget.__init__(self)
+class GeneratorItem(QGroupBox):
+    def __init__(self, name, model, parent=None):
+        super(GeneratorItem, self).__init__(name, parent)
         self.name = name
         self.model = model;
         self.settings = {}
