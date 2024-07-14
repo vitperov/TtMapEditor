@@ -1,10 +1,8 @@
 from PyQt5 import QtWidgets
 from pyqtgraph.Qt import QtCore, QtGui
-
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
-
 from functools import partial
 
 class GeneratorSettings(QWidget):
@@ -50,9 +48,9 @@ class GeneratorSettings(QWidget):
             layout.addLayout(controlLayout)
             self.controls[key] = control
 
-        appyButton = QPushButton("Appy")
-        appyButton.clicked.connect(self.applySettings)
-        layout.addWidget(appyButton)
+        applyButton = QPushButton("Apply")
+        applyButton.clicked.connect(self.applySettings)
+        layout.addWidget(applyButton)
 
     def applySettings(self):
         for key, control in self.controls.items():
@@ -69,22 +67,37 @@ class GeneratorItem(QGroupBox):
     def __init__(self, name, model, parent=None):
         super(GeneratorItem, self).__init__(name, parent)
         self.name = name
-        self.model = model;
+        self.model = model
         self.settings = {}
         
         layout = QVBoxLayout()
         self.setLayout(layout)
-        firstRowLayout = QHBoxLayout()
-        settingsWg = GeneratorSettings(model)
-        layout.addLayout(firstRowLayout)
-        layout.addWidget(settingsWg)
 
-        nameLabel = QLabel(name)
-        layout.addWidget(nameLabel)
+        firstRowLayout = QHBoxLayout()
+        self.toggleButton = QToolButton()
+        self.toggleButton.setCheckable(True)
+        self.toggleButton.setChecked(False)
+        self.toggleButton.setIcon(QtGui.QIcon.fromTheme("list-add"))  # Initially showing the minus icon
+        self.toggleButton.clicked.connect(self.toggleSettings)
+
+        firstRowLayout.addWidget(self.toggleButton)
+        layout.addLayout(firstRowLayout)
         
         generateBtn = QPushButton("Generate")
-        layout.addWidget(generateBtn)
+        firstRowLayout.addWidget(generateBtn)
         generateBtn.clicked.connect(partial(model.generate, self.settings))
+
+        self.settingsWg = GeneratorSettings(model)
+        layout.addWidget(self.settingsWg)
+        self.settingsWg.hide()
+
+    def toggleSettings(self):
+        if self.toggleButton.isChecked():
+            self.settingsWg.show()
+            self.toggleButton.setIcon(QtGui.QIcon.fromTheme("list-remove"))  # Show minus icon when expanded
+        else:
+            self.settingsWg.hide()
+            self.toggleButton.setIcon(QtGui.QIcon.fromTheme("list-add"))  # Show plus icon when collapsed
 
 class GeneratorsPanel(QWidget):
     generateSignal = pyqtSignal(str, dict)
@@ -95,6 +108,5 @@ class GeneratorsPanel(QWidget):
     
     def populateGenerators(self, generatorsModels):
         for name, model in generatorsModels.items():
-            genItem = GeneratorItem(name, model);
+            genItem = GeneratorItem(name, model)
             self.layout.addWidget(genItem)
-
