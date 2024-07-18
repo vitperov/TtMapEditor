@@ -9,12 +9,12 @@ class RespawnGenerator(GeneratorPluginBase):
         super().__init__(mapModel)
         self.respawnModel = 'opponentRespawn'
 
-    def generate(self, settings):
+    def generate(self):
         print("Generating respawns")
         # Find squares surrounded by trees. There can be 8 squares of forest maximum,
         # and don't forget to have at least one square to get out.
-        minForest = float(self.settings['minForestAround'])
-        maxForest = float(self.settings['maxForestAround'])
+        minForest = int(self.settings['minForestAround'])
+        maxForest = int(self.settings['maxForestAround'])
         def isForest(row, col):
             if row < 0:
                 return False

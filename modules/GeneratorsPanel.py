@@ -68,7 +68,6 @@ class GeneratorItem(QGroupBox):
         super(GeneratorItem, self).__init__(name, parent)
         self.name = name
         self.model = model
-        self.settings = {}
         
         layout = QVBoxLayout()
         self.setLayout(layout)
@@ -85,7 +84,7 @@ class GeneratorItem(QGroupBox):
         
         generateBtn = QPushButton("Generate")
         firstRowLayout.addWidget(generateBtn)
-        generateBtn.clicked.connect(partial(model.generate, self.settings))
+        generateBtn.clicked.connect(model.generate)
 
         self.settingsWg = GeneratorSettings(model)
         layout.addWidget(self.settingsWg)

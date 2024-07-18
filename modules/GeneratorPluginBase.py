@@ -64,5 +64,5 @@ class GeneratorPluginBase:
                 updatedSettings[key] = defaultValue
         return updatedSettings
 
-    def generate(self, settings):
+    def generate(self):
         raise NotImplementedError("Each plugin must implement the run method.")
