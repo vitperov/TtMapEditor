@@ -11,6 +11,7 @@ class BerriesGenerator(GeneratorPluginBase):
 
 
     def generate(self, settings):
+        print("Generating berries")
         probability = 0.1
         def isGrassSquare(row, col):
             if row < 0:
@@ -26,9 +27,7 @@ class BerriesGenerator(GeneratorPluginBase):
             sqType = square.getProperty('model')
             
             return sqType == TypeGrass
-            
-            
-        #FIXME: we can reduce available area excuding forest border
+
         for col in range(self.mapModel.width):
             for row in range(self.mapModel.height):
                 if isGrassSquare(row, col):

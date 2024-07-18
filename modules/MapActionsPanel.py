@@ -9,6 +9,7 @@ from functools import partial
 class MapActionsPanel(QWidget):
     mapSettings  = pyqtSignal()
     saveMap      = pyqtSignal(str)
+    refreshMap   = pyqtSignal()
 
     def __init__(self):
         QWidget.__init__(self)
@@ -18,14 +19,18 @@ class MapActionsPanel(QWidget):
 
         self._settingsBtn   = QPushButton("Generator settings");
         self._saveBtn       = QPushButton("Save")
+        self._refreshButton = QPushButton("Refresh", self)
+        self._refreshButton.setIcon(QtGui.QIcon.fromTheme("view-refresh"))
         
         self._layout.addWidget(self._settingsBtn)
         self._layout.addWidget(self._saveBtn)
+        self._layout.addWidget(self._refreshButton)
 
         self._layout.addStretch()
 
         self._settingsBtn.clicked.connect(self._settingsDlg)
         self._saveBtn.clicked.connect(self._saveFile)
+        self._refreshButton.clicked.connect(self._refreshAction)
 
     def _settingsDlg(self):
         self.mapSettings.emit()
@@ -35,3 +40,6 @@ class MapActionsPanel(QWidget):
         name = name[0]
         print(name)
         self.saveMap.emit(name)
+        
+    def _refreshAction(self):
+        self.refreshMap.emit()

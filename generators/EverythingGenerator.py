@@ -10,7 +10,6 @@ from modules.Terrain.TerrainGeneratorSettings import *
 
 from modules.Terrain.RespawnGenerator import *
 from modules.Terrain.FogGenerator import *
-from modules.Terrain.BerriesGenerator import *
 from modules.Terrain.MapEditHelper import *
 
 TypeForest = "Forest"
@@ -66,9 +65,6 @@ class EverythingGenerator(GeneratorPluginBase):
 
         fogGen = FogGenerator(self._model, self.oldSettings, 'Fog')
         fogGen.generate();
-        
-        berriesGen = BerriesGenerator(self._model, 'Berries')
-        berriesGen.generate(self.oldSettings.landLotSettings.berriesProbability)
 
     def fillEverythingGrass(self):
         self._editor.fillArea(Point(0,0), AreaSize(self._w, self._h), 'model', TypeGrass)
