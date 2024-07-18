@@ -1,4 +1,5 @@
 import os
+import json
 import inspect
 
 from modules.MapModelGeneral import *
@@ -6,25 +7,77 @@ from modules.MapModelGeneral import *
 class GeneratorPluginBase:
     def __init__(self, mapModel):
         self.mapModel = mapModel
-        self.pluginSettings = {}
+        self.pluginStaticSettings = {}
         self.schema = {}
-        #childPluginClassName = self.__class__.__name__
+        self.settings = {}
+        self.childPluginClassName = self.__class__.__name__
         childPluginLocation = inspect.getfile(self.__class__);
-        self.settingsFileName = os.path.splitext(childPluginLocation)[0] + '.json'
-        self.loadPluginSettings2()
+        self.staticSettingsFileName = os.path.splitext(childPluginLocation)[0] + '.json'
+        self.allPluginsSettingsFileName = 'generatorsSettings.json'
+        self.loadPluginSettings()
 
-    def loadPluginSettings2(self):
-        with open(self.settingsFileName, 'r') as f:
+    def loadPluginSettings(self):
+        # Load the schema file specific to the plugin
+        with open(self.staticSettingsFileName, 'r') as f:
             #print("FIle content:" + f.read())
-            self.pluginSettings = json.load(f)
-            print(">SETTINGS: " + str(self.pluginSettings))
-            self.schema = self.pluginSettings['schema']
-            
-            print(">SCHEMA: " + str(self.schema))
+            self.pluginStaticSettings = json.load(f)
+            self.schema = self.pluginStaticSettings['schema']
 
-    #def loadPluginSettings(self):
-    #    with open(self.settingsFileName, 'w') as f:
-    #        json.dump(self.pluginSettings, f, indent=4)
+        allSettings = self.loadAllPluginsSettings()
+
+        # Merge the settings with the schema defaults
+        pluginSettings = allSettings.get('plugins', {}).get(self.childPluginClassName, {})
+        self.settings = self.applySchemaDefaults(pluginSettings)
+
+    def savePluginSettings(self):
+        allSettings = self.loadAllPluginsSettings()
+
+        # Update the settings for this plugin
+        allSettings['plugins'][self.childPluginClassName] = self.settings
+
+        # Save the updated settings
+        with open(self.allPluginsSettingsFileName, 'w') as f:
+            json.dump(allSettings, f, indent=4)
+
+        print("Settings saved")
+
+    def loadAllPluginsSettings(self):
+        # Load the global settings file (all plugins settings)
+        if os.path.exists(self.allPluginsSettingsFileName):
+            with open(self.allPluginsSettingsFileName, 'r') as f:
+                allSettings = json.load(f)
+        else:
+            allSettings = {"plugins": {}}
+
+        return allSettings
+
+    def applySchemaDefaults(self, pluginSettings):
+        updatedSettings = {}
+        for key, value in self.schema.items():
+            settingType = value.get('type')
+            defaultValue = value.get('value')
+
+            if key in pluginSettings:
+                # If the setting exists in the loaded settings, use it
+                #updatedSettings[key] = self.castType(pluginSettings[key], settingType)
+                updatedSettings[key] = pluginSettings[key]
+            else:
+                # Otherwise, use the default value from the schema
+                #updatedSettings[key] = self.castType(defaultValue, settingType)
+                updatedSettings[key] = defaultValue
+        return updatedSettings
+
+    #def castType(self, value, typeТame):
+    #    if typeТame == 'float':
+    #        return float(value)
+    #    elif typeТame == 'int':
+    #        return int(value)
+    #    elif typeТame == 'bool':
+    #        return value.lower() in ('true', '1', 'yes')
+    #    elif typeТame == 'string':
+    #        return str(value)
+    #    else:
+    #        return value
 
     def generate(self, settings):
         raise NotImplementedError("Each plugin must implement the run method.")

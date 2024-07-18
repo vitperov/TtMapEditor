@@ -9,7 +9,6 @@ class GeneratorSettings(QWidget):
     def __init__(self, model):
         QWidget.__init__(self)
         self.model = model
-        self.settings = {}
         self.controls = {}
         self.initGui()
 
@@ -18,6 +17,7 @@ class GeneratorSettings(QWidget):
         self.setLayout(layout)
 
         print("SCHEMA: " + str(self.model.schema))
+        print("SETTINGS: " + str(self.model.settings))
 
         for key, info in self.model.schema.items():
             controlLayout = QHBoxLayout()
@@ -25,7 +25,8 @@ class GeneratorSettings(QWidget):
             controlLayout.addWidget(label)
 
             settingType = info['type']
-            settingValue = info['value']
+            settingValue = self.model.settings[key]
+            #print("    " + key + "->" + str(settingValue))
             
             if settingType == 'str':
                 control = QLineEdit()
@@ -55,13 +56,15 @@ class GeneratorSettings(QWidget):
     def applySettings(self):
         for key, control in self.controls.items():
             if isinstance(control, QLineEdit):
-                self.settings[key]['value'] = control.text()
+                self.model.settings[key] = control.text()
             elif isinstance(control, QSpinBox):
-                self.settings[key]['value'] = control.value()
+                self.model.settings[key] = str(control.value())
             elif isinstance(control, QDoubleSpinBox):
-                self.settings[key]['value'] = control.value()
+                self.model.settings[key] = str(control.value())
             elif isinstance(control, QCheckBox):
-                self.settings[key]['value'] = control.isChecked()
+                self.model.settings[key] = str(control.isChecked())
+
+        self.model.savePluginSettings()
 
 class GeneratorItem(QGroupBox):
     def __init__(self, name, model, parent=None):

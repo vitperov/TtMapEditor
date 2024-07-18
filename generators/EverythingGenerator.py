@@ -26,7 +26,7 @@ def genRandomObjPlace(landLotRect, objSize):
 class EverythingGenerator(GeneratorPluginBase):
     def __init__(self, mapModel):
         super().__init__(mapModel)
-        self.settings = TerrainGeneratorSettings()
+        self.oldSettings = TerrainGeneratorSettings()
 
         self._model = mapModel
         self._editor = MapEditHelper(mapModel)
@@ -42,15 +42,15 @@ class EverythingGenerator(GeneratorPluginBase):
 
     def loadSettings(self):
         try:
-            self.settings.loadFromFile()
+            self.oldSettings.loadFromFile()
         except FileNotFoundError:
             print("Warning: generator setting file is not found. Using default settings")
 
         self._calcMapSize()
 
     def _calcMapSize(self):
-        self._w = self.settings.landLotSettings.size.w * self.settings.columns + 2 * self.settings.forestKeepOut
-        self._h = self.settings.landLotSettings.size.h * self.settings.rows + 2 * self.settings.forestKeepOut + self.settings.roadWidth
+        self._w = self.oldSettings.landLotSettings.size.w * self.oldSettings.columns + 2 * self.oldSettings.forestKeepOut
+        self._h = self.oldSettings.landLotSettings.size.h * self.oldSettings.rows + 2 * self.oldSettings.forestKeepOut + self.oldSettings.roadWidth
 
     def generate(self, settings):
         print("Generating map size=" + str(self._h) + "x" + str(self._w))
@@ -61,49 +61,49 @@ class EverythingGenerator(GeneratorPluginBase):
         self.genRoad()
         self.genLandLots()
 
-        opponentsResp = RespawnGenerator(self._model, self.settings, 'opponentRespawn')
+        opponentsResp = RespawnGenerator(self._model, self.oldSettings, 'opponentRespawn')
         opponentsResp.generateHiddenRespawns();
 
-        fogGen = FogGenerator(self._model, self.settings, 'Fog')
+        fogGen = FogGenerator(self._model, self.oldSettings, 'Fog')
         fogGen.generate();
         
         berriesGen = BerriesGenerator(self._model, 'Berries')
-        berriesGen.generate(self.settings.landLotSettings.berriesProbability)
+        berriesGen.generate(self.oldSettings.landLotSettings.berriesProbability)
 
     def fillEverythingGrass(self):
         self._editor.fillArea(Point(0,0), AreaSize(self._w, self._h), 'model', TypeGrass)
 
     def genKeepOutForest(self):
         self._editor.fillAreaBorder(Point(0,0),  AreaSize(self._w, self._h),
-            TypeForest, width=self.settings.forestKeepOut)
+            TypeForest, width=self.oldSettings.forestKeepOut)
 
     def genRoad(self):
         #FIXME: do road after every landLot height
         halfHeight = math.ceil(self._h / 2)
 
         startEndMargin = 0
-        if self.settings.roadExitsArea == 0: # generate map without exits
-            startEndMargin = self.settings.forestKeepOut
+        if self.oldSettings.roadExitsArea == 0: # generate map without exits
+            startEndMargin = self.oldSettings.forestKeepOut
 
         self._editor.fillArea(Point(startEndMargin, halfHeight - 1), AreaSize(self._w-startEndMargin*2, 2), 'model', TypeRoad)
 
     def genLandLots(self):
-        for row in range(self.settings.rows):
-            for column in range(self.settings.columns):
+        for row in range(self.oldSettings.rows):
+            for column in range(self.oldSettings.columns):
                 print("Generating LandLot. Row=" + str(row) + " column=" + str(column))
-                startPt = Point(column * self.settings.landLotSettings.size.w + self.settings.forestKeepOut,
-                                row * self.settings.landLotSettings.size.h + self.settings.forestKeepOut)
+                startPt = Point(column * self.oldSettings.landLotSettings.size.w + self.oldSettings.forestKeepOut,
+                                row * self.oldSettings.landLotSettings.size.h + self.oldSettings.forestKeepOut)
 
                 #if (row != 0) and (row != self._rows - 1):
                 if row != 0:
-                    startPt.y += self.settings.roadWidth;
+                    startPt.y += self.oldSettings.roadWidth;
 
                 print("    startPt=" + str(startPt))
                 self.genLandLot(startPt)
                 self._currentLandLotId += 1
 
     def genLandLot(self, startPt):
-        landLot = LandLotGenerator(self._model, self.settings.landLotSettings, startPt)
+        landLot = LandLotGenerator(self._model, self.oldSettings.landLotSettings, startPt)
         landLot.generate()
 
 class LandLotLwObject():
@@ -195,7 +195,7 @@ class LandLotObject(LandLotLwObject):
 class LandLotGenerator():
     def __init__(self, model, settings, startPt):
         self.model = model
-        self.settings = settings
+        self.oldSettings = settings
         self.editor = MapEditHelper(model)
         self.startPt = startPt
         self.landLotRect = Rectangle(Point(0,0), settings.size)
@@ -216,20 +216,20 @@ class LandLotGenerator():
 
     def generate(self):
         # Debug landLot location
-        #self.editor.fillAreaBorder(self.startPt, self.settings.size, SquareType.Empty)
+        #self.editor.fillAreaBorder(self.startPt, self.oldSettings.size, SquareType.Empty)
 
-        generateHouse = (random() < self.settings.house.probability)
+        generateHouse = (random() < self.oldSettings.house.probability)
         if generateHouse:
             house = LandLotObject(self)
-            house.generateObjVariant(self.settings.house,
+            house.generateObjVariant(self.oldSettings.house,
                            TypeHouse)
 
             self.placedObjects.append(house)
 
-        generateShed = (random() < self.settings.shed.probability)
+        generateShed = (random() < self.oldSettings.shed.probability)
         if generateShed:
             shed = LandLotObject(self)
-            shed.generate(self.settings.shed.size,
+            shed.generate(self.oldSettings.shed.size,
                           SquareType.Shed,
                           "shed")
 
@@ -245,7 +245,7 @@ class LandLotGenerator():
             for y in range(rc.pt.y, rc.pt.y + rc.sz.h):
                 treeRect = Rectangle(Point(x,y), AreaSize(1,1))
                 if self.canPlaceObjectAt(treeRect):
-                    generateTree = (random() < self.settings.treeProbability)
+                    generateTree = (random() < self.oldSettings.treeProbability)
                     if generateTree:
                         # Should we place it to self.placedObjects?
                         obj = LandLotLwObject(self, Point(x,y), AreaSize(1, 1), keepout=0)
@@ -255,7 +255,7 @@ class LandLotGenerator():
 class RespawnGenerator():
     def __init__(self, model, settings, objModelName):
         self.model = model
-        self.settings = settings
+        self.oldSettings = settings
         self.respawnModel = objModelName
 
 

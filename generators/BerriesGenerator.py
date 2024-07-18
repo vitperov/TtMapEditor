@@ -15,14 +15,14 @@ class BerriesGenerator(GeneratorPluginBase):
         def isGrassSquare(row, col):
             if row < 0:
                 return False
-            if row >= self.model.height:
+            if row >= self.mapModel.height:
                 return False
             if col < 0:
                 return False
-            if col >= self.model.width:
+            if col >= self.mapModel.width:
                 return False
 
-            square = self.model.getSquare(col, row)
+            square = self.mapModel.getSquare(col, row)
             sqType = square.getProperty('model')
             
             return sqType == TypeGrass
@@ -40,4 +40,4 @@ class BerriesGenerator(GeneratorPluginBase):
     def _placeBerries(self, row, col):
         obj = MapObjectModelGeneral()
         obj.init(col, row, self.berriesModel)
-        self.model.addMapObject(obj)
+        self.mapModel.addMapObject(obj)
