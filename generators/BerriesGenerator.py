@@ -12,7 +12,7 @@ class BerriesGenerator(GeneratorPluginBase):
 
     def generate(self, settings):
         print("Generating berries")
-        probability = 0.1
+        probability = float(self.settings['probability'])
         def isGrassSquare(row, col):
             if row < 0:
                 return False
@@ -34,6 +34,8 @@ class BerriesGenerator(GeneratorPluginBase):
                     generate = (random() < probability)
                     if generate:
                         self._placeBerries(row,col)
+                        
+        print("Done")
 
 
     def _placeBerries(self, row, col):
