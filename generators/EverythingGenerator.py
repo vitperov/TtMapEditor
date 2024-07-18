@@ -8,7 +8,6 @@ from modules.MapModelGeneral import *
 from modules.GeometryPrimitives import *
 from modules.Terrain.TerrainGeneratorSettings import *
 
-from modules.Terrain.FogGenerator import *
 from modules.Terrain.MapEditHelper import *
 
 TypeForest = "Forest"
@@ -58,9 +57,6 @@ class EverythingGenerator(GeneratorPluginBase):
         self.genKeepOutForest()
         self.genRoad()
         self.genLandLots()
-
-        fogGen = FogGenerator(self._model, self.oldSettings, 'Fog')
-        fogGen.generate();
 
     def fillEverythingGrass(self):
         self._editor.fillArea(Point(0,0), AreaSize(self._w, self._h), 'model', TypeGrass)
