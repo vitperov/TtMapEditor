@@ -1,0 +1,12 @@
+{
+  "schema": {
+    "minForestAround": {
+      "type": "int",
+      "value": "3"
+    },
+    "maxForestAround": {
+      "type": "int",
+      "value": "5"
+    }
+  }
+}

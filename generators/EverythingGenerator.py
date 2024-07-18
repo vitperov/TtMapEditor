@@ -8,7 +8,6 @@ from modules.MapModelGeneral import *
 from modules.GeometryPrimitives import *
 from modules.Terrain.TerrainGeneratorSettings import *
 
-from modules.Terrain.RespawnGenerator import *
 from modules.Terrain.FogGenerator import *
 from modules.Terrain.MapEditHelper import *
 
@@ -59,9 +58,6 @@ class EverythingGenerator(GeneratorPluginBase):
         self.genKeepOutForest()
         self.genRoad()
         self.genLandLots()
-
-        opponentsResp = RespawnGenerator(self._model, self.oldSettings, 'opponentRespawn')
-        opponentsResp.generateHiddenRespawns();
 
         fogGen = FogGenerator(self._model, self.oldSettings, 'Fog')
         fogGen.generate();
