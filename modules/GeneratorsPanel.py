@@ -16,9 +16,6 @@ class GeneratorSettings(QWidget):
         layout = QVBoxLayout()
         self.setLayout(layout)
 
-        print("SCHEMA: " + str(self.model.schema))
-        print("SETTINGS: " + str(self.model.settings))
-
         for key, info in self.model.schema.items():
             controlLayout = QHBoxLayout()
             label = QLabel(key)
@@ -49,7 +46,7 @@ class GeneratorSettings(QWidget):
             layout.addLayout(controlLayout)
             self.controls[key] = control
 
-        applyButton = QPushButton("Apply")
+        applyButton = QPushButton("Save & Apply")
         applyButton.clicked.connect(self.applySettings)
         layout.addWidget(applyButton)
 

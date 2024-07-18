@@ -19,7 +19,6 @@ class GeneratorPluginBase:
     def loadPluginSettings(self):
         # Load the schema file specific to the plugin
         with open(self.staticSettingsFileName, 'r') as f:
-            #print("FIle content:" + f.read())
             self.pluginStaticSettings = json.load(f)
             self.schema = self.pluginStaticSettings['schema']
 
@@ -59,25 +58,11 @@ class GeneratorPluginBase:
 
             if key in pluginSettings:
                 # If the setting exists in the loaded settings, use it
-                #updatedSettings[key] = self.castType(pluginSettings[key], settingType)
                 updatedSettings[key] = pluginSettings[key]
             else:
                 # Otherwise, use the default value from the schema
-                #updatedSettings[key] = self.castType(defaultValue, settingType)
                 updatedSettings[key] = defaultValue
         return updatedSettings
-
-    #def castType(self, value, typeТame):
-    #    if typeТame == 'float':
-    #        return float(value)
-    #    elif typeТame == 'int':
-    #        return int(value)
-    #    elif typeТame == 'bool':
-    #        return value.lower() in ('true', '1', 'yes')
-    #    elif typeТame == 'string':
-    #        return str(value)
-    #    else:
-    #        return value
 
     def generate(self, settings):
         raise NotImplementedError("Each plugin must implement the run method.")
