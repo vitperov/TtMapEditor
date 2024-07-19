@@ -25,6 +25,14 @@ class GeneratorSettings(QWidget):
             settingValue = self.model.settings[key]
             #print("    " + key + "->" + str(settingValue))
             
+            def parseBool(var):
+                if var.lower() == "false":
+                    return False
+                elif var.lower() == "true":
+                    return True
+                else:
+                    raise Exception("Unsupported boolean value: " + var)
+            
             if settingType == 'str':
                 control = QLineEdit()
                 control.setText(settingValue)
@@ -38,7 +46,7 @@ class GeneratorSettings(QWidget):
                 control.setValue(float(settingValue))
             elif settingType == 'bool':
                 control = QCheckBox()
-                control.setChecked(int(settingValue))
+                control.setChecked(parseBool(settingValue))
             else:
                 raise Exception("Unsupported schema type: " + settingType)
             
