@@ -79,17 +79,16 @@ class MapSkeletonGenerator(GeneratorPluginBase):
             for column in range(self.landLotsColumns):
                 print("Generating LandLot. Row=" + str(row) + " column=" + str(column))
                 startPt = Point(column * self.landLotWidth + self.forestAroundMap,
-                                row * self.landLotsColumns + self.forestAroundMap)
+                                row * self.landLotHeight + self.forestAroundMap)
 
-                #if (row != 0) and (row != self._rows - 1):
                 if row != 0:
                     startPt.y += self.roadWidth
 
                 print("    startPt=" + str(startPt))
                 self.placeLandLot(startPt.x, startPt.y)
 
-    def placeLandLot(self, row, col):
+    def placeLandLot(self, x, y):
         obj = MapObjectModelGeneral()
-        obj.init(col, row, "LandLot", ObjectRotation.deg0, self.landLotWidth, self.landLotHeight)
+        obj.init(x, y, "LandLot", ObjectRotation.deg0, self.landLotWidth, self.landLotHeight)
         self.mapModel.addMapObject(obj)
 
