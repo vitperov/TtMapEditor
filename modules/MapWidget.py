@@ -5,6 +5,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 from modules.MapItem import *
+from modules.MapContour import *
 from modules.DeleteButtonItem import *
 
 import math
@@ -91,8 +92,14 @@ class MapWidget(QWidget):
         self.items = []
 
         mapSquares = self._model.getAllSquares()
-        for squareModel in mapSquares:
-            item = MapItem(squareModel, self._canvas, self.pixPerTile, squareModel.x, squareModel.y, self._model._objCollection, self.updateCanvas)
+        mapObjects = self._model.getAllObjects()
+        for squareModel in (mapSquares + mapObjects):
+            sqType = squareModel.getProperty('model')
+            isContour = self._model._objCollection.isContour(sqType)
+            if isContour:
+                item = MapContour(squareModel, self._canvas, self.pixPerTile, squareModel.x, squareModel.y, self._model._objCollection, self.updateCanvas)
+            else:
+                item = MapItem(squareModel, self._canvas, self.pixPerTile, squareModel.x, squareModel.y, self._model._objCollection, self.updateCanvas)
 
             squareModel.changed.connect(item.updateState)
             self.items.append(item)
