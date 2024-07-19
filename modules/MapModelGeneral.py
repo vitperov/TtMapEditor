@@ -12,6 +12,7 @@ class ObjectRotation(str, Enum):
 
 class MapObjectModelGeneral(QObject):
     changed = pyqtSignal()
+
     def __init__(self):
         QObject.__init__(self)
         self.classnames = dict()
@@ -24,12 +25,19 @@ class MapObjectModelGeneral(QObject):
         self.properties['model']      = "Empty"
 
         self.id = str(uuid.uuid4())
-        
-    def init(self, x, y, model, rotation=ObjectRotation.deg0):
+
+        self.x = 0
+        self.y = 0
+        self.w = 1
+        self.h = 1
+
+    def init(self, x, y, model, rotation=ObjectRotation.deg0, w=1, h=1):
         self.x = x
         self.y = y
         self.properties['model']    = model
         self.properties['rotation'] = rotation
+        self.w = w
+        self.h = h
 
     def toSerializableObj(self):
         # properties are enums, they can't be directly converted to int
@@ -40,7 +48,8 @@ class MapObjectModelGeneral(QObject):
 
         obj['x'] =  self.x
         obj['y'] =  self.y
-        
+        obj['w'] =  self.w
+        obj['h'] =  self.h
         obj['id'] = self.id
 
         return obj
@@ -50,16 +59,18 @@ class MapObjectModelGeneral(QObject):
 
     def setProperty(self, name, value):
         variableClass = self.classnames[name]
-        self.properties[name] = variableClass(value);
+        self.properties[name] = variableClass(value)
         self.changed.emit()
 
     def restoreFromJson(self, js):
         self.x = js['x']
         self.y = js['y']
-        
+        self.w = js.get('w', 1)
+        self.h = js.get('h', 1)
+
         if ('id' in js) and (len(js['id'])) > 0:
             self.id = js['id']
-        else :
+        else:
             self.id = str(uuid.uuid4())
 
         for propName, propClass in self.classnames.items():
