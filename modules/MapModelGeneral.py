@@ -124,12 +124,6 @@ class MapModelGeneral(QObject):
                 items.append(square)
         return items
 
-    # NOTE: depricated
-    #def getObjectById(self, id):
-    #    for square in self._squares:
-    #        if square.id == id:
-    #            return square
-
     # TODO: used only for house square and deletes object, not sqare
     # We should rename it, or better refactor everything and use only objects
     def deleteSquareById(self, id):
