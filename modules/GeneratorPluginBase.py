@@ -11,7 +11,7 @@ class GeneratorPluginBase:
         self.schema = {}
         self.settings = {}
         self.childPluginClassName = self.__class__.__name__
-        childPluginLocation = inspect.getfile(self.__class__);
+        childPluginLocation = inspect.getfile(self.__class__)
         self.staticSettingsFileName = os.path.splitext(childPluginLocation)[0] + '.json'
         self.allPluginsSettingsFileName = 'generatorsSettings.json'
         self.loadPluginSettings()

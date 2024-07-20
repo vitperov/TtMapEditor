@@ -7,7 +7,7 @@ from modules.GeneratorPluginBase import *
 
 class GeneratorPluginsLoader:
     def __init__(self, mapModel):
-        self.generators = {}
+        self.generators = []
         self.mapModel = mapModel
 
     def loadPluginsFrom(self, directory):
@@ -21,17 +21,22 @@ class GeneratorPluginsLoader:
             if not is_pkg:
                 print("Importing: " + fullModuleName)
                 module = importlib.import_module(fullModuleName)
-                found_plugin = False
+                foundPlugin = False
                 for attr in dir(module):
                     obj = getattr(module, attr)
                     if isinstance(obj, type) and issubclass(obj, GeneratorPluginBase) and obj is not GeneratorPluginBase:
-                        self.generators[name] = obj(self.mapModel)
-                        found_plugin = True
-                if not found_plugin:
+                        pluginInstance = obj(self.mapModel)
+                        order = float(pluginInstance.pluginStaticSettings.get('order', float('inf')))
+                        self.generators.append((name, order, pluginInstance))
+                        foundPlugin = True
+                if not foundPlugin:
                     warnings.warn(f"Module '{fullModuleName}' does not contain any class derived from GeneratorPluginBase")
-            else :
+            else:
                 print("Loading packages is not implemented: " + fullModuleName)
 
+        # Sort the generators by the order value
+        self.generators.sort(key=lambda x: x[1])
+
     def printLoaded(self):
-        for name, plugin in self.generators.items():
-            print(f" {name}:")
+        for name, order, plugin in self.generators:
+            print(f"{name} (order: {order}):")

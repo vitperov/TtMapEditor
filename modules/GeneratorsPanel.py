@@ -114,6 +114,6 @@ class GeneratorsPanel(QWidget):
         self.setLayout(self.layout)
     
     def populateGenerators(self, generatorsModels):
-        for name, model in generatorsModels.items():
+        for name, order, model in generatorsModels:
             genItem = GeneratorItem(name, model)
             self.layout.addWidget(genItem)
