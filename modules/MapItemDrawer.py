@@ -16,15 +16,23 @@ class MapItemDrawer(QObject):
         self._redrawClbk = redrawClbk;
 
         size = QSize(self._tilesize, self._tilesize)
+        
+        self.sqType = self._model.getProperty('model')
+        self.isContour = objCollection.isContour(self.sqType)
+        #print(f"{self.sqType} -> {self.isContour}")
 
         self.updateState()
 
-
     def updateState(self):
-        sqType      = self._model.getProperty('model')
+        if self.isContour:
+            self.drawContour()
+        else:
+            self.drawPixmap()
+
+    def drawPixmap(self):
         rotation    = self._model.getProperty('rotation')
 
-        imgFile = self._objCollection.getIcon(sqType)
+        imgFile = self._objCollection.getIcon(self.sqType)
         pixmap = QtGui.QPixmap(imgFile)
 
         transform = QtGui.QTransform().rotate(int(rotation))
@@ -39,6 +47,27 @@ class MapItemDrawer(QObject):
         painter = QtGui.QPainter(self._canvas)
         painter.drawPixmap(x, y, scaledPixmap)
         
+        painter.end()
+        self._redrawClbk()
+        
+    def drawContour(self):
+        sqTypeDescription = self._objCollection.getObject(self.sqType)
+        contourColor = sqTypeDescription.contour
+
+        x = self._col * self._tilesize
+        y = self._row * self._tilesize
+        width = self._model.w * self._tilesize
+        height = self._model.h * self._tilesize
+
+        color = QtGui.QColor(contourColor)
+
+        painter = QtGui.QPainter(self._canvas)
+        painter.setPen(QtGui.QPen(color, 1))  # Set pen color and thickness
+
+        # Draw the rectangle contour
+        #print(f"{sqType} -> {contourColor} -> {x} {y} {width} {height}")
+        painter.drawRect(x, y, width, height)
+
         painter.end()
         self._redrawClbk()
 
