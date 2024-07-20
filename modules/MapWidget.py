@@ -17,7 +17,6 @@ class MapWidget(QWidget):
     def __init__(self):
         QWidget.__init__(self)
         self._model = None
-        self.items = []
 
         self._layout = QVBoxLayout()
         self._model = None
@@ -88,16 +87,11 @@ class MapWidget(QWidget):
         print("=============== NEW CANVAS==============+")
         self._createNewCanvas(editMode=True)
 
-        self.items = []
-
         mapSquares = self._model.getAllSquares()
         mapObjects = self._model.getAllObjects()
         for squareModel in (mapSquares + mapObjects):
+            # Don not store. It's one-time object that just draws an object
             item = MapItemDrawer(squareModel, self._canvas, self.pixPerTile, self._model._objCollection, self.updateCanvas)
-
-            squareModel.changed.connect(item.updateState)
-            self.items.append(item)
-
 
         # column delete buttons
         for x in range(w):

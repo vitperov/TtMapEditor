@@ -3,9 +3,8 @@ from PyQt5.QtCore import *
 
 from pyqtgraph.Qt import QtCore, QtGui
 
-class MapItemDrawer(QObject):
+class MapItemDrawer:
     def __init__(self, model, canvas, tilesize, objCollection, redrawClbk):
-        QObject.__init__(self)
 
         self._model = model
         self._objCollection = objCollection
@@ -18,13 +17,10 @@ class MapItemDrawer(QObject):
         size = QSize(self._tilesize, self._tilesize)
         
         self.sqType = self._model.getProperty('model')
-        self.isContour = objCollection.isContour(self.sqType)
-        #print(f"{self.sqType} -> {self.isContour}")
+        isContour = objCollection.isContour(self.sqType)
+        #print(f"{self.sqType} -> {isContour}")
 
-        self.updateState()
-
-    def updateState(self):
-        if self.isContour:
+        if isContour:
             self.drawContour()
         else:
             self.drawPixmap()
