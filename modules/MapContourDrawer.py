@@ -3,16 +3,16 @@ from PyQt5.QtCore import *
 
 from pyqtgraph.Qt import QtCore, QtGui
 
-class MapContour(QObject):
-    def __init__(self, model, canvas, tilesize, col, row, objCollection, redrawClbk):
+class MapContourDrawer(QObject):
+    def __init__(self, model, canvas, tilesize, objCollection, redrawClbk):
         QObject.__init__(self)
 
         self._model = model
         self._canvas = canvas
         self._objCollection = objCollection
         self._tilesize = tilesize
-        self._col = col
-        self._row = row
+        self._col = model.x
+        self._row = model.y
         self._redrawClbk = redrawClbk
 
         self.updateState()

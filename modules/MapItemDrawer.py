@@ -3,16 +3,16 @@ from PyQt5.QtCore import *
 
 from pyqtgraph.Qt import QtCore, QtGui
 
-class MapItem(QObject):
-    def __init__(self, model, canvas, tilesize, col, row, objCollection, redrawClbk):
+class MapItemDrawer(QObject):
+    def __init__(self, model, canvas, tilesize, objCollection, redrawClbk):
         QObject.__init__(self)
 
         self._model = model
         self._objCollection = objCollection
         self._canvas = canvas
         self._tilesize = tilesize
-        self._col = col
-        self._row = row
+        self._col = model.x
+        self._row = model.y
         self._redrawClbk = redrawClbk;
 
         size = QSize(self._tilesize, self._tilesize)

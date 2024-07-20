@@ -4,8 +4,8 @@ from pyqtgraph.Qt import QtCore, QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from modules.MapItem import *
-from modules.MapContour import *
+from modules.MapItemDrawer import *
+from modules.MapContourDrawer import *
 from modules.DeleteButtonItem import *
 
 import math
@@ -97,9 +97,9 @@ class MapWidget(QWidget):
             sqType = squareModel.getProperty('model')
             isContour = self._model._objCollection.isContour(sqType)
             if isContour:
-                item = MapContour(squareModel, self._canvas, self.pixPerTile, squareModel.x, squareModel.y, self._model._objCollection, self.updateCanvas)
+                item = MapContourDrawer(squareModel, self._canvas, self.pixPerTile, self._model._objCollection, self.updateCanvas)
             else:
-                item = MapItem(squareModel, self._canvas, self.pixPerTile, squareModel.x, squareModel.y, self._model._objCollection, self.updateCanvas)
+                item = MapItemDrawer(squareModel, self._canvas, self.pixPerTile, self._model._objCollection, self.updateCanvas)
 
             squareModel.changed.connect(item.updateState)
             self.items.append(item)
@@ -114,17 +114,6 @@ class MapWidget(QWidget):
         for y in range(h):
             item = DeleteButtonItem(self._canvas, self.pixPerTile, w, y)
             # no need to store, will be garbage-collected
-
-
-        #try :
-        mapObjects = self._model.getAllObjects()
-        for mapObject in mapObjects:
-            item = MapItem(mapObject, self._canvas, self.pixPerTile, mapObject.x, mapObject.y, self._model._objCollection, self.updateCanvas)
-
-            mapObject.changed.connect(item.updateState)
-            self.items.append(item)
-        #except:
-        #    print("Unable to load map objects (maybe there is no objects, only squares)")
 
 
         self.updateCanvas()
