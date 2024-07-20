@@ -179,6 +179,14 @@ class MapModelGeneral(QObject):
         
     def getAllObjects(self):
         return self._objects
+        
+    # iterates (squares + objects)
+    def getAllObjectOfType(self, modelType):
+        result = []
+        for obj in self._objects + self._squares:
+            if obj.properties.get('model') == modelType:
+                result.append(obj)
+        return result
 
     def size(self):
         return [self.height, self.width]
