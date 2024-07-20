@@ -46,6 +46,8 @@ class MapSkeletonGenerator(GeneratorPluginBase):
         self.genRoad()
         
         self.genLandLots()
+        
+        self.mapModel.updateEntireMap()
 
         print("Done")
 

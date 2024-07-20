@@ -92,7 +92,7 @@ class MapModelGeneral(QObject):
         self.editorHeight = 0;
         self._squares = list()
         self._objects = list()
-        self._updateCallback = self._updateEntireMap
+        self._updateCallback = self.updateEntireMap
 
     def setUpdatedCallback(self, callback):
         self._updateCallback = callback
@@ -249,6 +249,6 @@ class MapModelGeneral(QObject):
         if self._updateCallback is not None:
             self._updateCallback()
             
-    def _updateEntireMap(self):
+    def updateEntireMap(self):
         self.updatedEntireMap.emit()
 

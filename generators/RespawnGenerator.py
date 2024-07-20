@@ -27,27 +27,29 @@ class RespawnGenerator(GeneratorPluginBase):
 
             square = self.mapModel.getSquare(col, row)
             sqType = square.getProperty('model')
-            
+
             return sqType == TypeForest
-            
+
 
         def isHiddenSquare(row, col):
             if isForest(row, col):
                 return False; # respawn can't be in the square with a tree
-                
+
             forestSquares = 0;
             for r in [row-1, row, row+1]:
                 for c in [col-1, col, col+1]:
                     if isForest(r, c):
                         forestSquares += 1
-                        
+
             return (forestSquares >= minForest) and (forestSquares <= maxForest)
-            
+
         for col in range(self.mapModel.width):
             for row in range(self.mapModel.height):
                 if isHiddenSquare(row, col):
                     self.placeRespawn(row,col)
-                    
+
+        self.mapModel.updateEntireMap()
+
         print("Done")
 
     def placeRespawn(self, row, col):

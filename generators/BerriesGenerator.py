@@ -25,7 +25,7 @@ class BerriesGenerator(GeneratorPluginBase):
 
             square = self.mapModel.getSquare(col, row)
             sqType = square.getProperty('model')
-            
+
             return sqType == TypeGrass
 
         for col in range(self.mapModel.width):
@@ -34,7 +34,9 @@ class BerriesGenerator(GeneratorPluginBase):
                     generate = (random() < probability)
                     if generate:
                         self._placeBerries(row,col)
-                        
+
+        self.mapModel.updateEntireMap()
+
         print("Done")
 
 

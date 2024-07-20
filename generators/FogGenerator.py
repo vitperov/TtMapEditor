@@ -17,7 +17,9 @@ class FogGenerator(GeneratorPluginBase):
         for col in range(0, self.mapModel.width, interval):
             for row in range(0, self.mapModel.height, interval):
                 self._placeFog(row,col)
-                        
+
+        self.mapModel.updateEntireMap()
+
         print("Done")
 
 

@@ -29,6 +29,9 @@ class LandLotContentGenerator(GeneratorPluginBase):
             size    = AreaSize(lot.w, lot.h)
             generator = LandLotGenerator(self.mapModel, startPt, size)
             generator.generate(houseProbability, forestProbability)
+
+        self.mapModel.updateEntireMap()
+
         print("Done")
 
 
