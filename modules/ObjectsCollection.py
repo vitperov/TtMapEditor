@@ -59,9 +59,11 @@ class ObjectsCollection:
             return map_object.iconFile
         else:
             return None
-            
+
     def isContour(self, objname: str) -> bool:
         map_object = self.objects.get(objname)
+        if map_object is None:
+            return False
         return map_object.isContour()
         
     def getObject(self, objname: str) -> MapObject:

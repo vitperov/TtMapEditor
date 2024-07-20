@@ -10,6 +10,7 @@ TypeLandLot  = "LandLot"
 TypeHouse    = "House"
 TypeShed     = "Shed"
 TypeForest   = "Forest"
+TypeNone     = "None"
 
 class LandLotContentGenerator(GeneratorPluginBase):
     def __init__(self, mapModel):
@@ -114,7 +115,7 @@ class LandLotObject(LandLotLwObject):
     def __init__(self, landLot):
         LandLotLwObject.__init__(self, landLot, keepout=1)
 
-    def generate(self, size, squareType, objModelName):
+    def generate(self, size, objModelName, objModelVariant):
         # can we pass landObj and get it's size?
         self.size = size
 
@@ -132,7 +133,8 @@ class LandLotObject(LandLotLwObject):
         print("    Obj placed at: " + str(self.localPos) + "; size=" + str(size))
 
         obj = MapObjectModelGeneral()
-        obj.init(self.globalPosition().x, self.globalPosition().y, objModelName)
+        obj.init(self.globalPosition().x, self.globalPosition().y, objModelName, ObjectRotation.deg0, size.w, size.h)
+        obj.setProperty('variant',objModelVariant)
         self._randomizeProperty(obj, 'rotation')
         self.landLot.model.addMapObject(obj)
 
@@ -140,8 +142,9 @@ class LandLotObject(LandLotLwObject):
         rotatedSize = size.rotated(rotation)
         print("Rotation " + str(rotation) + ": size=" + str(size) + " -> " + str(rotatedSize))
 
+        #delete grass under the object
         self.landLot.editor.fillArea(self.globalPosition(),
-            rotatedSize, 'model', squareType)
+            rotatedSize, 'model', TypeNone)
 
         return True
 
@@ -172,10 +175,10 @@ class LandLotObject(LandLotLwObject):
         newValue = propClass(newValueStr)
         obj.properties[propertyName] = newValue
 
-    def generateObjVariant(self, landObj, squareType):
+    def generateObjVariant(self, landObj, objModelName):
         variantIdx = self._chooseObjVariant(landObj)
         variant = landObj.variants[variantIdx]
-        self.generate(variant.size, squareType, variant.modelName)
+        self.generate(variant.size, objModelName, variant.modelName)
 
 #TODO: move to some library
 def genRandomObjPlace(landLotRect, objSize):

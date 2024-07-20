@@ -33,6 +33,7 @@ class MapContour(QObject):
         painter.setPen(QtGui.QPen(color, 1))  # Set pen color and thickness
 
         # Draw the rectangle contour
+        #print(f"{sqType} -> {contourColor} -> {x} {y} {width} {height}")
         painter.drawRect(x, y, width, height)
 
         painter.end()

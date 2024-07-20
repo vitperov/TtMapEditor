@@ -24,6 +24,9 @@ class MapObjectModelGeneral(QObject):
         self.classnames['model']      = str
         self.properties['model']      = "Empty"
 
+        self.classnames['variant']      = str
+        self.properties['variant']      = ""
+
         self.id = str(uuid.uuid4())
 
         self.x = 0
@@ -31,11 +34,12 @@ class MapObjectModelGeneral(QObject):
         self.w = 1
         self.h = 1
 
-    def init(self, x, y, model, rotation=ObjectRotation.deg0, w=1, h=1):
+    def init(self, x, y, model, rotation=ObjectRotation.deg0, w=1, h=1, variant=""):
         self.x = x
         self.y = y
         self.properties['model']    = model
         self.properties['rotation'] = rotation
+        self.properties['variant'] = variant
         self.w = w
         self.h = h
 
