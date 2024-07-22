@@ -1,0 +1,16 @@
+{
+  "schema": {
+    "intervalX": {
+      "type": "int",
+      "value": "15"
+    },
+    "intervalY": {
+      "type": "int",
+      "value": "15"
+    },
+    "skipHouse": {
+      "type": "bool",
+      "value": "False"
+    }
+  }
+}

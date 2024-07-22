@@ -4,13 +4,13 @@ from random import random
 
 TypeForest  = "Forest"
 
-class RespawnGenerator(GeneratorPluginBase):
+class HiddenRespawnGenerator(GeneratorPluginBase):
     def __init__(self, mapModel):
         super().__init__(mapModel)
         self.respawnModel = 'opponentRespawn'
 
     def generate(self):
-        print("Generating respawns")
+        print("Generating hidden respawns")
         # Find squares surrounded by trees. There can be 8 squares of forest maximum,
         # and don't forget to have at least one square to get out.
         minForest = int(self.settings['minForestAround'])
