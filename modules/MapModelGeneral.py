@@ -78,7 +78,7 @@ class MapObjectModelGeneral(QObject):
             self.id = str(uuid.uuid4())
 
         for propName, propClass in self.classnames.items():
-            self.properties[propName] = propClass(js[propName])
+            self.properties[propName] = propClass(js.get(propName,""))
 
 class MapModelGeneral(QObject):
     updatedEntireMap = pyqtSignal()
