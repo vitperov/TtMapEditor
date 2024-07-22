@@ -8,8 +8,9 @@ from functools import partial
 
 #FIXME turn to widget. Possible memory leak
 class PropertiesItem():
-    def __init__(self, objModel, title, objCollection, category):
+    def __init__(self, objModel, title, objCollection, mapModel, category):
         self._model = objModel
+        self._mapModel = mapModel
 
         self.widget = QGroupBox(title)
         self.layout = QHBoxLayout()
@@ -40,6 +41,7 @@ class PropertiesItem():
             def onIndexChanged(propName, valueIdx):
                 valueStr = possibleValues[valueIdx]
                 self._model.setProperty(propName, valueStr)
+                self._mapModel.updateEntireMap()
 
             comboBox.currentIndexChanged.connect(partial(onIndexChanged, propName))
 
@@ -85,7 +87,7 @@ class PropertiesPanel(QWidget):
 
             num += 1;
             title = str(num)
-            itemWg = PropertiesItem(itemModel, title, self.mapModel._objCollection, self._category)
+            itemWg = PropertiesItem(itemModel, title, self.mapModel._objCollection, self.mapModel, self._category)
             self.properties.addWidget(itemWg.widget)
 
             removeBtn = QPushButton("Remove")
