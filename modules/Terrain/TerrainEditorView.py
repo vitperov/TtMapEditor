@@ -31,18 +31,20 @@ class TerrainEditorView(QMainWindow):
         self.generatorsPanel = GeneratorsPanel()
 
     def _createLayout(self):
-        layout = QVBoxLayout()
-
-        layout.addWidget(self.actionsPanel)
-        mapLayout = QHBoxLayout()
+        layout = QHBoxLayout()
+        mapLayout = QVBoxLayout()
         layout.addLayout(mapLayout)
         
+        mapLayout.addWidget(self.actionsPanel)
         mapLayout.addWidget(self.mapWidget)
+        mapLayout.addStretch()
         
         rightLayout = QVBoxLayout()
-        mapLayout.addLayout(rightLayout);
         rightLayout.addWidget(self.generatorsPanel)
         rightLayout.addWidget(self.propPanel)
+        
+        layout.addStretch()
+        layout.addLayout(rightLayout)
 
         return layout
 
