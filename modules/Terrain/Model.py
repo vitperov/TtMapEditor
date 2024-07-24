@@ -10,13 +10,13 @@ class Model:
         nativeMapObjectsDir   = os.path.join(os.getcwd(), 'mapObjects/native')
         externalMapObjectsDir = os.path.join(os.getcwd(), 'mapObjects/external')
         self.objCollection = ObjectsCollection([nativeMapObjectsDir, externalMapObjectsDir])
-        print("Map objects found: " + str(self.objCollection.allObjectTypes()))
+        #print("Map objects found: " + str(self.objCollection.allObjectTypes()))
 
         self.map = MapModelGeneral(MapObjectModelGeneral, self.objCollection)
         
         pluginsDir = 'generators'
         self.generators = GeneratorPluginsLoader(self.map)
         self.generators.loadPluginsFrom(pluginsDir)
-        print("Generator plugins found: " + str(self.generators.generators))
+        #print("Generator plugins found: " + str(self.generators.generators))
    
 
