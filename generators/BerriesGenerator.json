@@ -1,0 +1,8 @@
+{
+  "schema": {
+    "probability": {
+      "type": "float",
+      "value": "0.03"
+    }
+  }
+}

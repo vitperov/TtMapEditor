@@ -1,6 +1,6 @@
 {
     "name": "House",
     "categories": "outdoor",
-    "iconFile": "House.png",
-    "mapFile": "House.png"
+    "iconFile": "",
+    "contour" : "orange"
 }

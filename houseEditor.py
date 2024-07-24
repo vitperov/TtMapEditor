@@ -14,7 +14,7 @@ def main():
     nativeMapObjectsDir   = os.path.join(os.path.dirname(__file__), 'mapObjects/native')
     externalMapObjectsDir = os.path.join(os.path.dirname(__file__), 'mapObjects/external')
     objCollection = ObjectsCollection([nativeMapObjectsDir, externalMapObjectsDir])
-    print("Map objects found: " + str(objCollection.allObjectTypes()))
+    #print("Map objects found: " + str(objCollection.allObjectTypes()))
 
     view = HouseView()
     view.show()

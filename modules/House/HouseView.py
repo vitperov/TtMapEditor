@@ -8,7 +8,7 @@ from PyQt5.QtCore import *
 
 from modules.MapWidget import *
 from modules.PropertiesPanel import *
-from modules.ActionsPanel import *
+from modules.House.HouseToolbar import *
 
 
 class HouseView(QMainWindow):
@@ -25,8 +25,9 @@ class HouseView(QMainWindow):
 
     def _createWidgets(self):
         self.mapWidget = MapWidget()
-        self.propPanel = PropertiesPanel()
-        self.actionsPanel = ActionsPanel()
+        category = 'indoor'
+        self.propPanel = PropertiesPanel(category)
+        self.actionsPanel = HouseToolbar()
 
     def _createLayout(self):
         layout = QVBoxLayout()

@@ -1,0 +1,38 @@
+{
+  "order": "0",
+  "schema": {
+    "forestAroundMap": {
+      "type": "int",
+      "value": "5"
+    },
+    "roadWidth": {
+      "type": "int",
+      "value": "2"
+    },
+    "leftExit": {
+      "type": "bool",
+      "value": "false"
+    },
+    "rightExit": {
+      "type": "bool",
+      "value": "false"
+    },
+    "landLotWidth": {
+      "type": "int",
+      "value": "22"
+    },
+    "landLotHeight": {
+      "type": "int",
+      "value": "15"
+    },
+    "landLotsRows": {
+      "type": "int",
+      "value": "2"
+    },
+    "landLotsColumns": {
+      "type": "int",
+      "value": "5"
+    }
+    
+  }
+}

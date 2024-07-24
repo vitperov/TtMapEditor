@@ -4,7 +4,7 @@ from pyqtgraph.Qt import QtCore, QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from modules.MapItem import *
+from modules.MapItemDrawer import *
 from modules.DeleteButtonItem import *
 
 import math
@@ -17,7 +17,6 @@ class MapWidget(QWidget):
     def __init__(self):
         QWidget.__init__(self)
         self._model = None
-        self.items = []
 
         self._layout = QVBoxLayout()
         self._model = None
@@ -88,15 +87,11 @@ class MapWidget(QWidget):
         print("=============== NEW CANVAS==============+")
         self._createNewCanvas(editMode=True)
 
-        self.items = []
-
         mapSquares = self._model.getAllSquares()
-        for squareModel in mapSquares:
-            item = MapItem(squareModel, self._canvas, self.pixPerTile, squareModel.x, squareModel.y, self._model._objCollection, self.updateCanvas)
-
-            squareModel.changed.connect(item.updateState)
-            self.items.append(item)
-
+        mapObjects = self._model.getAllObjects()
+        for squareModel in (mapSquares + mapObjects):
+            # Don not store. It's one-time object that just draws an object
+            item = MapItemDrawer(squareModel, self._canvas, self.pixPerTile, self._model._objCollection, self.updateCanvas)
 
         # column delete buttons
         for x in range(w):
@@ -107,17 +102,6 @@ class MapWidget(QWidget):
         for y in range(h):
             item = DeleteButtonItem(self._canvas, self.pixPerTile, w, y)
             # no need to store, will be garbage-collected
-
-
-        #try :
-        mapObjects = self._model.getAllObjects()
-        for mapObject in mapObjects:
-            item = MapItem(mapObject, self._canvas, self.pixPerTile, mapObject.x, mapObject.y, self._model._objCollection, self.updateCanvas)
-
-            mapObject.changed.connect(item.updateState)
-            self.items.append(item)
-        #except:
-        #    print("Unable to load map objects (maybe there is no objects, only squares)")
 
 
         self.updateCanvas()

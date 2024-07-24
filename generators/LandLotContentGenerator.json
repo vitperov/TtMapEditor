@@ -1,0 +1,13 @@
+{
+  "order": "2",
+  "schema": {
+    "houseProbability": {
+      "type": "float",
+      "value": "0.8"
+    },
+    "forestProbability": {
+      "type": "float",
+      "value": "0.2"
+    }
+  }
+}

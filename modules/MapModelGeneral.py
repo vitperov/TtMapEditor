@@ -12,6 +12,7 @@ class ObjectRotation(str, Enum):
 
 class MapObjectModelGeneral(QObject):
     changed = pyqtSignal()
+
     def __init__(self):
         QObject.__init__(self)
         self.classnames = dict()
@@ -23,13 +24,24 @@ class MapObjectModelGeneral(QObject):
         self.classnames['model']      = str
         self.properties['model']      = "Empty"
 
+        self.classnames['variant']      = str
+        self.properties['variant']      = ""
+
         self.id = str(uuid.uuid4())
-        
-    def init(self, x, y, model, rotation=ObjectRotation.deg0):
+
+        self.x = 0
+        self.y = 0
+        self.w = 1
+        self.h = 1
+
+    def init(self, x, y, model, rotation=ObjectRotation.deg0, w=1, h=1, variant=""):
         self.x = x
         self.y = y
         self.properties['model']    = model
         self.properties['rotation'] = rotation
+        self.properties['variant'] = variant
+        self.w = w
+        self.h = h
 
     def toSerializableObj(self):
         # properties are enums, they can't be directly converted to int
@@ -40,7 +52,8 @@ class MapObjectModelGeneral(QObject):
 
         obj['x'] =  self.x
         obj['y'] =  self.y
-        
+        obj['w'] =  self.w
+        obj['h'] =  self.h
         obj['id'] = self.id
 
         return obj
@@ -50,20 +63,22 @@ class MapObjectModelGeneral(QObject):
 
     def setProperty(self, name, value):
         variableClass = self.classnames[name]
-        self.properties[name] = variableClass(value);
+        self.properties[name] = variableClass(value)
         self.changed.emit()
 
     def restoreFromJson(self, js):
         self.x = js['x']
         self.y = js['y']
-        
+        self.w = js.get('w', 1)
+        self.h = js.get('h', 1)
+
         if ('id' in js) and (len(js['id'])) > 0:
             self.id = js['id']
-        else :
+        else:
             self.id = str(uuid.uuid4())
 
         for propName, propClass in self.classnames.items():
-            self.properties[propName] = propClass(js[propName])
+            self.properties[propName] = propClass(js.get(propName,""))
 
 class MapModelGeneral(QObject):
     updatedEntireMap = pyqtSignal()
@@ -77,7 +92,7 @@ class MapModelGeneral(QObject):
         self.editorHeight = 0;
         self._squares = list()
         self._objects = list()
-        self._updateCallback = self._updateEntireMap
+        self._updateCallback = self.updateEntireMap
 
     def setUpdatedCallback(self, callback):
         self._updateCallback = callback
@@ -112,12 +127,6 @@ class MapModelGeneral(QObject):
             if square.x == x and square.y == y:
                 items.append(square)
         return items
-
-    # NOTE: depricated
-    #def getObjectById(self, id):
-    #    for square in self._squares:
-    #        if square.id == id:
-    #            return square
 
     # TODO: used only for house square and deletes object, not sqare
     # We should rename it, or better refactor everything and use only objects
@@ -174,6 +183,14 @@ class MapModelGeneral(QObject):
         
     def getAllObjects(self):
         return self._objects
+        
+    # iterates (squares + objects)
+    def getAllObjectOfType(self, modelType):
+        result = []
+        for obj in self._objects + self._squares:
+            if obj.properties.get('model') == modelType:
+                result.append(obj)
+        return result
 
     def size(self):
         return [self.height, self.width]
@@ -209,6 +226,12 @@ class MapModelGeneral(QObject):
             obj.restoreFromJson(square)
             self._squares.append(obj)
 
+        self._objects = list()
+        for jsObj in js['objects']:
+            obj = self._sqareModel()
+            obj.restoreFromJson(jsObj)
+            self._objects.append(obj)
+
     def saveMap(self, filename):
         extension = '.json'
         if not filename.endswith(extension):
@@ -232,6 +255,6 @@ class MapModelGeneral(QObject):
         if self._updateCallback is not None:
             self._updateCallback()
             
-    def _updateEntireMap(self):
+    def updateEntireMap(self):
         self.updatedEntireMap.emit()
 

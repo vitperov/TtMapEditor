@@ -13,28 +13,35 @@ from PyQt5.QtCore import *
 from modules.Terrain.TerrainGeneratorSettingsDlg import *
 
 class TerrainMapController:
-    def __init__(self, view, model, generator):
+    def __init__(self, view, model):
         self._view = view
-        self._mapModel = model
-        self._generator = generator
+        self._model = model
 
         self._provideModel()
         self._connectSignals()
+        self._startActions()
 
     def _provideModel(self):
-        self._view.mapWidget.setModel(self._mapModel)
-        self._view.actionsPanel.generateMap.connect(self._onGenerateClick)
-        self._view.actionsPanel.saveMap.connect(self._mapModel.saveMap)
+        self._view.mapWidget.setModel(self._model.map)
+        self._view.propPanel.setModel(self._model.map)
+        self._view.actionsPanel.openMap.connect(self._model.map.openMap)
+        self._view.actionsPanel.saveMap.connect(self._model.map.saveMap)
         self._view.actionsPanel.mapSettings.connect(self._onSettingsClick)
+        self._view.actionsPanel.refreshMap.connect(self._view.mapWidget.redrawAll)
 
     def _connectSignals(self):
-        self._mapModel.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
+        self._model.map.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
+        self._view.mapWidget.activeItemChanged.connect(self._onSquareClicked)
 
-    def _onGenerateClick(self):
-        self._generator.loadSettings()
-        self._generator.generateMap()
-        self._view.mapWidget.redrawAll()
+    def _startActions(self):
+        self._view.generatorsPanel.populateGenerators(self._model.generators.generators)
 
     def _onSettingsClick(self):
         TerrainGeneratorSettingsDlg.runDlg("Terrain generator settings", \
-            self._generator.settings, self._view)
+            self._model.generators.generators['EverythingGenerator'].settings, self._view)
+
+    def _onSquareClicked(self, x, y):
+        #model = self._houseModel.getSquare(x, y)
+        # TODO: delete wrapper and call directly
+        self._view.propPanel.showSquareProperties(x, y)
+

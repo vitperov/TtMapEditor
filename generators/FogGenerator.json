@@ -1,0 +1,8 @@
+{
+  "schema": {
+    "intervalSquares": {
+      "type": "int",
+      "value": "4"
+    }
+  }
+}
