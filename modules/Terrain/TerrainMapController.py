@@ -24,6 +24,7 @@ class TerrainMapController:
     def _provideModel(self):
         self._view.mapWidget.setModel(self._model.map)
         self._view.propPanel.setModel(self._model.map)
+        self._view.actionsPanel.openMap.connect(self._model.map.openMap)
         self._view.actionsPanel.saveMap.connect(self._model.map.saveMap)
         self._view.actionsPanel.mapSettings.connect(self._onSettingsClick)
         self._view.actionsPanel.refreshMap.connect(self._view.mapWidget.redrawAll)

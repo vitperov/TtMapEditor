@@ -8,6 +8,7 @@ from functools import partial
 
 class TerrainToolbar(QWidget):
     mapSettings  = pyqtSignal()
+    openMap      = pyqtSignal(str)
     saveMap      = pyqtSignal(str)
     refreshMap   = pyqtSignal()
 
@@ -18,17 +19,20 @@ class TerrainToolbar(QWidget):
         self.setLayout(self._layout)
 
         self._settingsBtn   = QPushButton("Generator settings");
+        self._openBtn       = QPushButton("Open")
         self._saveBtn       = QPushButton("Save")
         self._refreshButton = QPushButton("Refresh", self)
         self._refreshButton.setIcon(QtGui.QIcon.fromTheme("view-refresh"))
         
         self._layout.addWidget(self._settingsBtn)
+        self._layout.addWidget(self._openBtn)
         self._layout.addWidget(self._saveBtn)
         self._layout.addWidget(self._refreshButton)
 
         self._layout.addStretch()
 
         self._settingsBtn.clicked.connect(self._settingsDlg)
+        self._openBtn.clicked.connect(self._openFile)
         self._saveBtn.clicked.connect(self._saveFile)
         self._refreshButton.clicked.connect(self._refreshAction)
 
@@ -39,7 +43,12 @@ class TerrainToolbar(QWidget):
         name = QtGui.QFileDialog.getSaveFileName(self, 'Save File', filter='*.json')
         name = name[0]
         print(name)
-        self.saveMap.emit(name)
+        self.loadMap.emit(name)
+
+    def _openFile(self):
+        name = QtGui.QFileDialog.getOpenFileName(self, 'Open File', filter='*.json')
+        name = name[0]
+        self.openMap.emit(name)
         
     def _refreshAction(self):
         self.refreshMap.emit()
