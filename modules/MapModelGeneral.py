@@ -226,6 +226,12 @@ class MapModelGeneral(QObject):
             obj.restoreFromJson(square)
             self._squares.append(obj)
 
+        self._objects = list()
+        for jsObj in js['objects']:
+            obj = self._sqareModel()
+            obj.restoreFromJson(jsObj)
+            self._objects.append(obj)
+
     def saveMap(self, filename):
         extension = '.json'
         if not filename.endswith(extension):
