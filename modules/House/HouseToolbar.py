@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import *
 
 from functools import partial
 
-class ActionsPanel(QWidget):
+class HouseToolbar(QWidget):
     newMap      = pyqtSignal(int, int)
     saveMap     = pyqtSignal(str)
     openMap     = pyqtSignal(str)
