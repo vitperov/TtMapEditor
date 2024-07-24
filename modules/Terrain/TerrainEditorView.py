@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 from modules.MapWidget import *
-from modules.MapActionsPanel import *
+from modules.Terrain.TerrainToolbar import *
 from modules.PropertiesPanel import *
 from modules.GeneratorsPanel import *
 
@@ -24,7 +24,7 @@ class TerrainEditorView(QMainWindow):
         self._centralWidget.setLayout(self._createLayout())
 
     def _createWidgets(self):
-        self.actionsPanel = MapActionsPanel()
+        self.actionsPanel = TerrainToolbar()
         self.mapWidget = MapWidget()
         category = 'outdoor'
         self.propPanel = PropertiesPanel(category)

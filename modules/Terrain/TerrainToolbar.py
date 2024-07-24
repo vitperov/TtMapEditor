@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import *
 
 from functools import partial
 
-class MapActionsPanel(QWidget):
+class TerrainToolbar(QWidget):
     mapSettings  = pyqtSignal()
     saveMap      = pyqtSignal(str)
     refreshMap   = pyqtSignal()
