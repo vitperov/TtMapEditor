@@ -104,7 +104,7 @@ class GeneratorItem(QGroupBox):
         
         clearBtn = QPushButton("Clear generated")
         firstRowLayout.addWidget(clearBtn)
-        clearBtn.clicked.connect(model.generate)
+        clearBtn.clicked.connect(model.clear_generated)
 
         self.settingsWg = GeneratorSettings(model)
         layout.addWidget(self.settingsWg)

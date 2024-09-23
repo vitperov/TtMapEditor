@@ -38,6 +38,10 @@ class BerriesGenerator(GeneratorPluginBase):
         self.mapModel.updateEntireMap()
 
         print("Done")
+        
+    def clear_generated(self):
+        print("Clear generated Berries")
+        print("Done nothing TODO")
 
 
     def _placeBerries(self, row, col):

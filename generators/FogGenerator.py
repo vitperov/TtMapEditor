@@ -22,6 +22,9 @@ class FogGenerator(GeneratorPluginBase):
 
         print("Done")
 
+    def clear_generated(self):
+        print("Clear generated Fog")
+        print("Done nothing TODO")
 
     def _placeFog(self, row, col):
         obj = MapObjectModelGeneral()

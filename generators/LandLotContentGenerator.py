@@ -33,6 +33,10 @@ class LandLotContentGenerator(GeneratorPluginBase):
         self.mapModel.updateEntireMap()
 
         print("Done")
+        
+    def clear_generated(self):
+        print("Clear generated LandLotContent")
+        print("Done nothing TODO")
 
 
 class LandLotGenerator():

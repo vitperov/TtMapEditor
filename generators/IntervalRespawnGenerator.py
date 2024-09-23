@@ -40,6 +40,10 @@ class IntervalRespawnGenerator(GeneratorPluginBase):
         self.mapModel.updateEntireMap()
 
         print("Done")
+        
+    def clear_generated(self):
+        print("Clear generated IntervalRespawn")
+        print("Done nothing TODO")
 
     def placeRespawn(self, row, col):
         obj = MapObjectModelGeneral()
