@@ -1,8 +1,16 @@
-from PyQt5 import QtWidgets
-from pyqtgraph.Qt import QtCore, QtGui
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
+try:
+    from PyQt5 import QtWidgets
+    from pyqtgraph.Qt import QtCore, QtGui
+    from PyQt5.QtCore import *
+    from PyQt5.QtWidgets import *
+    from PyQt5.QtCore import pyqtSignal, pyqtSlot
+except:
+    from PyQt4 import QtWidgets
+    from pyqtgraph.Qt import QtCore, QtGui
+    from PyQt4.QtCore import *
+    from PyQt4.QtWidgets import *
+    from PyQt4.QtCore import pyqtSignal, pyqtSlot
+
 from functools import partial
 
 class GeneratorSettings(QWidget):
@@ -93,6 +101,10 @@ class GeneratorItem(QGroupBox):
         generateBtn = QPushButton("Generate")
         firstRowLayout.addWidget(generateBtn)
         generateBtn.clicked.connect(model.generate)
+        
+        clearBtn = QPushButton("Clear generated")
+        firstRowLayout.addWidget(clearBtn)
+        clearBtn.clicked.connect(model.generate)
 
         self.settingsWg = GeneratorSettings(model)
         layout.addWidget(self.settingsWg)
