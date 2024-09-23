@@ -38,7 +38,7 @@ class TerrainMapController:
 
     def _onSettingsClick(self):
         TerrainGeneratorSettingsDlg.runDlg("Terrain generator settings", \
-            self._model.generators.generators['EverythingGenerator'].settings, self._view)
+            self._model.generators.generators[1][2].settings, self._view) # EverythingGenerator was renamed to LandLotContentGenerator
 
     def _onSquareClicked(self, x, y):
         #model = self._houseModel.getSquare(x, y)
