@@ -9,7 +9,6 @@ class BerriesGenerator(GeneratorPluginBase):
         super().__init__(mapModel)
         self.berriesModel = 'Berries'
 
-
     def generate(self):
         print("Generating berries")
         probability = float(self.settings['probability'])
@@ -41,10 +40,17 @@ class BerriesGenerator(GeneratorPluginBase):
         
     def clear_generated(self):
         print("Clear generated Berries")
-        print("Done nothing TODO")
-
+        res = self.mapModel.removeAllMapObjects(BerriesGenerator)
+        if (True == res):
+            self.mapModel.updateEntireMap()
+            print("Done")
+        elif (False == res):
+            print("Done (was empty)")
+        else:
+            self.mapModel.updateEntireMap()
+            print("Done (smth wrong)")
 
     def _placeBerries(self, row, col):
         obj = MapObjectModelGeneral()
-        obj.init(col, row, self.berriesModel)
+        obj.init(col, row, model = self.berriesModel, modelGenerator = BerriesGenerator)
         self.mapModel.addMapObject(obj)

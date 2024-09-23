@@ -1,8 +1,13 @@
 from enum import Enum
-from PyQt5.QtCore import *
+try:
+    from PyQt5.QtCore import *
+except:
+    from PyQt4.QtCore import *
 
+import traceback
 import json
-import uuid
+import uuid # we use it as string
+from numbers import Number # not only integer
 
 class ObjectRotation(str, Enum):
     deg0    = '0'
@@ -13,10 +18,12 @@ class ObjectRotation(str, Enum):
 class MapObjectModelGeneral(QObject):
     changed = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, id = None): # TODO FIX: why second init??
         QObject.__init__(self)
         self.classnames = dict()
         self.properties = dict()
+        
+        self.modelGenerator = None
 
         self.classnames['rotation']  = ObjectRotation
         self.properties['rotation']  = ObjectRotation.deg0
@@ -27,17 +34,19 @@ class MapObjectModelGeneral(QObject):
         self.classnames['variant']      = str
         self.properties['variant']      = ""
 
-        self.id = str(uuid.uuid4())
+        self.id = str(id) if (id is not None) else str(uuid.uuid4())
 
         self.x = 0
         self.y = 0
         self.w = 1
         self.h = 1
 
-    def init(self, x, y, model, rotation=ObjectRotation.deg0, w=1, h=1, variant=""):
+    def init(self, x, y, model, modelGenerator, rotation=ObjectRotation.deg0, w=1, h=1, variant="", id=None):
+        self.id = str(id) if (id is not None) else str(uuid.uuid4()) # FIXED: id was missing
         self.x = x
         self.y = y
-        self.properties['model']    = model
+        self.modelGenerator = modelGenerator # model generator type
+        self.properties['model']    = model # model name (where it is used?)
         self.properties['rotation'] = rotation
         self.properties['variant'] = variant
         self.w = w
@@ -55,8 +64,38 @@ class MapObjectModelGeneral(QObject):
         obj['w'] =  self.w
         obj['h'] =  self.h
         obj['id'] = self.id
+        obj['modelGenerator'] = self.modelGenerator
 
         return obj
+        
+    def __hash__(self):
+        return hash(self.toSerializableObj())
+        
+    def __eq__(self, other):
+        try:
+            if isinstance(other, self.__class__):
+                #print('self', self.__dict__)
+                #print('other', other.__dict__)
+                if (self.id == other.id):
+                    return True
+                tmp_self = self.__dict__
+                tmp_other = other.__dict__
+                del tmp_self['id']
+                del tmp_other['id']
+                return tmp_self == tmp_other
+        except:
+            print(traceback.format_exc())
+        return None #return NotImplemented
+            
+    def __lt__(self, other):
+        if ((self.x) == (other.x) and (self.y) == (other.y)):
+            return self.id < other.id
+        return ((self.x) < (other.x) or (self.y) < (other.y))
+        
+    def __gt__(self, other):
+        if ((self.x) == (other.x) and (self.y) == (other.y)):
+            return self.id > other.id
+        return ((self.x) > (other.x) or (self.y) > (other.y))
 
     def getProperty(self, name):
         return self.properties[name]
@@ -197,6 +236,57 @@ class MapModelGeneral(QObject):
 
     def addMapObject(self, obj):
         self._objects.append(obj)
+        
+    def removeMapObject(self, objOrId, modelOrType = '*'):
+        '''
+        Remove the map object:
+        objOrId - the object or the string id of object
+        modelOrType - filter by model generator class or model generator class name
+        '''
+        if (isinstance(objOrId, Number)):
+            objOrId = str(objOrId)
+        if (isinstance(objOrId, str)):
+            #tmp = MapObjectModelGeneral()
+            #tmp.id = objOrId
+            tmp = MapObjectModelGeneral(id = objOrId)
+            if (tmp in self._objects):
+                tmp = self._objects[self._objects.index(tmp)]
+            else:
+                return False
+        else:
+            tmp = objOrId
+        #print('tmp0: ', tmp)
+        #print('modelOrType: ', modelOrType)
+        if (isinstance(modelOrType, str)):
+            print('str')
+            if ('*' != modelOrType and tmp.__class__.__name__ != modelOrType and tmp.modelGenerator.__name__ != modelOrType):
+                print('str bad')
+                return None
+            print('str good')
+        elif (not isinstance(tmp, modelOrType) and tmp.modelGenerator != modelOrType):
+            print('type bad: ', tmp, modelOrType)
+            return None
+        print('good')
+        self._objects.remove(tmp)
+        #print('removed tmp: ', tmp)
+        return True
+        
+    def removeAllMapObjects(self, modelOrType):
+        was = None
+        try:
+            if ('*' == modelOrType):
+                print('* is not allowed here')
+                return was
+            was = False
+            tmps = list(self._objects)
+            for obj in tmps:
+                self.removeMapObject(obj, modelOrType)
+                was = True
+        except:
+            #print(e1)
+            print(traceback.format_exc())
+        finally:
+            return was
 
     def toSerializableObj(self):
         squares = list()

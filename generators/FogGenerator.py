@@ -24,9 +24,17 @@ class FogGenerator(GeneratorPluginBase):
 
     def clear_generated(self):
         print("Clear generated Fog")
-        print("Done nothing TODO")
+        res = self.mapModel.removeAllMapObjects(FogGenerator)
+        if (True == res):
+            self.mapModel.updateEntireMap()
+            print("Done")
+        elif (False == res):
+            print("Done (was empty)")
+        else:
+            self.mapModel.updateEntireMap()
+            print("Done (smth wrong)")
 
     def _placeFog(self, row, col):
         obj = MapObjectModelGeneral()
-        obj.init(col, row, self.fogModel)
+        obj.init(col, row, model = self.fogModel, modelGenerator = FogGenerator)
         self.mapModel.addMapObject(obj)
