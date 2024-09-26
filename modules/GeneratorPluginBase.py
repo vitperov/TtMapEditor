@@ -7,6 +7,7 @@ from modules.MapModelGeneral import *
 class GeneratorPluginBase:
     def __init__(self, mapModel):
         self.mapModel = mapModel
+        self.generatedModel = 'Unknown' # or maybe None?
         self.pluginStaticSettings = {}
         self.schema = {}
         self.settings = {}
@@ -63,6 +64,18 @@ class GeneratorPluginBase:
                 # Otherwise, use the default value from the schema
                 updatedSettings[key] = defaultValue
         return updatedSettings
+        
+    def clear_generated(self):
+        print("Clear generated " + str(self.generatedModel))
+        res = self.mapModel.removeAllMapObjects(self.generatedModel)
+        if (True == res):
+            self.mapModel.updateEntireMap()
+            print("Done")
+        elif (False == res):
+            print("Done (was empty)")
+        else:
+            self.mapModel.updateEntireMap()
+            print("Done (smth wrong)")
 
     def generate(self):
         raise NotImplementedError("Each plugin must implement the run method.")

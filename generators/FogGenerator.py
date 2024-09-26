@@ -7,7 +7,7 @@ TypeGrass  = "Grass"
 class FogGenerator(GeneratorPluginBase):
     def __init__(self, mapModel):
         super().__init__(mapModel)
-        self.fogModel = 'Fog'
+        self.generatedModel = 'Fog'
 
 
     def generate(self):
@@ -20,21 +20,12 @@ class FogGenerator(GeneratorPluginBase):
 
         self.mapModel.updateEntireMap()
 
-        print("Done")
+        print("Done " + str(self.generatedModel))
 
     def clear_generated(self):
-        print("Clear generated Fog")
-        res = self.mapModel.removeAllMapObjects(self.fogModel)
-        if (True == res):
-            self.mapModel.updateEntireMap()
-            print("Done")
-        elif (False == res):
-            print("Done (was empty)")
-        else:
-            self.mapModel.updateEntireMap()
-            print("Done (smth wrong)")
+        return super().clear_generated()
 
     def _placeFog(self, row, col):
         obj = MapObjectModelGeneral()
-        obj.init(col, row, model = self.fogModel)
+        obj.init(col, row, model = self.generatedModel)
         self.mapModel.addMapObject(obj)

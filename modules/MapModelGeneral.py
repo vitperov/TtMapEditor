@@ -35,6 +35,7 @@ class MapObjectModelGeneral(QObject):
         self.properties = dict()
         
         self.model = "Empty"
+        self.modelSuper = None
 
         self.classnames['rotation']  = ObjectRotation
         self.properties['rotation']  = ObjectRotation.deg0
@@ -52,10 +53,11 @@ class MapObjectModelGeneral(QObject):
         self.w = 1
         self.h = 1
 
-    def init(self, x, y, model, rotation=ObjectRotation.deg0, w=1, h=1, variant="", id=None):
+    def init(self, x, y, model, rotation=ObjectRotation.deg0, w=1, h=1, variant="", id=None, modelSuper=None):
         self.id = str(id) if (id is not None) else str(uuid.uuid4()) # FIXED: id was missing
         self.x = x
         self.y = y
+        self.modelSuper = None if (modelSuper is None or not(modelSuper)) else modelSuper # It is just model super replacer on comparation e.g. for LandLotContent
         #self.modelGenerator = modelGenerator # model generator type
         self.model = model # model generator type
         self.properties['model']    = model # model name (where it is used?)
@@ -90,13 +92,14 @@ class MapObjectModelGeneral(QObject):
                 #print('other', other.__dict__)
                 if (self.id == other.id):
                     return True
-                tmp_self = self.__dict__
-                tmp_other = other.__dict__
+                tmp_self = dict(self.__dict__)
+                tmp_other = dict(other.__dict__)
                 del tmp_self['id']
                 del tmp_other['id']
                 return tmp_self == tmp_other
-        except:
+        except Exception as e1:
             print(traceback.format_exc())
+            #raise e1
         return None #return NotImplemented
             
     def __lt__(self, other):
@@ -134,6 +137,10 @@ class MapObjectModelGeneral(QObject):
 class MapModelGeneral(QObject):
     updatedEntireMap = pyqtSignal()
     def __init__(self, squareModel, objCollection):
+        """
+        squareModel is MapObjectModelGeneral
+        objCollection is ?
+        """
         QObject.__init__(self)
         self._sqareModel = squareModel
         self._objCollection = objCollection
@@ -198,7 +205,7 @@ class MapModelGeneral(QObject):
         self._squares.append(obj)
         return obj
 
-    def deleteRow(self, rowId):
+    def deleteRow(self, rowId): # _squares nice here, but what about _objects?
         # delete row
         self._squares[:] = filter(lambda item: item.y != rowId, self._squares)
 
@@ -239,7 +246,7 @@ class MapModelGeneral(QObject):
     def getAllObjectOfType(self, modelType):
         result = []
         for obj in self._objects + self._squares:
-            if obj.properties.get('model') == modelType:
+            if (obj.properties.get('model') == modelType or obj.modelSuper == modelType):
                 result.append(obj)
         return result
 
@@ -255,37 +262,51 @@ class MapModelGeneral(QObject):
         objOrId - the object or the string id of object
         modelOrType - filter by model generator class or model generator class name
         '''
-        if (isinstance(objOrId, Number)):
-            objOrId = str(objOrId)
-        if (isinstance(objOrId, str)):
-            #tmp = MapObjectModelGeneral()
-            #tmp.id = objOrId
-            tmp = MapObjectModelGeneral(id = objOrId)
-            if (tmp in self._objects):
-                tmp = self._objects[self._objects.index(tmp)]
+        tmp = None
+        actualModel = None
+        try:
+            if (isinstance(objOrId, Number)):
+                objOrId = str(objOrId)
+            if (isinstance(objOrId, str)):
+                tmp = MapObjectModelGeneral(id = objOrId)
+                if (tmp in self._objects):
+                    tmp = self._objects[self._objects.index(tmp)]
+                elif (tmp in self._squares):
+                    tmp = self._squares[self._squares.index(tmp)]
+                else:
+                    return False
             else:
-                return False
-        else:
-            tmp = objOrId
-        print('tmp0: ', tmp)
-        #print('modelOrType: ', modelOrType)
-        if (isinstance(modelOrType, str)):
-            print('str', modelOrType, tmp.model)
-            print('*' != modelOrType)
-            print(tmp.model != modelOrType)
-            print(tmp.__class__.__name__ != modelOrType)
-            print((isclass(tmp.model) and tmp.model.__name__ != modelOrType))
-            if ('*' != modelOrType and tmp.model != modelOrType and tmp.__class__.__name__ != modelOrType and (not isclass(tmp.model) or (isclass(tmp.model) and tmp.model.__name__ != modelOrType))):
-                print('str bad')
+                tmp = objOrId
+            try:
+                if (tmp.modelSuper is not None):
+                    print('tmp.model: ', tmp.model, tmp.modelSuper)
+            except:
+                pass
+            actualModel = tmp.model;  tmp.model = tmp.modelSuper if (tmp.modelSuper is not None) else tmp.model # It is because of strange LandLotContent
+            #print('tmp0: ', tmp)
+            #print('modelOrType: ', modelOrType)
+            if (isinstance(modelOrType, str)):
+                #print('str', modelOrType, tmp.model)
+                #print('*' != modelOrType)
+                #print(tmp.model != modelOrType)
+                #print(tmp.__class__.__name__ != modelOrType)
+                #print((isclass(tmp.model) and tmp.model.__name__ != modelOrType))
+                if ('*' != modelOrType and tmp.model != modelOrType and tmp.__class__.__name__ != modelOrType and (not isclass(tmp.model) or (isclass(tmp.model) and tmp.model.__name__ != modelOrType))):
+                    #print('str bad')
+                    return None
+                #print('str good')
+            elif (not isinstance(tmp, modelOrType) and tmp.model != modelOrType):
+                #print('type bad: ', tmp, modelOrType)
                 return None
-            print('str good')
-        elif (not isinstance(tmp, modelOrType) and tmp.model != modelOrType):
-            print('type bad: ', tmp, modelOrType)
-            return None
-        print('good')
-        self._objects.remove(tmp)
-        #print('removed tmp: ', tmp)
-        return True
+            #print('good')
+            if (tmp in self._objects):
+                self._objects.remove(tmp)
+            else:
+                self._squares.remove(tmp)
+            return True
+        finally:
+            if (actualModel is not None and (tmp is not None) and isinstance(tmp, MapObjectModelGeneral)):
+                tmp.model = actualModel
         
     def removeAllMapObjects(self, modelOrType):
         was = None
@@ -294,9 +315,9 @@ class MapModelGeneral(QObject):
                 print('* is not allowed here')
                 return was
             was = False
-            tmps = list(self._objects)
+            tmps = list(self._objects) + list(self._squares)
             for obj in tmps:
-                if (self.removeMapObject(obj, modelOrType)):
+                if (self.removeMapObject(obj, modelOrType)): ##### if (self.removeMapObject(obj.id, modelOrType)):
                     was = True
         except:
             #print(e1)

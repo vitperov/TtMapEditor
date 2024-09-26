@@ -19,7 +19,10 @@ class DeleteButtonItem(QObject):
 
     def updateState(self):
         imgFile = "resources/redX.png"
-        pixmap = QtGui.QPixmap(imgFile)
+        try:
+            pixmap = QtGui.QPixmap(imgFile, "1")  # see: https://stackoverflow.com/questions/16990914/python-pyqt-qpixmap-returns-null-for-a-valid-image/17121857#17121857
+        except:
+            pixmap = QtGui.QPixmap(imgFile)
         size = QSize(self._tilesize, self._tilesize)
 
         scaledPixmap = pixmap.scaled(size, QtCore.Qt.KeepAspectRatio)
