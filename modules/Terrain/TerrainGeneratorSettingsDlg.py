@@ -5,40 +5,40 @@ except:
     import PyQt4
     PyQt = 'PyQt4'
 
-def dynamic_import (module_full_name, target_name):
-    tmp = __import__(module_full_name)
-    return getattr(tmp, target_name)
-    
-def dynamic_import_from (module_full_name, target_names = ['*',], update_globals = True):
-    tmp = __import__(module_full_name, fromlist = target_names)
-    if (update_globals):
-        was_star = False
-        for name in target_names:
-            if ('*' == name):
-                was_star = True
-                continue
-            value = getattr(tmp, name)
-            globals()[name] = value
-        if (was_star):
-            globals().update(tmp.__dict__)
-    return tmp
+#def dynamic_import (module_full_name, target_name):
+#    tmp = __import__(module_full_name)
+#    return getattr(tmp, target_name)
+#    
+#def dynamic_import_from (module_full_name, target_names = ['*',], update_globals = True):
+#    tmp = __import__(module_full_name, fromlist = target_names)
+#    if (update_globals):
+#        was_star = False
+#        for name in target_names:
+#            if ('*' == name):
+#                was_star = True
+#                continue
+#            value = getattr(tmp, name)
+#            globals()[name] = value
+#        if (was_star):
+#            globals().update(tmp.__dict__)
+#    return tmp
 
-def fullname (o):
-    module = o.__class__.__module__
-    if module is None or module == str.__class__.__module__:
-        return o.__class__.__name__
-    return module + '.' + o.__class__.__name__
+#def fullname (o):
+#    module = o.__class__.__module__
+#    if module is None or module == str.__class__.__module__:
+#        return o.__class__.__name__
+#    return module + '.' + o.__class__.__name__
 
-QtWidgets = dynamic_import(str(PyQt),  'QtWidgets') #from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets #QtWidgets = dynamic_import(str(PyQt),  'QtWidgets')
 from pyqtgraph.Qt import QtCore, QtGui
 
-dynamic_import_from(str(PyQt) + '.QtCore', ['*']) #from PyQt5.QtCore import *
-dynamic_import_from(str(PyQt) + '.QtWidgets', ['*']) #from PyQt5.QtWidgets import *
+from PyQt5.QtCore import * #dynamic_import_from(str(PyQt) + '.QtCore', ['*']) #
+from PyQt5.QtWidgets import * #dynamic_import_from(str(PyQt) + '.QtWidgets', ['*']) #
 
 try:
-    dynamic_import_from(str(PyQt) + '.QtGui', ['QDialog']) #from PyQt5.QtGui import QDialog
+    from PyQt5.QtGui import QDialog #dynamic_import_from(str(PyQt) + '.QtGui', ['QDialog']) #
 except:
-    dynamic_import_from(str(PyQt) + '.QtWidgets', ['QDialog']) #from PyQt5.QtWidgets import QDialog # see https://github.com/3liz/lizmap-plugin/issues/98
+    from PyQt5.QtWidgets import QDialog #dynamic_import_from(str(PyQt) + '.QtWidgets', ['QDialog']) # # see https://github.com/3liz/lizmap-plugin/issues/98
 
 import json
 from json import JSONEncoder
