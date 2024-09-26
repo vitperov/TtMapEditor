@@ -9,6 +9,17 @@ import json
 import uuid # we use it as string
 from numbers import Number # not only integer
 
+def isclass (obj):
+    """Return true if the obj is a class.
+    Class objects provide these attributes:
+        __doc__         documentation string
+        __module__      name of module in which this class was defined"""
+    try:
+        import types
+        return isinstance(obj, (type, types.ClassType,))
+    except:
+        return isinstance(obj, (type,))
+
 class ObjectRotation(str, Enum):
     deg0    = '0'
     deg90   = '90'
@@ -18,12 +29,12 @@ class ObjectRotation(str, Enum):
 class MapObjectModelGeneral(QObject):
     changed = pyqtSignal()
 
-    def __init__(self, id = None): # TODO FIX: why second init??
+    def __init__(self, id=None): # TODO FIX: why second init??
         QObject.__init__(self)
         self.classnames = dict()
         self.properties = dict()
         
-        self.modelGenerator = None
+        self.model = "Empty"
 
         self.classnames['rotation']  = ObjectRotation
         self.properties['rotation']  = ObjectRotation.deg0
@@ -41,11 +52,12 @@ class MapObjectModelGeneral(QObject):
         self.w = 1
         self.h = 1
 
-    def init(self, x, y, model, modelGenerator, rotation=ObjectRotation.deg0, w=1, h=1, variant="", id=None):
+    def init(self, x, y, model, rotation=ObjectRotation.deg0, w=1, h=1, variant="", id=None):
         self.id = str(id) if (id is not None) else str(uuid.uuid4()) # FIXED: id was missing
         self.x = x
         self.y = y
-        self.modelGenerator = modelGenerator # model generator type
+        #self.modelGenerator = modelGenerator # model generator type
+        self.model = model # model generator type
         self.properties['model']    = model # model name (where it is used?)
         self.properties['rotation'] = rotation
         self.properties['variant'] = variant
@@ -64,7 +76,7 @@ class MapObjectModelGeneral(QObject):
         obj['w'] =  self.w
         obj['h'] =  self.h
         obj['id'] = self.id
-        obj['modelGenerator'] = self.modelGenerator
+        obj['model'] = self.properties['model']
 
         return obj
         
@@ -255,15 +267,19 @@ class MapModelGeneral(QObject):
                 return False
         else:
             tmp = objOrId
-        #print('tmp0: ', tmp)
+        print('tmp0: ', tmp)
         #print('modelOrType: ', modelOrType)
         if (isinstance(modelOrType, str)):
-            print('str')
-            if ('*' != modelOrType and tmp.__class__.__name__ != modelOrType and tmp.modelGenerator.__name__ != modelOrType):
+            print('str', modelOrType, tmp.model)
+            print('*' != modelOrType)
+            print(tmp.model != modelOrType)
+            print(tmp.__class__.__name__ != modelOrType)
+            print((isclass(tmp.model) and tmp.model.__name__ != modelOrType))
+            if ('*' != modelOrType and tmp.model != modelOrType and tmp.__class__.__name__ != modelOrType and (not isclass(tmp.model) or (isclass(tmp.model) and tmp.model.__name__ != modelOrType))):
                 print('str bad')
                 return None
             print('str good')
-        elif (not isinstance(tmp, modelOrType) and tmp.modelGenerator != modelOrType):
+        elif (not isinstance(tmp, modelOrType) and tmp.model != modelOrType):
             print('type bad: ', tmp, modelOrType)
             return None
         print('good')
@@ -280,8 +296,8 @@ class MapModelGeneral(QObject):
             was = False
             tmps = list(self._objects)
             for obj in tmps:
-                self.removeMapObject(obj, modelOrType)
-                was = True
+                if (self.removeMapObject(obj, modelOrType)):
+                    was = True
         except:
             #print(e1)
             print(traceback.format_exc())

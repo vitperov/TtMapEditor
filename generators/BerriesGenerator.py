@@ -40,7 +40,7 @@ class BerriesGenerator(GeneratorPluginBase):
         
     def clear_generated(self):
         print("Clear generated Berries")
-        res = self.mapModel.removeAllMapObjects(BerriesGenerator)
+        res = self.mapModel.removeAllMapObjects(self.berriesModel)
         if (True == res):
             self.mapModel.updateEntireMap()
             print("Done")
@@ -52,5 +52,5 @@ class BerriesGenerator(GeneratorPluginBase):
 
     def _placeBerries(self, row, col):
         obj = MapObjectModelGeneral()
-        obj.init(col, row, model = self.berriesModel, modelGenerator = BerriesGenerator)
+        obj.init(col, row, model = self.berriesModel) #, modelGenerator = BerriesGenerator)
         self.mapModel.addMapObject(obj)
