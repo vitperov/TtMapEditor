@@ -51,6 +51,9 @@ class MapSkeletonGenerator(GeneratorPluginBase):
 
         print("Done")
 
+    def clear_generated(self):
+        print("Clear generated Map Skeleton")
+        print("Done nothing")
 
     def _calcMapSize(self):
         self._w = self.landLotWidth * self.landLotsColumns + 2 * self.forestAroundMap

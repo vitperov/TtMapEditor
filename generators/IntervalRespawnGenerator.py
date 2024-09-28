@@ -10,7 +10,7 @@ TypeHouse   = "House"
 class IntervalRespawnGenerator(GeneratorPluginBase):
     def __init__(self, mapModel):
         super().__init__(mapModel)
-        self.respawnModel = 'opponentRespawn'
+        self.generatedModel = 'opponentRespawn'
 
     def generate(self):
         print("Generating interval respawns")
@@ -39,11 +39,14 @@ class IntervalRespawnGenerator(GeneratorPluginBase):
 
         self.mapModel.updateEntireMap()
 
-        print("Done")
+        print("Done " + str(self.generatedModel))
+        
+    def clear_generated(self):
+        return super().clear_generated()
 
     def placeRespawn(self, row, col):
         obj = MapObjectModelGeneral()
-        obj.init(col, row, self.respawnModel)
+        obj.init(col, row, self.generatedModel)
         self.mapModel.addMapObject(obj)
 
     def isForest(self, row, col):

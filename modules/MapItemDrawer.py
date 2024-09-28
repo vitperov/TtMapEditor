@@ -29,7 +29,10 @@ class MapItemDrawer:
         rotation    = self._model.getProperty('rotation')
 
         imgFile = self._objCollection.getIcon(self.sqType)
-        pixmap = QtGui.QPixmap(imgFile)
+        try:
+            pixmap = QtGui.QPixmap(imgFile, "1") # see: https://stackoverflow.com/questions/16990914/python-pyqt-qpixmap-returns-null-for-a-valid-image/17121857#17121857
+        except:
+            pixmap = QtGui.QPixmap(imgFile)
 
         transform = QtGui.QTransform().rotate(int(rotation))
         rotatedPixmap = pixmap.transformed(transform, QtCore.Qt.SmoothTransformation)

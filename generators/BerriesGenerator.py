@@ -7,8 +7,7 @@ TypeGrass  = "Grass"
 class BerriesGenerator(GeneratorPluginBase):
     def __init__(self, mapModel):
         super().__init__(mapModel)
-        self.berriesModel = 'Berries'
-
+        self.generatedModel = 'Berries'
 
     def generate(self):
         print("Generating berries")
@@ -37,10 +36,12 @@ class BerriesGenerator(GeneratorPluginBase):
 
         self.mapModel.updateEntireMap()
 
-        print("Done")
-
+        print("Done " + str(self.generatedModel))
+        
+    def clear_generated(self):
+        return super().clear_generated()
 
     def _placeBerries(self, row, col):
         obj = MapObjectModelGeneral()
-        obj.init(col, row, self.berriesModel)
+        obj.init(col, row, model = self.generatedModel) #, modelGenerator = BerriesGenerator)
         self.mapModel.addMapObject(obj)

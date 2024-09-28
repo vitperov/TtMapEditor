@@ -1,8 +1,24 @@
 from enum import Enum
-from PyQt5.QtCore import *
+try:
+    from PyQt5.QtCore import *
+except:
+    from PyQt4.QtCore import *
 
+import traceback
 import json
-import uuid
+import uuid # we use it as string
+from numbers import Number # not only integer
+
+def isclass (obj):
+    """Return true if the obj is a class.
+    Class objects provide these attributes:
+        __doc__         documentation string
+        __module__      name of module in which this class was defined"""
+    try:
+        import types
+        return isinstance(obj, (type, types.ClassType,))
+    except:
+        return isinstance(obj, (type,))
 
 class ObjectRotation(str, Enum):
     deg0    = '0'
@@ -13,10 +29,13 @@ class ObjectRotation(str, Enum):
 class MapObjectModelGeneral(QObject):
     changed = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, id=None): # TODO FIX: why second init??
         QObject.__init__(self)
         self.classnames = dict()
         self.properties = dict()
+        
+        self.model = "Empty"
+        self.modelSuper = None
 
         self.classnames['rotation']  = ObjectRotation
         self.properties['rotation']  = ObjectRotation.deg0
@@ -27,17 +46,21 @@ class MapObjectModelGeneral(QObject):
         self.classnames['variant']      = str
         self.properties['variant']      = ""
 
-        self.id = str(uuid.uuid4())
+        self.id = str(id) if (id is not None) else str(uuid.uuid4())
 
         self.x = 0
         self.y = 0
         self.w = 1
         self.h = 1
 
-    def init(self, x, y, model, rotation=ObjectRotation.deg0, w=1, h=1, variant=""):
+    def init(self, x, y, model, rotation=ObjectRotation.deg0, w=1, h=1, variant="", id=None, modelSuper=None):
+        self.id = str(id) if (id is not None) else str(uuid.uuid4()) # FIXED: id was missing
         self.x = x
         self.y = y
-        self.properties['model']    = model
+        self.modelSuper = None if (modelSuper is None or not(modelSuper)) else modelSuper # It is just model super replacer on comparation e.g. for LandLotContent
+        #self.modelGenerator = modelGenerator # model generator type
+        self.model = model # model generator type
+        self.properties['model']    = model # model name (where it is used?)
         self.properties['rotation'] = rotation
         self.properties['variant'] = variant
         self.w = w
@@ -55,8 +78,39 @@ class MapObjectModelGeneral(QObject):
         obj['w'] =  self.w
         obj['h'] =  self.h
         obj['id'] = self.id
+        obj['model'] = self.properties['model']
 
         return obj
+        
+    def __hash__(self):
+        return hash(self.toSerializableObj())
+        
+    def __eq__(self, other):
+        try:
+            if isinstance(other, self.__class__):
+                #print('self', self.__dict__)
+                #print('other', other.__dict__)
+                if (self.id == other.id):
+                    return True
+                tmp_self = dict(self.__dict__)
+                tmp_other = dict(other.__dict__)
+                del tmp_self['id']
+                del tmp_other['id']
+                return tmp_self == tmp_other
+        except Exception as e1:
+            print(traceback.format_exc())
+            #raise e1
+        return None #return NotImplemented
+            
+    def __lt__(self, other):
+        if ((self.x) == (other.x) and (self.y) == (other.y)):
+            return self.id < other.id
+        return ((self.x) < (other.x) or (self.y) < (other.y))
+        
+    def __gt__(self, other):
+        if ((self.x) == (other.x) and (self.y) == (other.y)):
+            return self.id > other.id
+        return ((self.x) > (other.x) or (self.y) > (other.y))
 
     def getProperty(self, name):
         return self.properties[name]
@@ -83,6 +137,10 @@ class MapObjectModelGeneral(QObject):
 class MapModelGeneral(QObject):
     updatedEntireMap = pyqtSignal()
     def __init__(self, squareModel, objCollection):
+        """
+        squareModel is MapObjectModelGeneral
+        objCollection is ?
+        """
         QObject.__init__(self)
         self._sqareModel = squareModel
         self._objCollection = objCollection
@@ -147,7 +205,7 @@ class MapModelGeneral(QObject):
         self._squares.append(obj)
         return obj
 
-    def deleteRow(self, rowId):
+    def deleteRow(self, rowId): # _squares nice here, but what about _objects?
         # delete row
         self._squares[:] = filter(lambda item: item.y != rowId, self._squares)
 
@@ -188,7 +246,7 @@ class MapModelGeneral(QObject):
     def getAllObjectOfType(self, modelType):
         result = []
         for obj in self._objects + self._squares:
-            if obj.properties.get('model') == modelType:
+            if (obj.properties.get('model') == modelType or obj.modelSuper == modelType):
                 result.append(obj)
         return result
 
@@ -197,6 +255,75 @@ class MapModelGeneral(QObject):
 
     def addMapObject(self, obj):
         self._objects.append(obj)
+        
+    def removeMapObject(self, objOrId, modelOrType = '*'):
+        '''
+        Remove the map object:
+        objOrId - the object or the string id of object
+        modelOrType - filter by model generator class or model generator class name
+        '''
+        tmp = None
+        actualModel = None
+        try:
+            if (isinstance(objOrId, Number)):
+                objOrId = str(objOrId)
+            if (isinstance(objOrId, str)):
+                tmp = MapObjectModelGeneral(id = objOrId)
+                if (tmp in self._objects):
+                    tmp = self._objects[self._objects.index(tmp)]
+                elif (tmp in self._squares):
+                    tmp = self._squares[self._squares.index(tmp)]
+                else:
+                    return False
+            else:
+                tmp = objOrId
+            try:
+                if (tmp.modelSuper is not None):
+                    print('tmp.model: ', tmp.model, tmp.modelSuper)
+            except:
+                pass
+            actualModel = tmp.model;  tmp.model = tmp.modelSuper if (tmp.modelSuper is not None) else tmp.model # It is because of strange LandLotContent
+            #print('tmp0: ', tmp)
+            #print('modelOrType: ', modelOrType)
+            if (isinstance(modelOrType, str)):
+                #print('str', modelOrType, tmp.model)
+                #print('*' != modelOrType)
+                #print(tmp.model != modelOrType)
+                #print(tmp.__class__.__name__ != modelOrType)
+                #print((isclass(tmp.model) and tmp.model.__name__ != modelOrType))
+                if ('*' != modelOrType and tmp.model != modelOrType and tmp.__class__.__name__ != modelOrType and (not isclass(tmp.model) or (isclass(tmp.model) and tmp.model.__name__ != modelOrType))):
+                    #print('str bad')
+                    return None
+                #print('str good')
+            elif (not isinstance(tmp, modelOrType) and tmp.model != modelOrType):
+                #print('type bad: ', tmp, modelOrType)
+                return None
+            #print('good')
+            if (tmp in self._objects):
+                self._objects.remove(tmp)
+            else:
+                self._squares.remove(tmp)
+            return True
+        finally:
+            if (actualModel is not None and (tmp is not None) and isinstance(tmp, MapObjectModelGeneral)):
+                tmp.model = actualModel
+        
+    def removeAllMapObjects(self, modelOrType):
+        was = None
+        try:
+            if ('*' == modelOrType):
+                print('* is not allowed here')
+                return was
+            was = False
+            tmps = list(self._objects) + list(self._squares)
+            for obj in tmps:
+                if (self.removeMapObject(obj, modelOrType)): ##### if (self.removeMapObject(obj.id, modelOrType)):
+                    was = True
+        except:
+            #print(e1)
+            print(traceback.format_exc())
+        finally:
+            return was
 
     def toSerializableObj(self):
         squares = list()

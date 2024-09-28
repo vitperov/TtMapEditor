@@ -83,13 +83,13 @@ class MapWidget(QWidget):
 
     def redrawAll(self):
         [h, w] = self._model.size()
-
         print("=============== NEW CANVAS==============+")
         self._createNewCanvas(editMode=True)
-
         mapSquares = self._model.getAllSquares()
         mapObjects = self._model.getAllObjects()
-        for squareModel in (mapSquares + mapObjects):
+        mapAll = (mapSquares + mapObjects)
+        print('len of mapAll: ', len(mapAll))
+        for squareModel in mapAll:
             # Don not store. It's one-time object that just draws an object
             item = MapItemDrawer(squareModel, self._canvas, self.pixPerTile, self._model._objCollection, self.updateCanvas)
 

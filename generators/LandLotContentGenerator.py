@@ -15,6 +15,7 @@ TypeNone     = "None"
 class LandLotContentGenerator(GeneratorPluginBase):
     def __init__(self, mapModel):
         super().__init__(mapModel)
+        self.generatedModel = 'landLotContent' # It is really for any object like this?
 
     def generate(self):
         print("Generating landLotContent")
@@ -32,11 +33,14 @@ class LandLotContentGenerator(GeneratorPluginBase):
 
         self.mapModel.updateEntireMap()
 
-        print("Done")
-
+        print("Done " + str(self.generatedModel))
+        
+    def clear_generated(self):
+        return super().clear_generated()
 
 class LandLotGenerator():
     def __init__(self, model, startPt, size):
+        self.generatedModel = 'landLotContent'
         self.model = model
         self.editor = MapEditHelper(model)
         self.startPt = startPt
@@ -59,6 +63,9 @@ class LandLotGenerator():
                 return False
 
         return True
+
+    #def clear_generated(self):
+    #    return super().clear_generated()
 
     def generate(self, houseProbability, forestProbability):
         generateHouse = (random() < houseProbability)
@@ -97,6 +104,7 @@ class LandLotGenerator():
 
 class LandLotLwObject():
     def __init__(self, landLot, localPos=None, size=None, keepout=0):
+        self.generatedModel = 'landLotContent'
         self.landLot = landLot
         self.objKeepout = keepout
         self.localPos = localPos
@@ -116,7 +124,11 @@ class LandLotLwObject():
 
 class LandLotObject(LandLotLwObject):
     def __init__(self, landLot):
+        self.generatedModel = 'landLotContent'
         LandLotLwObject.__init__(self, landLot, keepout=1)
+
+    #def clear_generated(self):
+    #    return super().clear_generated()
 
     def generate(self, size, objModelName, objModelVariant):
         # can we pass landObj and get it's size?
@@ -136,7 +148,7 @@ class LandLotObject(LandLotLwObject):
         print("    Obj placed at: " + str(self.localPos) + "; size=" + str(size))
 
         obj = MapObjectModelGeneral()
-        obj.init(self.globalPosition().x, self.globalPosition().y, objModelName, ObjectRotation.deg0, size.w, size.h)
+        obj.init(self.globalPosition().x, self.globalPosition().y, objModelName, ObjectRotation.deg0, size.w, size.h, modelSuper=self.generatedModel)
         obj.setProperty('variant',objModelVariant)
         self._randomizeProperty(obj, 'rotation')
         self.landLot.model.addMapObject(obj)
