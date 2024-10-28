@@ -1,15 +1,8 @@
-try:
-    from PyQt5 import QtWidgets
-    from pyqtgraph.Qt import QtCore, QtGui
-    from PyQt5.QtCore import *
-    from PyQt5.QtWidgets import *
-    from PyQt5.QtCore import pyqtSignal, pyqtSlot
-except:
-    from PyQt4 import QtWidgets
-    from pyqtgraph.Qt import QtCore, QtGui
-    from PyQt4.QtCore import *
-    from PyQt4.QtWidgets import *
-    from PyQt4.QtCore import pyqtSignal, pyqtSlot
+from PyQt5 import QtWidgets
+from pyqtgraph.Qt import QtCore, QtGui
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
 
 from functools import partial
 
