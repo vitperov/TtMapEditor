@@ -9,3 +9,21 @@ Warning: Project is not finished. Interfaces and file format can be changed in t
 # Map example
 ![Example](doc/houseExample.jpg)
 
+## Installation
+
+To install and use **TtMapEditor**, follow these steps:
+
+1. Clone the repository:
+
+    ```bash
+    git clone https://github.com/vitperov/TtMapEditor.git
+    cd TtMapEditor
+    ```
+
+2. Install the required dependencies:
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+
