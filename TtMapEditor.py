@@ -14,6 +14,7 @@ from modules.House.HouseView import *
 from modules.House.HouseController import *
 from modules.ObjectsCollection import *
 from modules.ApplicationSettings.ApplicationSettingsDlg import ApplicationSettingsDlg
+from modules.ApplicationSettings.ApplicationSettingsModel import ApplicationSettingsModel
 
 class TtMapEditor(QMainWindow):
     def __init__(self):
@@ -74,12 +75,12 @@ class TtMapEditor(QMainWindow):
         self.setCentralWidget(view)
         
     def showHouseEditor(self):
-        if not self.objCollection:  # Lazy loading of objects collection
-            nativeMapObjectsDir = os.path.join(os.path.dirname(__file__), 'mapObjects/native')
-            externalMapObjectsDir = os.path.join(os.path.dirname(__file__), 'mapObjects/external')
-            self.objCollection = ObjectsCollection([nativeMapObjectsDir, externalMapObjectsDir])
+        settings = ApplicationSettingsModel()
+        nativeMapObjectsDir = os.path.join(os.path.dirname(__file__), 'mapObjects/native')
+        externalMapObjectsDir = settings.getAdditionalMapObjectsDir()
+        objCollection = ObjectsCollection([nativeMapObjectsDir, externalMapObjectsDir])
         
-        model = MapModelGeneral(MapObjectModelGeneral, self.objCollection)
+        model = MapModelGeneral(MapObjectModelGeneral, objCollection)
         view = HouseView()
         controller = HouseController(view=view, houseModel=model)
         self.setCentralWidget(view)

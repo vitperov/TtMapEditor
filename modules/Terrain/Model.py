@@ -4,11 +4,13 @@ from PyQt5.QtCore import *
 from modules.MapModelGeneral import *
 from modules.ObjectsCollection import *
 from modules.GeneratorPluginsLoader import *
+from modules.ApplicationSettings.ApplicationSettingsModel import ApplicationSettingsModel
 
 class Model:
     def __init__(self):
+        settings = ApplicationSettingsModel()
         nativeMapObjectsDir   = os.path.join(os.getcwd(), 'mapObjects/native')
-        externalMapObjectsDir = os.path.join(os.getcwd(), 'mapObjects/external')
+        externalMapObjectsDir = settings.getAdditionalMapObjectsDir()
         self.objCollection = ObjectsCollection([nativeMapObjectsDir, externalMapObjectsDir])
         #print("Map objects found: " + str(self.objCollection.allObjectTypes()))
 
