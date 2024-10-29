@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 from PyQt5.QtWidgets import *
+from PyQt5.QtGui import QIcon, QFont
+from PyQt5.QtCore import QSize
 import sys
 import os
 
@@ -22,14 +24,33 @@ class TtMapEditor(QMainWindow):
         
         layout = QVBoxLayout()
         
-        self.terrainButton = QPushButton("Terrain Editor")
-        self.houseButton = QPushButton("House Editor")
+        # Set a custom font with larger text size for the buttons
+        buttonFont = QFont()
+        buttonFont.setPointSize(24)  # Increase the font size as needed
         
+        # Create Terrain Editor button with custom icon
+        self.terrainButton = QPushButton("Terrain Editor")
+        self.terrainButton.setFont(buttonFont)
+        terrainIcon = QIcon("resources/terrainEditor.png")  # Load custom terrain icon
+        self.terrainButton.setIcon(terrainIcon)
+        self.terrainButton.setIconSize(QSize(150, 150))  # Set icon size
+        self.terrainButton.setStyleSheet("padding-left: 20px;")  # Space between icon and text
+        
+        # Create House Editor button with custom icon
+        self.houseButton = QPushButton("House Editor")
+        self.houseButton.setFont(buttonFont)
+        houseIcon = QIcon("resources/houseEditor.png")  # Load custom house icon
+        self.houseButton.setIcon(houseIcon)
+        self.houseButton.setIconSize(QSize(150, 150))  # Set icon size
+        self.houseButton.setStyleSheet("padding-left: 20px;")  # Space between icon and text
+        
+        # Add buttons to layout
         layout.addWidget(self.terrainButton)
         layout.addWidget(self.houseButton)
         
         self.centralWidget.setLayout(layout)
         
+        # Connect button signals to their respective slots
         self.terrainButton.clicked.connect(self.showTerrainEditor)
         self.houseButton.clicked.connect(self.showHouseEditor)
         
