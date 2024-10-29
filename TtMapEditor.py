@@ -13,6 +13,7 @@ from modules.Terrain.Model import *
 from modules.House.HouseView import *
 from modules.House.HouseController import *
 from modules.ObjectsCollection import *
+from modules.ApplicationSettings.ApplicationSettingsDlg import ApplicationSettingsDlg
 
 class TtMapEditor(QMainWindow):
     def __init__(self):
@@ -84,11 +85,10 @@ class TtMapEditor(QMainWindow):
         self.setCentralWidget(view)
     
     def showSettings(self):
-        # Placeholder for settings functionality
-        settingsDialog = QDialog(self)
-        settingsDialog.setWindowTitle("Settings")
-        settingsDialog.setModal(True)
-        settingsDialog.exec_()
+        # Open the settings dialog
+        settingsDialog = ApplicationSettingsDlg(self)
+        if settingsDialog.exec_() == QDialog.Accepted:
+            print("Settings saved successfully")
 
 def main():
     app = QApplication(sys.argv)
