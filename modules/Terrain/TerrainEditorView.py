@@ -11,17 +11,15 @@ from modules.Terrain.TerrainToolbar import *
 from modules.PropertiesPanel import *
 from modules.GeneratorsPanel import *
 
-class TerrainEditorView(QMainWindow):
-    """Main Window."""
+class TerrainEditorView(QWidget):
+    """Terrain Editor View Widget."""
     def __init__(self):
         super().__init__()
         self.setWindowTitle('TT Map Generator')
 
         self._createWidgets()
 
-        self._centralWidget = QWidget(self)
-        self.setCentralWidget(self._centralWidget)
-        self._centralWidget.setLayout(self._createLayout())
+        self.setLayout(self._createLayout())
 
     def _createWidgets(self):
         self.actionsPanel = TerrainToolbar()
@@ -47,4 +45,3 @@ class TerrainEditorView(QMainWindow):
         layout.addLayout(rightLayout)
 
         return layout
-
