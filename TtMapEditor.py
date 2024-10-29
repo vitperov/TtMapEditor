@@ -44,15 +44,25 @@ class TtMapEditor(QMainWindow):
         self.houseButton.setIconSize(QSize(150, 150))  # Set icon size
         self.houseButton.setStyleSheet("padding-left: 20px;")  # Space between icon and text
         
+        # Create Settings button with custom icon
+        self.settingsButton = QPushButton("Settings")
+        self.settingsButton.setFont(buttonFont)
+        settingsIcon = QIcon("resources/settings.png")  # Load custom settings icon
+        self.settingsButton.setIcon(settingsIcon)
+        self.settingsButton.setIconSize(QSize(150, 150))  # Set icon size
+        self.settingsButton.setStyleSheet("padding-left: 20px;")  # Space between icon and text
+        
         # Add buttons to layout
         layout.addWidget(self.terrainButton)
         layout.addWidget(self.houseButton)
+        layout.addWidget(self.settingsButton)
         
         self.centralWidget.setLayout(layout)
         
         # Connect button signals to their respective slots
         self.terrainButton.clicked.connect(self.showTerrainEditor)
         self.houseButton.clicked.connect(self.showHouseEditor)
+        self.settingsButton.clicked.connect(self.showSettings)
         
         self.objCollection = None
 
@@ -72,6 +82,13 @@ class TtMapEditor(QMainWindow):
         view = HouseView()
         controller = HouseController(view=view, houseModel=model)
         self.setCentralWidget(view)
+    
+    def showSettings(self):
+        # Placeholder for settings functionality
+        settingsDialog = QDialog(self)
+        settingsDialog.setWindowTitle("Settings")
+        settingsDialog.setModal(True)
+        settingsDialog.exec_()
 
 def main():
     app = QApplication(sys.argv)
