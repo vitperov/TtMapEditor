@@ -10,18 +10,15 @@ from modules.MapWidget import *
 from modules.PropertiesPanel import *
 from modules.House.HouseToolbar import *
 
-
-class HouseView(QMainWindow):
-    """Main Window."""
+class HouseView(QWidget):
+    """House Editor View Widget."""
     def __init__(self):
         super().__init__()
         self.setWindowTitle('TT House editor')
 
         self._createWidgets()
 
-        self._centralWidget = QWidget(self)
-        self.setCentralWidget(self._centralWidget)
-        self._centralWidget.setLayout(self._createLayout())
+        self.setLayout(self._createLayout())
 
     def _createWidgets(self):
         self.mapWidget = MapWidget()
@@ -40,4 +37,3 @@ class HouseView(QMainWindow):
         mapLayout.addWidget(self.propPanel)
 
         return layout
-

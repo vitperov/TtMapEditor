@@ -1,8 +1,6 @@
 from enum import Enum
-try:
-    from PyQt5.QtCore import *
-except:
-    from PyQt4.QtCore import *
+
+from PyQt5.QtCore import *
 
 import traceback
 import json
