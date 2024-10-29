@@ -69,9 +69,9 @@ class TtMapEditor(QMainWindow):
         self.objCollection = None
 
     def showTerrainEditor(self):
-        model = Model()
+        self.model = Model()
         view = TerrainEditorView()
-        controller = TerrainMapController(view, model)
+        self.controller = TerrainMapController(view, self.model)
         self.setCentralWidget(view)
         
     def showHouseEditor(self):
@@ -80,9 +80,9 @@ class TtMapEditor(QMainWindow):
         externalMapObjectsDir = settings.getAdditionalMapObjectsDir()
         objCollection = ObjectsCollection([nativeMapObjectsDir, externalMapObjectsDir])
         
-        model = MapModelGeneral(MapObjectModelGeneral, objCollection)
+        self.model = MapModelGeneral(MapObjectModelGeneral, objCollection)
         view = HouseView()
-        controller = HouseController(view=view, houseModel=model)
+        self.controller = HouseController(view=view, houseModel=self.model)
         self.setCentralWidget(view)
     
     def showSettings(self):
