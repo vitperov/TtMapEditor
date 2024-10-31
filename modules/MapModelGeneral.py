@@ -48,6 +48,7 @@ class MapObjectModelGeneral(QObject):
 
         self.x = 0
         self.y = 0
+        self.z = 0
         self.w = 1
         self.h = 1
 
@@ -55,6 +56,7 @@ class MapObjectModelGeneral(QObject):
         self.id = str(id) if (id is not None) else str(uuid.uuid4()) # FIXED: id was missing
         self.x = x
         self.y = y
+        self.z = 0
         self.modelSuper = None if (modelSuper is None or not(modelSuper)) else modelSuper # It is just model super replacer on comparation e.g. for LandLotContent
         #self.modelGenerator = modelGenerator # model generator type
         self.model = model # model generator type
@@ -73,6 +75,7 @@ class MapObjectModelGeneral(QObject):
 
         obj['x'] =  self.x
         obj['y'] =  self.y
+        obj['z'] =  self.z
         obj['w'] =  self.w
         obj['h'] =  self.h
         obj['id'] = self.id
@@ -121,6 +124,7 @@ class MapObjectModelGeneral(QObject):
     def restoreFromJson(self, js):
         self.x = js['x']
         self.y = js['y']
+        self.z = js.get('z', 0)
         self.w = js.get('w', 1)
         self.h = js.get('h', 1)
 
@@ -196,10 +200,11 @@ class MapModelGeneral(QObject):
                     self._updateCallback()
                 return
 
-    def createObjectAt(self, x, y):
+    def createObjectAt(self, x, y, z):
         obj = self._sqareModel()
         obj.x = x
         obj.y = y
+        obj.z = z
         self._squares.append(obj)
         return obj
 
