@@ -44,3 +44,4 @@ class HouseController:
 
     def _setZLevel(self, zLevel):
         self._view.mapWidget.zLevel = zLevel
+        self._view.mapWidget.redrawAll()

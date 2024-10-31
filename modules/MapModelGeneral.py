@@ -256,8 +256,12 @@ class MapModelGeneral(QObject):
         if self._updateCallback:
             self._updateCallback()
 
-    def getAllSquares(self):
-        return self._squares
+    def getAllSquares(self, zLevel):
+        items = list()
+        for square in self._squares:
+            if square.z == zLevel:
+                items.append(square)
+        return items
         
     def getAllObjects(self):
         return self._objects

@@ -55,6 +55,7 @@ class PropertiesPanel(QWidget):
 
         self.x = None
         self.y = None
+        self.zLevel = None
         self._category = category
 
         layout = QVBoxLayout()
@@ -76,6 +77,7 @@ class PropertiesPanel(QWidget):
     def showSquareProperties(self, x, y, z):
         self.x = x
         self.y = y
+        self.zLevel = z
 
         for i in reversed(range(self.properties.count())):
             self.properties.itemAt(i).widget().setParent(None)
@@ -96,9 +98,9 @@ class PropertiesPanel(QWidget):
             removeBtn.clicked.connect(partial(self.removeObject, itemModel.id))
 
     def addObject(self):
-        if self.x is not None and self.y is not None:
-            obj = self.mapModel.createObjectAt(self.x, self.y)
-            self.showSquareProperties(self.x, self.y)
+        if self.x is not None and self.y is not None and self.zLevel is not None:
+            obj = self.mapModel.createObjectAt(self.x, self.y, self.zLevel)
+            self.showSquareProperties(self.x, self.y, self.zLevel)
             self.updatedEntireMap.emit()
 
     def removeObject(self, id):

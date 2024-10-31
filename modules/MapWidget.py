@@ -86,7 +86,7 @@ class MapWidget(QWidget):
         [h, w] = self._model.size()
         print("=============== NEW CANVAS==============+")
         self._createNewCanvas(editMode=True)
-        mapSquares = self._model.getAllSquares()
+        mapSquares = self._model.getAllSquares(self.zLevel)
         mapObjects = self._model.getAllObjects()
         mapAll = (mapSquares + mapObjects)
         print('len of mapAll: ', len(mapAll))
