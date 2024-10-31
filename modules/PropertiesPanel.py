@@ -73,14 +73,14 @@ class PropertiesPanel(QWidget):
     def setModel(self, model):
         self.mapModel = model
 
-    def showSquareProperties(self, x, y):
+    def showSquareProperties(self, x, y, z):
         self.x = x
         self.y = y
 
         for i in reversed(range(self.properties.count())):
             self.properties.itemAt(i).widget().setParent(None)
 
-        items = self.mapModel.getSquareItems(x, y)
+        items = self.mapModel.getSquareItems(x, y, z)
         num = 0;
         for itemModel in items:
             self.coordinatesLbl.setText("X: " + str(x) + " Y: " + str(y))

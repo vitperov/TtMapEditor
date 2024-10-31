@@ -181,10 +181,10 @@ class MapModelGeneral(QObject):
 
         return None
 
-    def getSquareItems(self, x, y):
+    def getSquareItems(self, x, y, z):
         items = list()
         for square in self._squares:
-            if square.x == x and square.y == y:
+            if square.x == x and square.y == y and square.z == z:
                 items.append(square)
         return items
 

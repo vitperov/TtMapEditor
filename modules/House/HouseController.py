@@ -37,7 +37,7 @@ class HouseController:
         self._view.mapWidget.deleteRow.connect(self._houseModel.deleteRow)
         self._view.mapWidget.deleteColumn.connect(self._houseModel.deleteColumn)
 
-    def _onHouseSquareClicked(self, x, y):
+    def _onHouseSquareClicked(self, x, y, z):
         #model = self._houseModel.getSquare(x, y)
         # TODO: delete wrapper and call directly
-        self._view.propPanel.showSquareProperties(x, y)
+        self._view.propPanel.showSquareProperties(x, y, z)
