@@ -233,6 +233,23 @@ class MapModelGeneral(QObject):
 
         self._updateCallback()
 
+    def addRow(self):
+        """Adds a new row at the bottom of the map."""
+        for column in range(self.width):
+            self.createEmpySquareAt(self.height, column)  # New row at the end
+
+        self.height += 1  # Increase the height count
+        if self._updateCallback:
+            self._updateCallback()
+
+    def addColumn(self):
+        """Adds a new column to the right side of the map."""
+        for row in range(self.height):
+            self.createEmpySquareAt(row, self.width)  # New column on the right
+
+        self.width += 1  # Increase the width count
+        if self._updateCallback:
+            self._updateCallback()
 
     def getAllSquares(self):
         return self._squares
@@ -382,4 +399,3 @@ class MapModelGeneral(QObject):
             
     def updateEntireMap(self):
         self.updatedEntireMap.emit()
-

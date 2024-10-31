@@ -28,6 +28,8 @@ class HouseController:
         self._view.actionsPanel.newMap.connect(self._houseModel.newMap)
         self._view.actionsPanel.openMap.connect(self._houseModel.openMap)
         self._view.actionsPanel.saveMap.connect(self._houseModel.saveMap)
+        self._view.actionsPanel.addColumn.connect(self._houseModel.addColumn)
+        self._view.actionsPanel.addRow.connect(self._houseModel.addRow)
 
         self._houseModel.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
         self._view.propPanel.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
@@ -39,6 +41,3 @@ class HouseController:
         #model = self._houseModel.getSquare(x, y)
         # TODO: delete wrapper and call directly
         self._view.propPanel.showSquareProperties(x, y)
-
-
-
