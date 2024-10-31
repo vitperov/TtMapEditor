@@ -83,7 +83,7 @@ class PropertiesPanel(QWidget):
         items = self.mapModel.getSquareItems(x, y, z)
         num = 0;
         for itemModel in items:
-            self.coordinatesLbl.setText("X: " + str(x) + " Y: " + str(y))
+            self.coordinatesLbl.setText("X: " + str(x) + " Y: " + str(y) + " Zlevel: " + str(z))
 
             num += 1;
             title = str(num)
