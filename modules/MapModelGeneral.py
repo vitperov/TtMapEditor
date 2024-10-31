@@ -220,6 +220,8 @@ class MapModelGeneral(QObject):
         # add empy row at the end
         for column in range(self.width):
             self.createEmpySquareAt(self.height - 1, column)
+            
+        self.height -= 1
 
         self._updateCallback()
 
@@ -235,6 +237,8 @@ class MapModelGeneral(QObject):
         # add empy column at the end
         for row in range(self.height):
             self.createEmpySquareAt(row, self.width - 1)
+            
+        self.width -= 1
 
         self._updateCallback()
 
@@ -255,6 +259,16 @@ class MapModelGeneral(QObject):
         self.width += 1  # Increase the width count
         if self._updateCallback:
             self._updateCallback()
+            
+    #def recalculateMapSize(self):
+    #    maxX = 0
+    #    maxY = 0
+    #    for square in self._squares:
+    #        maxX = max(maxX, square.x)
+    #        maxY = max(maxY, square.y)
+    #        
+    #    self.width = maxX + 1
+    #    self.height = maxY + 1
 
     def getAllSquares(self, zLevel):
         items = list()
