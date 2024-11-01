@@ -9,57 +9,48 @@ from modules.SimpleSquareItem import SimpleSquareItem
 from modules.ChooseRotationDlg import ChooseRotationDlg
 from modules.ChooseModelDlg import ChooseModelDlg
 
-#FIXME turn to widget. Possible memory leak
-class PropertiesItem():
-    def __init__(self, objModel, title, objCollection, mapModel, category, tilesize=64):
+class PropertiesItem(QWidget):
+    updateAllProperties = pyqtSignal()  # Signal to notify when properties are updated
+
+    def __init__(self, objModel, objCollection, mapModel, category, tilesize=64, parent=None):
+        super(PropertiesItem, self).__init__(parent)  # Initialize QWidget directly
         self._model = objModel
         self._mapModel = mapModel
         self._category = category
+        
+        sqType = self._model.getProperty('model')
 
-        self.widget = QGroupBox(title)
-        self.layout = QVBoxLayout()
-        self.widget.setLayout(self.layout)
+        # Create a layout for the widget
+        layout = QVBoxLayout(self)
+        self.setLayout(layout)
 
-        # Add SimpleSquareItem before properties
+        # Set up the group box with a title
+        groupBox = QGroupBox(sqType, self)
+        groupBoxLayout = QVBoxLayout()
+        groupBox.setLayout(groupBoxLayout)
+        layout.addWidget(groupBox)
+
+        # Add SimpleSquareItem
         self.modelPicture = SimpleSquareItem(objModel, objCollection, tilesize)
-        self.layout.addWidget(self.modelPicture)
+        groupBoxLayout.addWidget(self.modelPicture)
 
-        #availableObjects = objCollection.getTypesInCategory(self._category)
+        # Rotation Button
+        rotationBtn = QPushButton()
+        rotationBtn.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
+        rotationBtn.clicked.connect(self.showChooseRotationDlg)
+        groupBoxLayout.addWidget(rotationBtn)
 
-        def addBoxParameter(propName, propValue, possibleValues):
-            groupbox = QGroupBox(propName)
-            self.layout.addWidget(groupbox)
-            box = QVBoxLayout()
-            groupbox.setLayout(box)
+        # Model Button
+        modelBtn = QPushButton()
+        modelBtn.setIcon(self.style().standardIcon(QStyle.SP_FileDialogDetailedView))
+        modelBtn.clicked.connect(self.showChooseModelDlg)
+        groupBoxLayout.addWidget(modelBtn)
 
-            if propName == 'rotation':
-                dialogBtn = QPushButton("Choose Rotation")
-                # lambda is needed to fix Qt connection issue
-                dialogBtn.clicked.connect(lambda: self.showChooseRotationDlg())
-                box.addWidget(dialogBtn)
-            elif propName == 'model':
-                dialogBtn = QPushButton("Choose Model")
-                # lambda is needed to fix Qt connection issue
-                dialogBtn.clicked.connect(lambda: self.showChooseModelDlg())
-                box.addWidget(dialogBtn)
-            else:
-                # NOTE: it's useless code, but kept for the future when we might need additional properties support
-                comboBox = QComboBox()
-                for optionName in possibleValues:
-                    comboBox.addItem(optionName, optionName)
-                
-                comboBox.setCurrentIndex(possibleValues.index(propValue))
-                box.addWidget(comboBox)
-                
-                def onIndexChanged(propName, valueIdx):
-                    valueStr = possibleValues[valueIdx]
-                    self._model.setProperty(propName, valueStr)
-                    self._mapModel.updateEntireMap()
-
-                comboBox.currentIndexChanged.connect(partial(onIndexChanged, propName))
-
-        addBoxParameter('model',    self._model.properties['model'], list())
-        addBoxParameter('rotation', self._model.properties['rotation'], list())
+        # Remove Button
+        removeBtn = QPushButton()
+        removeBtn.setIcon(self.style().standardIcon(QStyle.SP_DialogCancelButton))
+        groupBoxLayout.addWidget(removeBtn)
+        removeBtn.clicked.connect(partial(self.removeObject, self._model.id))
 
     def showChooseRotationDlg(self):
         dlg = ChooseRotationDlg(self._model, self._mapModel._objCollection, 64)
@@ -69,7 +60,7 @@ class PropertiesItem():
                 self._model.setProperty('rotation', str(chosenRotation))
                 self._mapModel.updateEntireMap()
                 self.modelPicture.updatePixmap()
-    
+
     def showChooseModelDlg(self):
         dlg = ChooseModelDlg(self._mapModel._objCollection, self._category, 64)
         if dlg.exec_() == QDialog.Accepted:
@@ -78,6 +69,10 @@ class PropertiesItem():
                 self._model.setProperty('model', chosenModel)
                 self._mapModel.updateEntireMap()
                 self.modelPicture.updatePixmap()
+
+    def removeObject(self, id):
+        self._mapModel.deleteSquareById(id)
+        self.updateAllProperties.emit()
 
 class PropertiesPanel(QWidget):
     updatedEntireMap = pyqtSignal()
@@ -114,26 +109,18 @@ class PropertiesPanel(QWidget):
             self.properties.itemAt(i).widget().setParent(None)
 
         items = self.mapModel.getSquareItems(x, y, z)
-        num = 0;
         for itemModel in items:
             self.coordinatesLbl.setText("X: " + str(x) + " Y: " + str(y) + " Zlevel: " + str(z))
 
-            num += 1;
-            title = str(num)
-            itemWg = PropertiesItem(itemModel, title, self.mapModel._objCollection, self.mapModel, self._category)
-            self.properties.addWidget(itemWg.widget)
-
-            removeBtn = QPushButton("Remove")
-            self.properties.addWidget(removeBtn)
-
-            removeBtn.clicked.connect(partial(self.removeObject, itemModel.id))
+            itemWg = PropertiesItem(itemModel, self.mapModel._objCollection, self.mapModel, self._category)
+            itemWg.updateAllProperties.connect(self.update)
+            self.properties.addWidget(itemWg)
 
     def addObject(self):
         if self.x is not None and self.y is not None and self.zLevel is not None:
             obj = self.mapModel.createObjectAt(self.x, self.y, self.zLevel)
             self.showSquareProperties(self.x, self.y, self.zLevel)
             self.updatedEntireMap.emit()
-
-    def removeObject(self, id):
-        self.mapModel.deleteSquareById(id)
-        self.showSquareProperties(self.x, self.y)
+            
+    def update(self):
+        self.showSquareProperties(self.x, self.y, self.zLevel)
