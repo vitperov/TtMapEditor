@@ -69,7 +69,7 @@ class PropertiesItem():
                 self._mapModel.updateEntireMap()
     
     def showChooseModelDlg(self):
-        dlg = ChooseModelDlg(self._mapModel._objCollection, self._category)
+        dlg = ChooseModelDlg(self._mapModel._objCollection, self._category, 64)
         if dlg.exec_() == QDialog.Accepted:
             chosenModel = dlg.selectedModel
             if chosenModel is not None:
