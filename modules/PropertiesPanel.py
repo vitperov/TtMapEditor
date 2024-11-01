@@ -26,7 +26,7 @@ class PropertiesItem(QWidget):
 
         # Set up the group box with a title
         groupBox = QGroupBox(sqType, self)
-        groupBoxLayout = QVBoxLayout()
+        groupBoxLayout = QHBoxLayout()  # Change to QHBoxLayout for horizontal arrangement
         groupBox.setLayout(groupBoxLayout)
         layout.addWidget(groupBox)
 
@@ -34,22 +34,26 @@ class PropertiesItem(QWidget):
         self.modelPicture = SimpleSquareItem(objModel, objCollection, tilesize)
         groupBoxLayout.addWidget(self.modelPicture)
 
+        # Create a vertical layout to stack buttons
+        buttonLayout = QVBoxLayout()
+        groupBoxLayout.addLayout(buttonLayout)
+
         # Rotation Button
         rotationBtn = QPushButton()
         rotationBtn.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
         rotationBtn.clicked.connect(self.showChooseRotationDlg)
-        groupBoxLayout.addWidget(rotationBtn)
+        buttonLayout.addWidget(rotationBtn)
 
         # Model Button
         modelBtn = QPushButton()
         modelBtn.setIcon(self.style().standardIcon(QStyle.SP_FileDialogDetailedView))
         modelBtn.clicked.connect(self.showChooseModelDlg)
-        groupBoxLayout.addWidget(modelBtn)
+        buttonLayout.addWidget(modelBtn)
 
         # Remove Button
         removeBtn = QPushButton()
         removeBtn.setIcon(self.style().standardIcon(QStyle.SP_DialogCancelButton))
-        groupBoxLayout.addWidget(removeBtn)
+        buttonLayout.addWidget(removeBtn)
         removeBtn.clicked.connect(partial(self.removeObject, self._model.id))
 
     def showChooseRotationDlg(self):
@@ -96,6 +100,8 @@ class PropertiesPanel(QWidget):
         addBtn = QPushButton("Add object")
         layout.addWidget(addBtn)
         addBtn.clicked.connect(self.addObject)
+
+        layout.addStretch()  # Add vertical spacer at the end
 
     def setModel(self, model):
         self.mapModel = model
