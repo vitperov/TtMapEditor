@@ -7,12 +7,14 @@ from PyQt5.QtWidgets import *
 from functools import partial
 from modules.SimpleSquareItem import SimpleSquareItem
 from modules.ChooseRotationDlg import ChooseRotationDlg
+from modules.ChooseModelDlg import ChooseModelDlg
 
 #FIXME turn to widget. Possible memory leak
 class PropertiesItem():
     def __init__(self, objModel, title, objCollection, mapModel, category, tilesize=64):
         self._model = objModel
         self._mapModel = mapModel
+        self._category = category
 
         self.widget = QGroupBox(title)
         self.layout = QVBoxLayout()
@@ -22,7 +24,7 @@ class PropertiesItem():
         self.simpleSquareItem = SimpleSquareItem(objModel, objCollection, tilesize)
         self.layout.addWidget(self.simpleSquareItem)
 
-        availableObjects = objCollection.getTypesInCategory(category)
+        #availableObjects = objCollection.getTypesInCategory(self._category)
 
         def addBoxParameter(propName, propValue, possibleValues):
             groupbox = QGroupBox(propName)
@@ -32,7 +34,13 @@ class PropertiesItem():
 
             if propName == 'rotation':
                 dialogBtn = QPushButton("Choose Rotation")
-                dialogBtn.clicked.connect(self.showChooseRotationDlg)
+                # lambda is needed to fix Qt connection issue
+                dialogBtn.clicked.connect(lambda: self.showChooseRotationDlg())
+                box.addWidget(dialogBtn)
+            elif propName == 'model':
+                dialogBtn = QPushButton("Choose Model")
+                # lambda is needed to fix Qt connection issue
+                dialogBtn.clicked.connect(lambda: self.showChooseModelDlg())
                 box.addWidget(dialogBtn)
             else:
                 comboBox = QComboBox()
@@ -49,8 +57,8 @@ class PropertiesItem():
 
                 comboBox.currentIndexChanged.connect(partial(onIndexChanged, propName))
 
-        addBoxParameter('model',    self._model.properties['model'], availableObjects)
-        addBoxParameter('rotation', self._model.properties['rotation'], list(self._model.classnames['rotation']))
+        addBoxParameter('model',    self._model.properties['model'], list())
+        addBoxParameter('rotation', self._model.properties['rotation'], list())
 
     def showChooseRotationDlg(self):
         dlg = ChooseRotationDlg(self._model, self._mapModel._objCollection, 64)
@@ -58,6 +66,14 @@ class PropertiesItem():
             chosenRotation = dlg.selectedRotation
             if chosenRotation is not None:
                 self._model.setProperty('rotation', str(chosenRotation))
+                self._mapModel.updateEntireMap()
+    
+    def showChooseModelDlg(self):
+        dlg = ChooseModelDlg(self._mapModel._objCollection, self._category)
+        if dlg.exec_() == QDialog.Accepted:
+            chosenModel = dlg.selectedModel
+            if chosenModel is not None:
+                self._model.setProperty('model', chosenModel)
                 self._mapModel.updateEntireMap()
 
 class PropertiesPanel(QWidget):
