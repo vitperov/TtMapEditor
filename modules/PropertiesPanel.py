@@ -1,46 +1,12 @@
 from PyQt5 import QtWidgets
-from pyqtgraph.Qt import QtCore, QtGui
+from pyqtgraph.Qt import QtCore
 
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 from functools import partial
-
-class SimpleSquareItem(QWidget):
-    def __init__(self, model, objCollection, tilesize):
-        super(SimpleSquareItem, self).__init__()
-        self._model = model
-        self._objCollection = objCollection
-        self._tilesize = tilesize
-        
-        self.initUI()
-
-    def initUI(self):
-        layout = QVBoxLayout()
-        self.setLayout(layout)
-        
-        label = QLabel()
-        self.updatePixmap(label)
-        
-        layout.addWidget(label)
-    
-    def updatePixmap(self, label):
-        sqType = self._model.getProperty('model')
-        rotation = self._model.getProperty('rotation')
-
-        imgFile = self._objCollection.getIcon(sqType)
-        try:
-            pixmap = QtGui.QPixmap(imgFile, "1")
-        except:
-            pixmap = QtGui.QPixmap(imgFile)
-        
-        transform = QtGui.QTransform().rotate(int(rotation))
-        rotatedPixmap = pixmap.transformed(transform, QtCore.Qt.SmoothTransformation)
-        
-        size = QSize(self._tilesize, self._tilesize)
-        scaledPixmap = rotatedPixmap.scaled(size, QtCore.Qt.KeepAspectRatio)
-        
-        label.setPixmap(scaledPixmap)
+from modules.SimpleSquareItem import SimpleSquareItem
+from modules.ChooseRotationDlg import ChooseRotationDlg
 
 #FIXME turn to widget. Possible memory leak
 class PropertiesItem():
@@ -64,29 +30,35 @@ class PropertiesItem():
             box = QVBoxLayout()
             groupbox.setLayout(box)
 
-            valType = type(propValue)
-            print(valType)
-            if valType == 'Enum':
-                nValues = len(valType)
+            if propName == 'rotation':
+                dialogBtn = QPushButton("Choose Rotation")
+                dialogBtn.clicked.connect(self.showChooseRotationDlg)
+                box.addWidget(dialogBtn)
             else:
-                nValues = len(availableObjects) 
-            
-            comboBox = QComboBox()
-            for optionName in possibleValues:
-                comboBox.addItem(optionName, optionName)
-            
-            comboBox.setCurrentIndex(possibleValues.index(propValue))
-            box.addWidget(comboBox)
-            
-            def onIndexChanged(propName, valueIdx):
-                valueStr = possibleValues[valueIdx]
-                self._model.setProperty(propName, valueStr)
-                self._mapModel.updateEntireMap()
+                comboBox = QComboBox()
+                for optionName in possibleValues:
+                    comboBox.addItem(optionName, optionName)
+                
+                comboBox.setCurrentIndex(possibleValues.index(propValue))
+                box.addWidget(comboBox)
+                
+                def onIndexChanged(propName, valueIdx):
+                    valueStr = possibleValues[valueIdx]
+                    self._model.setProperty(propName, valueStr)
+                    self._mapModel.updateEntireMap()
 
-            comboBox.currentIndexChanged.connect(partial(onIndexChanged, propName))
+                comboBox.currentIndexChanged.connect(partial(onIndexChanged, propName))
 
         addBoxParameter('model',    self._model.properties['model'], availableObjects)
         addBoxParameter('rotation', self._model.properties['rotation'], list(self._model.classnames['rotation']))
+
+    def showChooseRotationDlg(self):
+        dlg = ChooseRotationDlg(self._model, self._mapModel._objCollection, 64)
+        if dlg.exec_() == QDialog.Accepted:
+            chosenRotation = dlg.selectedRotation
+            if chosenRotation is not None:
+                self._model.setProperty('rotation', str(chosenRotation))
+                self._mapModel.updateEntireMap()
 
 class PropertiesPanel(QWidget):
     updatedEntireMap = pyqtSignal()
