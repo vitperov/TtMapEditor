@@ -16,12 +16,12 @@ class SimpleSquareItem(QWidget):
         layout = QVBoxLayout()
         self.setLayout(layout)
         
-        label = QLabel()
-        self.updatePixmap(label)
+        self.label = QLabel()
+        self.updatePixmap()
         
-        layout.addWidget(label)
+        layout.addWidget(self.label)
     
-    def updatePixmap(self, label):
+    def updatePixmap(self):
         sqType = self._model.getProperty('model')
         rotation = self._model.getProperty('rotation')
 
@@ -37,4 +37,4 @@ class SimpleSquareItem(QWidget):
         size = QSize(self._tilesize, self._tilesize)
         scaledPixmap = rotatedPixmap.scaled(size, QtCore.Qt.KeepAspectRatio)
         
-        label.setPixmap(scaledPixmap)
+        self.label.setPixmap(scaledPixmap)

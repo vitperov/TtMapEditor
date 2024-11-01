@@ -21,8 +21,8 @@ class PropertiesItem():
         self.widget.setLayout(self.layout)
 
         # Add SimpleSquareItem before properties
-        self.simpleSquareItem = SimpleSquareItem(objModel, objCollection, tilesize)
-        self.layout.addWidget(self.simpleSquareItem)
+        self.modelPicture = SimpleSquareItem(objModel, objCollection, tilesize)
+        self.layout.addWidget(self.modelPicture)
 
         #availableObjects = objCollection.getTypesInCategory(self._category)
 
@@ -43,6 +43,7 @@ class PropertiesItem():
                 dialogBtn.clicked.connect(lambda: self.showChooseModelDlg())
                 box.addWidget(dialogBtn)
             else:
+                # NOTE: it's useless code, but kept for the future when we might need additional properties support
                 comboBox = QComboBox()
                 for optionName in possibleValues:
                     comboBox.addItem(optionName, optionName)
@@ -67,6 +68,7 @@ class PropertiesItem():
             if chosenRotation is not None:
                 self._model.setProperty('rotation', str(chosenRotation))
                 self._mapModel.updateEntireMap()
+                self.modelPicture.updatePixmap()
     
     def showChooseModelDlg(self):
         dlg = ChooseModelDlg(self._mapModel._objCollection, self._category, 64)
@@ -75,6 +77,7 @@ class PropertiesItem():
             if chosenModel is not None:
                 self._model.setProperty('model', chosenModel)
                 self._mapModel.updateEntireMap()
+                self.modelPicture.updatePixmap()
 
 class PropertiesPanel(QWidget):
     updatedEntireMap = pyqtSignal()
