@@ -29,10 +29,10 @@ class HouseToolbar(QWidget):
         self._addRowBtn = QPushButton("Add Row")
         self._addRowBtn.setIcon(QIcon("resources/add-row.png"))
 
-        # Create dropdown for zLevel
-        self._zLevelComboBox = QComboBox()
-        self._zLevelComboBox.addItems(map(str, range(5)))
-        self._zLevelComboBox.currentIndexChanged.connect(self._zLevelChanged)
+        # Create dropdown for Floor
+        self._floorComboBox = QComboBox()
+        self._floorComboBox.addItems(map(str, [i * 0.5 for i in range(7)]))
+        self._floorComboBox.currentIndexChanged.connect(self._floorChanged)
 
         # Add buttons to layout
         self._layout.addWidget(self._newBtn)
@@ -40,8 +40,8 @@ class HouseToolbar(QWidget):
         self._layout.addWidget(self._saveBtn)
         self._layout.addWidget(self._addColumnBtn)
         self._layout.addWidget(self._addRowBtn)
-        self._layout.addWidget(QLabel("Z Level:"))
-        self._layout.addWidget(self._zLevelComboBox)
+        self._layout.addWidget(QLabel("Floor:"))
+        self._layout.addWidget(self._floorComboBox)
         self._layout.addStretch()
 
         # Connect buttons to their respective methods
@@ -75,6 +75,7 @@ class HouseToolbar(QWidget):
         print("add row")
         self.addRow.emit()
 
-    def _zLevelChanged(self, index):
-        print("zLevel changed to", index)
-        self.zLevelChanged.emit(index)
+    def _floorChanged(self, index):
+        model_z_level = round(index * 2)
+        print("Floor changed to", model_z_level)
+        self.zLevelChanged.emit(model_z_level)
