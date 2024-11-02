@@ -76,6 +76,6 @@ class HouseToolbar(QWidget):
         self.addRow.emit()
 
     def _floorChanged(self, index):
-        model_z_level = round(index * 2)
+        model_z_level = index
         print("Floor changed to", model_z_level)
         self.zLevelChanged.emit(model_z_level)
