@@ -76,7 +76,7 @@ class TtMapEditor(QMainWindow):
         
     def showHouseEditor(self):
         settings = ApplicationSettingsModel()
-        nativeMapObjectsDir = os.path.join(os.path.dirname(__file__), 'mapObjects/native')
+        nativeMapObjectsDir = os.path.join(os.path.dirname(__file__), 'mapObjects')
         externalMapObjectsDir = settings.getAdditionalMapObjectsDir()
         objCollection = ObjectsCollection([nativeMapObjectsDir, externalMapObjectsDir])
         
