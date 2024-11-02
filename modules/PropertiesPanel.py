@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 from pyqtgraph.Qt import QtCore
 
 from PyQt5.QtCore import *
@@ -37,18 +37,18 @@ class PropertiesItem(QWidget):
         # Create a vertical layout to stack buttons
         buttonLayout = QVBoxLayout()
         groupBoxLayout.addLayout(buttonLayout)
+        
+        # Model Button
+        modelBtn = QPushButton()
+        modelBtn.setIcon(self.style().standardIcon(QStyle.SP_FileDialogDetailedView))
+        modelBtn.clicked.connect(self.showChooseModelDlg)
+        buttonLayout.addWidget(modelBtn)
 
         # Rotation Button
         rotationBtn = QPushButton()
         rotationBtn.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
         rotationBtn.clicked.connect(self.showChooseRotationDlg)
         buttonLayout.addWidget(rotationBtn)
-
-        # Model Button
-        modelBtn = QPushButton()
-        modelBtn.setIcon(self.style().standardIcon(QStyle.SP_FileDialogDetailedView))
-        modelBtn.clicked.connect(self.showChooseModelDlg)
-        buttonLayout.addWidget(modelBtn)
 
         # Remove Button
         removeBtn = QPushButton()
@@ -97,7 +97,8 @@ class PropertiesPanel(QWidget):
         self.properties = QVBoxLayout()
         layout.addLayout(self.properties)
 
-        addBtn = QPushButton("Add object")
+        addBtn = QPushButton()
+        addBtn.setIcon(QtGui.QIcon('resources/greenPlus.png'))
         layout.addWidget(addBtn)
         addBtn.clicked.connect(self.addObject)
 
