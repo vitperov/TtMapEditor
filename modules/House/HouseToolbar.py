@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFileDialog
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFileDialog, QComboBox, QLabel
 from PyQt5.QtGui import QIcon
 from functools import partial
 
@@ -10,6 +10,7 @@ class HouseToolbar(QWidget):
     openMap = pyqtSignal(str)
     addColumn = pyqtSignal()
     addRow = pyqtSignal()
+    zLevelChanged = pyqtSignal(int)
 
     def __init__(self):
         super().__init__()
@@ -28,12 +29,19 @@ class HouseToolbar(QWidget):
         self._addRowBtn = QPushButton("Add Row")
         self._addRowBtn.setIcon(QIcon("resources/add-row.png"))
 
+        # Create dropdown for Floor
+        self._floorComboBox = QComboBox()
+        self._floorComboBox.addItems(map(str, [i * 0.5 for i in range(7)]))
+        self._floorComboBox.currentIndexChanged.connect(self._floorChanged)
+
         # Add buttons to layout
         self._layout.addWidget(self._newBtn)
         self._layout.addWidget(self._openBtn)
         self._layout.addWidget(self._saveBtn)
         self._layout.addWidget(self._addColumnBtn)
         self._layout.addWidget(self._addRowBtn)
+        self._layout.addWidget(QLabel("Floor:"))
+        self._layout.addWidget(self._floorComboBox)
         self._layout.addStretch()
 
         # Connect buttons to their respective methods
@@ -66,3 +74,8 @@ class HouseToolbar(QWidget):
     def _addRow(self):
         print("add row")
         self.addRow.emit()
+
+    def _floorChanged(self, index):
+        model_z_level = round(index * 2)
+        print("Floor changed to", model_z_level)
+        self.zLevelChanged.emit(model_z_level)

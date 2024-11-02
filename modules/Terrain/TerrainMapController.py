@@ -42,8 +42,6 @@ class TerrainMapController:
         TerrainGeneratorSettingsDlg.runDlg("Terrain generator settings", \
             self._model.generators.generators[1][2].settings, self._view) # EverythingGenerator was renamed to LandLotContentGenerator
 
-    def _onSquareClicked(self, x, y):
-        #model = self._houseModel.getSquare(x, y)
-        # TODO: delete wrapper and call directly
-        self._view.propPanel.showSquareProperties(x, y)
+    def _onSquareClicked(self, x, y, z):
+        self._view.propPanel.showSquareProperties(x, y, z)
 
