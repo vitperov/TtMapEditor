@@ -56,13 +56,13 @@ class HouseToolbar(QWidget):
         self.newMap.emit(8, 8)
 
     def _saveFile(self):
-        name, _ = QFileDialog.getSaveFileName(self, 'Save File', filter='*.json')
+        name, _ = QFileDialog.getSaveFileName(self, 'Save File', 'output/house', filter='*.json')
         if name:
             print(name)
             self.saveMap.emit(name)
 
     def _openFile(self):
-        name, _ = QFileDialog.getOpenFileName(self, 'Open File', filter='*.json')
+        name, _ = QFileDialog.getOpenFileName(self, 'Open File', 'output/house', filter='*.json')
         if name:
             print(name)
             self.openMap.emit(name)
@@ -76,6 +76,6 @@ class HouseToolbar(QWidget):
         self.addRow.emit()
 
     def _floorChanged(self, index):
-        model_z_level = round(index * 2)
+        model_z_level = index
         print("Floor changed to", model_z_level)
         self.zLevelChanged.emit(model_z_level)

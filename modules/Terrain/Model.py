@@ -9,7 +9,7 @@ from modules.ApplicationSettings.ApplicationSettingsModel import ApplicationSett
 class Model:
     def __init__(self):
         settings = ApplicationSettingsModel()
-        nativeMapObjectsDir   = os.path.join(os.getcwd(), 'mapObjects/native')
+        nativeMapObjectsDir   = os.path.join(os.getcwd(), 'mapObjects')
         externalMapObjectsDir = settings.getAdditionalMapObjectsDir()
         self.objCollection = ObjectsCollection([nativeMapObjectsDir, externalMapObjectsDir])
         #print("Map objects found: " + str(self.objCollection.allObjectTypes()))

@@ -38,12 +38,12 @@ class TerrainToolbar(QWidget):
         self.mapSettings.emit()
 
     def _saveFile(self):
-        name, _ = QFileDialog.getSaveFileName(self, 'Save File', filter='*.json')
+        name, _ = QFileDialog.getSaveFileName(self, 'Save File', 'output/terrain', filter='*.json')
         if name:
             self.saveMap.emit(name)
 
     def _openFile(self):
-        name, _ = QFileDialog.getOpenFileName(self, 'Open File', filter='*.json')
+        name, _ = QFileDialog.getOpenFileName(self, 'Open File', 'output/terrain', filter='*.json')
         if name:
             self.openMap.emit(name)
         
