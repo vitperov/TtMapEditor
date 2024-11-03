@@ -107,17 +107,20 @@ class PropertiesPanel(QWidget):
     def setModel(self, model):
         self.mapModel = model
 
-    def showSquareProperties(self, x, y, z):
+    def onSquaresSelected(self, startCol, startRow, endCol, endRow, zLevel):
+        # Consider how to utilize start and end coordinates
+        x = startCol  # This is a simplification, adjust based on your requirements.
+        y = startRow  # This is a simplification, adjust based on your requirements.
         self.x = x
         self.y = y
-        self.zLevel = z
+        self.zLevel = zLevel
 
         for i in reversed(range(self.properties.count())):
             self.properties.itemAt(i).widget().setParent(None)
 
-        items = self.mapModel.getSquareItems(x, y, z)
+        items = self.mapModel.getSquareItems(x, y, zLevel)
         for itemModel in items:
-            self.coordinatesLbl.setText("X: " + str(x) + " Y: " + str(y) + " Zlevel: " + str(z))
+            self.coordinatesLbl.setText("X: " + str(x) + " Y: " + str(y) + " Zlevel: " + str(zLevel))
 
             itemWg = PropertiesItem(itemModel, self.mapModel._objCollection, self.mapModel, self._category)
             itemWg.updateAllProperties.connect(self.update)
@@ -126,8 +129,8 @@ class PropertiesPanel(QWidget):
     def addObject(self):
         if self.x is not None and self.y is not None and self.zLevel is not None:
             obj = self.mapModel.createObjectAt(self.x, self.y, self.zLevel)
-            self.showSquareProperties(self.x, self.y, self.zLevel)
+            self.onSquaresSelected(self.x, self.y, self.zLevel, self.x, self.y)
             self.updatedEntireMap.emit()
             
     def update(self):
-        self.showSquareProperties(self.x, self.y, self.zLevel)
+        self.onSquaresSelected(self.x, self.y, self.zLevel, self.x, self.y)

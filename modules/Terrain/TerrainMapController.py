@@ -33,7 +33,7 @@ class TerrainMapController:
 
     def _connectSignals(self):
         self._model.map.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
-        self._view.mapWidget.activeItemChanged.connect(self._onSquareClicked)
+        self._view.mapWidget.multipleSelection.connect(self._view.propPanel.onSquaresSelected)
 
     def _startActions(self):
         self._view.generatorsPanel.populateGenerators(self._model.generators.generators)
@@ -41,7 +41,3 @@ class TerrainMapController:
     def _onSettingsClick(self):
         TerrainGeneratorSettingsDlg.runDlg("Terrain generator settings", \
             self._model.generators.generators[1][2].settings, self._view) # EverythingGenerator was renamed to LandLotContentGenerator
-
-    def _onSquareClicked(self, x, y, z):
-        self._view.propPanel.showSquareProperties(x, y, z)
-

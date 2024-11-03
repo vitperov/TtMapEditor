@@ -11,7 +11,7 @@ class HouseToolbar(QWidget):
     addColumn = pyqtSignal()
     addRow = pyqtSignal()
     zLevelChanged = pyqtSignal(int)
-    changedSelection = pyqtSignal(bool)
+    #changedSelection = pyqtSignal(bool)
 
     ICON_SIZE = QSize(32, 32)  # Common size constant for all icons
 
@@ -42,18 +42,18 @@ class HouseToolbar(QWidget):
         self._addRowBtn.setIcon(QIcon("resources/add-row.png"))
         self._addRowBtn.setIconSize(self.ICON_SIZE)
 
-        self._singleSelectionBtn = QPushButton()
-        self._singleSelectionBtn.setCheckable(True)
-        self._singleSelectionBtn.setChecked(True)
-        self._singleSelectionBtn.setIcon(QIcon("resources/single_selection.png"))
-        self._singleSelectionBtn.setIconSize(self.ICON_SIZE)
-        self._singleSelectionBtn.clicked.connect(self._onSingleSelection)
+        #self._singleSelectionBtn = QPushButton()
+        #self._singleSelectionBtn.setCheckable(True)
+        #self._singleSelectionBtn.setChecked(True)
+        #self._singleSelectionBtn.setIcon(QIcon("resources/single_selection.png"))
+        #self._singleSelectionBtn.setIconSize(self.ICON_SIZE)
+        #self._singleSelectionBtn.clicked.connect(self._onSingleSelection)
         
-        self._multipleSelectionBtn = QPushButton()
-        self._multipleSelectionBtn.setCheckable(True)
-        self._multipleSelectionBtn.setIcon(QIcon("resources/multiple_selection.png"))
-        self._multipleSelectionBtn.setIconSize(self.ICON_SIZE)
-        self._multipleSelectionBtn.clicked.connect(self._onMultipleSelection)
+        #self._multipleSelectionBtn = QPushButton()
+        #self._multipleSelectionBtn.setCheckable(True)
+        #self._multipleSelectionBtn.setIcon(QIcon("resources/multiple_selection.png"))
+        #self._multipleSelectionBtn.setIconSize(self.ICON_SIZE)
+        #self._multipleSelectionBtn.clicked.connect(self._onMultipleSelection)
 
         # Create dropdown for Floor
         self._floorComboBox = QComboBox()
@@ -66,8 +66,8 @@ class HouseToolbar(QWidget):
         self._layout.addWidget(self._saveBtn)
         self._layout.addWidget(self._addColumnBtn)
         self._layout.addWidget(self._addRowBtn)
-        self._layout.addWidget(self._singleSelectionBtn)
-        self._layout.addWidget(self._multipleSelectionBtn)
+        #self._layout.addWidget(self._singleSelectionBtn)
+        #self._layout.addWidget(self._multipleSelectionBtn)
         self._layout.addWidget(QLabel("Floor:"))
         self._layout.addWidget(self._floorComboBox)
         self._layout.addStretch()
@@ -114,8 +114,8 @@ class HouseToolbar(QWidget):
         print("Single Selection")
         self.changedSelection.emit(False)
 
-    def _onMultipleSelection(self):
-        if self._singleSelectionBtn.isChecked():
-            self._singleSelectionBtn.setChecked(False)
-        print("Multiple Selection")
-        self.changedSelection.emit(True)
+    #def _onMultipleSelection(self):
+    #    if self._singleSelectionBtn.isChecked():
+    #        self._singleSelectionBtn.setChecked(False)
+    #    print("Multiple Selection")
+    #    self.changedSelection.emit(True)

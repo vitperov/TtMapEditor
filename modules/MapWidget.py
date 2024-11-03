@@ -13,11 +13,13 @@ class MapWidget(QWidget):
     activeItemChanged = pyqtSignal(int, int, int)
     deleteRow         = pyqtSignal(int)
     deleteColumn      = pyqtSignal(int)
+    multipleSelection = pyqtSignal(int, int, int, int, int)
 
     def __init__(self):
         QWidget.__init__(self)
         self._model = None
-        self.zLevel = 0;
+        self.zLevel = 0
+        #self.isMultipleSelect = False
 
         self._layout = QVBoxLayout()
         self._model = None
@@ -25,7 +27,8 @@ class MapWidget(QWidget):
         self.setLayout(self._layout)
 
         self.label = QtWidgets.QLabel()
-        self.label.mousePressEvent = self.onMouseClick
+        self.label.mousePressEvent = self.onMousePress
+        self.label.mouseReleaseEvent = self.onMouseRelease
 
         self._canvas = QtGui.QPixmap(640, 480)
         self._canvas.fill(Qt.white)
@@ -35,36 +38,62 @@ class MapWidget(QWidget):
 
         self.selectedRow = None
         self.selectedCol = None
+        self.startPoint = None
+        self.endPoint = None
 
         self.updateCanvas()
 
     def updateCanvas(self):
         self.label.setPixmap(self._canvas)
 
-    def onMouseClick(self, event):
+    def onMousePress(self, event):
         x = event.pos().x()
         y = event.pos().y()
-        print("Clicked X=" + str(x) + "; Y=" + str(y))
-        col = int(x / self.pixPerTile)
-        row = int(y / self.pixPerTile)
-        print("Clicked row=" + str(row) + "; col=" + str(col))
+        self.startPoint = (x, y)
+
+    def onMouseRelease(self, event):
+        if not self.startPoint:
+            return
+
+        x1, y1 = self.startPoint
+        x2 = event.pos().x()
+        y2 = event.pos().y()
+
+        print(f"Mouse press point: ({x1}, {y1})")
+        print(f"Mouse release point: ({x2}, {y2})")
+
+        startCol = int(min(x1, x2) / self.pixPerTile)
+        endCol = int(max(x1, x2) / self.pixPerTile)
+        startRow = int(min(y1, y2) / self.pixPerTile)
+        endRow = int(max(y1, y2) / self.pixPerTile)
+
+        print(f"Selected area converted to cell coordinates: Start({startCol}, {startRow}), End({endCol}, {endRow})")
 
         [rows, cols] = self._model.size()
-        if row < rows and col < cols:
-            self.selectedRow = row
-            self.selectedCol = col
-            self.activeItemChanged.emit(col, row, self.zLevel)
-            self.redrawAll()
-        elif row == rows and col == cols:
+
+        self.endPoint = (endCol, endRow)
+
+       
+        
+        if startRow < rows and startCol < cols:
+            self.selectedRow = startRow
+            self.selectedCol = startCol
+            self.multipleSelection.emit(startCol, startRow, endCol, endRow, self.zLevel)
+            if (startCol == endCol) and (startRow == endRow):
+                self.activeItemChanged.emit(startCol, startRow, self.zLevel)
+                
+        elif startRow == rows and startCol == cols:
             print("Clicked corner. No actions")
-        elif row == rows:
-            print("Delete column idx=" + str(col))
-            self.deleteColumn.emit(col)
-        elif cols == cols:
-            print("Delete row idx=" + str(row))
-            self.deleteRow.emit(row)
-        else:
-            print("Error click outside canvas")
+        elif startRow == rows:
+            print("Delete column idx=" + str(startCol))
+            self.deleteColumn.emit(startCol)
+        elif startCol == cols:
+            print("Delete row idx=" + str(startRow))
+            self.deleteRow.emit(startRow)
+
+        self.redrawAll()
+        self.startPoint = None
+        self.endPoint = None
 
     def setModel(self, model):
         self._model = model
@@ -76,8 +105,8 @@ class MapWidget(QWidget):
             rows = rows + 1
             cols = cols + 1
 
-        maxWidth = 1400;
-        maxHeight = 900;
+        maxWidth = 1400
+        maxHeight = 900
 
         wPixPerSquare = math.floor(maxWidth / cols)
         hPixPerSquare = math.floor(maxHeight / rows)
@@ -106,7 +135,17 @@ class MapWidget(QWidget):
             selectionPen.setStyle(QtCore.Qt.SolidLine)
             selectionPen.setWidth(2)
             painter.setPen(selectionPen)
-            painter.drawRect(self.selectedCol * self.pixPerTile, self.selectedRow * self.pixPerTile, self.pixPerTile, self.pixPerTile)
+
+            if self.endPoint:
+                startCol, startRow = self.selectedCol, self.selectedRow
+                endCol, endRow = self.endPoint
+                x = startCol * self.pixPerTile
+                y = startRow * self.pixPerTile
+                w = (endCol - startCol + 1) * self.pixPerTile
+                h = (endRow - startRow + 1) * self.pixPerTile
+                painter.drawRect(x, y, w, h)
+            else:
+                painter.drawRect(self.selectedCol * self.pixPerTile, self.selectedRow * self.pixPerTile, self.pixPerTile, self.pixPerTile)
 
         painter.end()
         self.updateCanvas()
@@ -135,5 +174,6 @@ class MapWidget(QWidget):
 
         self.updateCanvas()
 
-    def onMultipleSelectionChanged(self, isMultiple):
-        print(f"Multiple selection changed: {isMultiple}")
+    #def onMultipleSelectionChanged(self, isMultiple):
+    #    self.isMultipleSelect = isMultiple
+    #    print(f"Multiple selection changed: {isMultiple}")
