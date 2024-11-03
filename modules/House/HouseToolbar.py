@@ -11,6 +11,7 @@ class HouseToolbar(QWidget):
     addColumn = pyqtSignal()
     addRow = pyqtSignal()
     zLevelChanged = pyqtSignal(int)
+    changedSelection = pyqtSignal(bool)
 
     def __init__(self):
         super().__init__()
@@ -30,10 +31,15 @@ class HouseToolbar(QWidget):
         self._addRowBtn.setIcon(QIcon("resources/add-row.png"))
 
         self._singleSelectionBtn = QPushButton()
+        self._singleSelectionBtn.setCheckable(True)
+        self._singleSelectionBtn.setChecked(True)
         self._singleSelectionBtn.setIcon(QIcon("resources/single_selection.png"))
+        self._singleSelectionBtn.clicked.connect(self._onSingleSelection)
         
         self._multipleSelectionBtn = QPushButton()
+        self._multipleSelectionBtn.setCheckable(True)
         self._multipleSelectionBtn.setIcon(QIcon("resources/multiple_selection.png"))
+        self._multipleSelectionBtn.clicked.connect(self._onMultipleSelection)
 
         # Create dropdown for Floor
         self._floorComboBox = QComboBox()
@@ -87,3 +93,15 @@ class HouseToolbar(QWidget):
         model_z_level = index
         print("Floor changed to", model_z_level)
         self.zLevelChanged.emit(model_z_level)
+
+    def _onSingleSelection(self):
+        if self._multipleSelectionBtn.isChecked():
+            self._multipleSelectionBtn.setChecked(False)
+        print("Single Selection")
+        self.changedSelection.emit(False)
+
+    def _onMultipleSelection(self):
+        if self._singleSelectionBtn.isChecked():
+            self._singleSelectionBtn.setChecked(False)
+        print("Multiple Selection")
+        self.changedSelection.emit(True)
