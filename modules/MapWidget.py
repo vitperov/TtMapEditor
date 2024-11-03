@@ -81,6 +81,20 @@ class MapWidget(QWidget):
 
         self._canvas = QtGui.QPixmap(cols*self.pixPerTile, rows*self.pixPerTile)
         self._canvas.fill(QtGui.QColor('#ADD8E6')) # light blue
+
+        # Draw dashed lines between squares
+        painter = QtGui.QPainter(self._canvas)
+        pen = QtGui.QPen(QtGui.QColor('#000000'))  # black color
+        pen.setStyle(QtCore.Qt.DashLine)
+        pen.setWidth(1)
+        painter.setPen(pen)
+
+        for x in range(0, cols*self.pixPerTile, self.pixPerTile):
+            painter.drawLine(x, 0, x, rows*self.pixPerTile)
+        for y in range(0, rows*self.pixPerTile, self.pixPerTile):
+            painter.drawLine(0, y, cols*self.pixPerTile, y)
+
+        painter.end()
         self.updateCanvas()
 
     def redrawAll(self):
