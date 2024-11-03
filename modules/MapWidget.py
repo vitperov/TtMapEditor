@@ -31,6 +31,7 @@ class MapWidget(QWidget):
         self._canvas.fill(Qt.white)
 
         self._layout.addWidget(self.label)
+        self._layout.addStretch()
 
         self.updateCanvas()
 
