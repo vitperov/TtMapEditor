@@ -119,5 +119,7 @@ class MapWidget(QWidget):
             item = DeleteButtonItem(self._canvas, self.pixPerTile, w, y)
             # no need to store, will be garbage-collected
 
-
         self.updateCanvas()
+
+    def onMultipleSelectionChanged(self, isMultiple):
+        print(f"Multiple selection changed: {isMultiple}")

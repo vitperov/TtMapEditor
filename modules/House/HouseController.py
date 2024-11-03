@@ -30,6 +30,7 @@ class HouseController:
         self._view.actionsPanel.addColumn.connect(self._houseModel.addColumn)
         self._view.actionsPanel.addRow.connect(self._houseModel.addRow)
         self._view.actionsPanel.zLevelChanged.connect(self._setZLevel)
+        self._view.actionsPanel.changedSelection.connect(self._view.mapWidget.onMultipleSelectionChanged)
 
         self._houseModel.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
         self._view.propPanel.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
