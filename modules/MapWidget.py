@@ -33,6 +33,9 @@ class MapWidget(QWidget):
         self._layout.addWidget(self.label)
         self._layout.addStretch()
 
+        self.selectedRow = None
+        self.selectedCol = None
+
         self.updateCanvas()
 
     def updateCanvas(self):
@@ -48,7 +51,10 @@ class MapWidget(QWidget):
 
         [rows, cols] = self._model.size()
         if row < rows and col < cols:
+            self.selectedRow = row
+            self.selectedCol = col
             self.activeItemChanged.emit(col, row, self.zLevel)
+            self.redrawAll()
         elif row == rows and col == cols:
             print("Clicked corner. No actions")
         elif row == rows:
@@ -93,6 +99,14 @@ class MapWidget(QWidget):
             painter.drawLine(x, 0, x, rows*self.pixPerTile)
         for y in range(0, rows*self.pixPerTile, self.pixPerTile):
             painter.drawLine(0, y, cols*self.pixPerTile, y)
+
+        if self.selectedRow is not None and self.selectedCol is not None:
+            # Draw a red rectangle around the selected square
+            selectionPen = QtGui.QPen(QtGui.QColor('#FF0000'))  # red color
+            selectionPen.setStyle(QtCore.Qt.SolidLine)
+            selectionPen.setWidth(2)
+            painter.setPen(selectionPen)
+            painter.drawRect(self.selectedCol * self.pixPerTile, self.selectedRow * self.pixPerTile, self.pixPerTile, self.pixPerTile)
 
         painter.end()
         self.updateCanvas()
