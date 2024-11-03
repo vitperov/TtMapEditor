@@ -23,11 +23,17 @@ class HouseToolbar(QWidget):
         self._saveBtn = QPushButton("Save")
 
         # Create additional toolbar buttons with icons
-        self._addColumnBtn = QPushButton("Add Column")
+        self._addColumnBtn = QPushButton("")
         self._addColumnBtn.setIcon(QIcon("resources/add-column.png"))
         
-        self._addRowBtn = QPushButton("Add Row")
+        self._addRowBtn = QPushButton("")
         self._addRowBtn.setIcon(QIcon("resources/add-row.png"))
+
+        self._singleSelectionBtn = QPushButton()
+        self._singleSelectionBtn.setIcon(QIcon("resources/single_selection.png"))
+        
+        self._multipleSelectionBtn = QPushButton()
+        self._multipleSelectionBtn.setIcon(QIcon("resources/multiple_selection.png"))
 
         # Create dropdown for Floor
         self._floorComboBox = QComboBox()
@@ -40,6 +46,8 @@ class HouseToolbar(QWidget):
         self._layout.addWidget(self._saveBtn)
         self._layout.addWidget(self._addColumnBtn)
         self._layout.addWidget(self._addRowBtn)
+        self._layout.addWidget(self._singleSelectionBtn)
+        self._layout.addWidget(self._multipleSelectionBtn)
         self._layout.addWidget(QLabel("Floor:"))
         self._layout.addWidget(self._floorComboBox)
         self._layout.addStretch()
