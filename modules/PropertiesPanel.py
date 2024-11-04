@@ -12,13 +12,15 @@ from modules.ChooseModelDlg import ChooseModelDlg
 class PropertiesItem(QWidget):
     updateAllProperties = pyqtSignal()  # Signal to notify when properties are updated
 
-    def __init__(self, objModel, objCollection, mapModel, category, tilesize=64, parent=None):
+    def __init__(self, objModel, objCollection, mapModel, category, multi_select=False, tilesize=64, parent=None):
         super(PropertiesItem, self).__init__(parent)  # Initialize QWidget directly
         self._model = objModel
         self._mapModel = mapModel
         self._category = category
         
         sqType = self._model.getProperty('model')
+        if multi_select:
+            sqType += " (multiple squares)"
 
         # Create a layout for the widget
         layout = QVBoxLayout(self)
@@ -29,9 +31,13 @@ class PropertiesItem(QWidget):
         groupBoxLayout = QHBoxLayout()  # Change to QHBoxLayout for horizontal arrangement
         groupBox.setLayout(groupBoxLayout)
         layout.addWidget(groupBox)
+        
+        # Change groupbox background if multiple squares are selected
+        if multi_select:
+            groupBox.setStyleSheet("background-color: #A5CEC0")
 
         # Add SimpleSquareItem
-        self.modelPicture = SimpleSquareItem(objModel, objCollection, tilesize)
+        self.modelPicture = SimpleSquareItem(objModel, objCollection, tilesize, multi_select)
         groupBoxLayout.addWidget(self.modelPicture)
 
         # Create a vertical layout to stack buttons
@@ -108,29 +114,39 @@ class PropertiesPanel(QWidget):
         self.mapModel = model
 
     def onSquaresSelected(self, startCol, startRow, endCol, endRow, zLevel):
-        # Consider how to utilize start and end coordinates
         x = startCol  # This is a simplification, adjust based on your requirements.
         y = startRow  # This is a simplification, adjust based on your requirements.
         self.x = x
         self.y = y
+        self.xEnd = endCol
+        self.yEnd = endRow
         self.zLevel = zLevel
 
         for i in reversed(range(self.properties.count())):
             self.properties.itemAt(i).widget().setParent(None)
 
-        items = self.mapModel.getSquareItems(x, y, zLevel)
-        for itemModel in items:
+        if startCol == endCol and startRow == endRow:
+            items = self.mapModel.getSquareItems(x, y, zLevel)
             self.coordinatesLbl.setText("X: " + str(x) + " Y: " + str(y) + " Zlevel: " + str(zLevel))
-
-            itemWg = PropertiesItem(itemModel, self.mapModel._objCollection, self.mapModel, self._category)
+            multi_select = False
+        else:
+            items = self.mapModel.getAreaSquareUniqueItems(x, y, endCol, endRow, zLevel)
+            width = abs(endCol - startCol) + 1
+            height = abs(endRow - startRow) + 1
+            totalItems = width * height
+            self.coordinatesLbl.setText(f"{totalItems} squares selected")
+            multi_select = True
+        
+        for itemModel in items:
+            itemWg = PropertiesItem(itemModel, self.mapModel._objCollection, self.mapModel, self._category, multi_select)
             itemWg.updateAllProperties.connect(self.update)
             self.properties.addWidget(itemWg)
 
     def addObject(self):
         if self.x is not None and self.y is not None and self.zLevel is not None:
             obj = self.mapModel.createObjectAt(self.x, self.y, self.zLevel)
-            self.onSquaresSelected(self.x, self.y, self.zLevel, self.x, self.y)
+            self.onSquaresSelected(self.x, self.y, self.xEnd, self.yEnd, self.zLevel)
             self.updatedEntireMap.emit()
             
     def update(self):
-        self.onSquaresSelected(self.x, self.y, self.zLevel, self.x, self.y)
+        self.onSquaresSelected(self.x, self.y, self.xEnd, self.yEnd, self.zLevel)

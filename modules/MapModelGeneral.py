@@ -188,6 +188,17 @@ class MapModelGeneral(QObject):
                 items.append(square)
         return items
 
+    def getAreaSquareUniqueItems(self, startX, startY, endX, endY, z):
+        items = list()
+        seen_models = set()
+        for square in self._squares:
+            if startX <= square.x <= endX and startY <= square.y <= endY and square.z == z:
+                model = square.properties['model']
+                if model not in seen_models:
+                    seen_models.add(model)
+                    items.append(square)
+        return items
+
     def deleteSquareById(self, id):
         print("Deleting entire square, id=" + str(id))
         N = len(self._squares);
