@@ -8,6 +8,7 @@ from functools import partial
 from modules.SimpleSquareItem import SimpleSquareItem
 from modules.ChooseRotationDlg import ChooseRotationDlg
 from modules.ChooseModelDlg import ChooseModelDlg
+from modules.MapModelGeneral import SelectionRange
 
 class PropertiesItem(QWidget):
     updateAllProperties = pyqtSignal()  # Signal to notify when properties are updated
@@ -125,12 +126,14 @@ class PropertiesPanel(QWidget):
         for i in reversed(range(self.properties.count())):
             self.properties.itemAt(i).widget().setParent(None)
 
+        selectionRange = SelectionRange(startCol, startRow, endCol, endRow, zLevel)
+        
         if startCol == endCol and startRow == endRow:
             items = self.mapModel.getSquareItems(x, y, zLevel)
             self.coordinatesLbl.setText("X: " + str(x) + " Y: " + str(y) + " Zlevel: " + str(zLevel))
             multi_select = False
         else:
-            items = self.mapModel.getAreaSquareUniqueItems(x, y, endCol, endRow, zLevel)
+            items = self.mapModel.getAreaSquareUniqueItems(selectionRange)
             width = abs(endCol - startCol) + 1
             height = abs(endRow - startRow) + 1
             totalItems = width * height

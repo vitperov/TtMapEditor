@@ -33,7 +33,7 @@ class TerrainMapController:
 
     def _connectSignals(self):
         self._model.map.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
-        self._view.mapWidget.multipleSelection.connect(self._view.propPanel.onSquaresSelected)
+        self._view.mapWidget.selectionChanged.connect(self._view.propPanel.onSquaresSelected)
 
     def _startActions(self):
         self._view.generatorsPanel.populateGenerators(self._model.generators.generators)

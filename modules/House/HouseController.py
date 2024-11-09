@@ -23,15 +23,13 @@ class HouseController:
         self._view.propPanel.setModel(self._houseModel)
 
     def _connectSignals(self):
-        # self._view.mapWidget.activeItemChanged.connect(self._onHouseSquareClicked)
-        self._view.mapWidget.multipleSelection.connect(self._view.propPanel.onSquaresSelected)
+        self._view.mapWidget.selectionChanged.connect(self._view.propPanel.onSquaresSelected)
         self._view.actionsPanel.newMap.connect(self._houseModel.newMap)
         self._view.actionsPanel.openMap.connect(self._houseModel.openMap)
         self._view.actionsPanel.saveMap.connect(self._houseModel.saveMap)
         self._view.actionsPanel.addColumn.connect(self._houseModel.addColumn)
         self._view.actionsPanel.addRow.connect(self._houseModel.addRow)
         self._view.actionsPanel.zLevelChanged.connect(self._setZLevel)
-        #self._view.actionsPanel.changedSelection.connect(self._view.mapWidget.onMultipleSelectionChanged)
 
         self._houseModel.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
         self._view.propPanel.updatedEntireMap.connect(self._view.mapWidget.redrawAll)

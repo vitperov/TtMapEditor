@@ -24,6 +24,14 @@ class ObjectRotation(str, Enum):
     deg180  = '180'
     deg270  = '270'
 
+class SelectionRange:
+    def __init__(self, startCol, startRow, endCol, endRow, zLevel):
+        self.startCol = startCol
+        self.startRow = startRow
+        self.endCol = endCol
+        self.endRow = endRow
+        self.zLevel = zLevel
+
 class MapObjectModelGeneral(QObject):
     changed = pyqtSignal()
 
@@ -188,11 +196,11 @@ class MapModelGeneral(QObject):
                 items.append(square)
         return items
 
-    def getAreaSquareUniqueItems(self, startX, startY, endX, endY, z):
+    def getAreaSquareUniqueItems(self, selectionRange):
         items = list()
         seen_models = set()
         for square in self._squares:
-            if startX <= square.x <= endX and startY <= square.y <= endY and square.z == z:
+            if selectionRange.startCol <= square.x <= selectionRange.endCol and selectionRange.startRow <= square.y <= selectionRange.endRow and square.z == selectionRange.zLevel:
                 model = square.properties['model']
                 if model not in seen_models:
                     seen_models.add(model)
@@ -432,8 +440,8 @@ class MapModelGeneral(QObject):
     def updateEntireMap(self):
         self.updatedEntireMap.emit()
         
-    def setGroupProperty(self, startX, startY, endX, endY, z, modelFilter, property, value):
+    def setGroupProperty(self, selectionRange, modelFilter, property, value):
         for square in self._squares:
-            if startX <= square.x <= endX and startY <= square.y <= endY and square.z == z:
+            if selectionRange.startCol <= square.x <= selectionRange.endCol and selectionRange.startRow <= square.y <= selectionRange.endRow and square.z == selectionRange.zLevel:
                 if square.properties['model'] == modelFilter:
                     square.setProperty(property, value)

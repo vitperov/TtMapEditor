@@ -10,10 +10,9 @@ from modules.DeleteButtonItem import *
 import math
 
 class MapWidget(QWidget):
-    activeItemChanged = pyqtSignal(int, int, int)
     deleteRow         = pyqtSignal(int)
     deleteColumn      = pyqtSignal(int)
-    multipleSelection = pyqtSignal(int, int, int, int, int)
+    selectionChanged  = pyqtSignal(int, int, int, int, int)
 
     def __init__(self):
         QWidget.__init__(self)
@@ -78,9 +77,7 @@ class MapWidget(QWidget):
         if startRow < rows and startCol < cols:
             self.selectedRow = startRow
             self.selectedCol = startCol
-            self.multipleSelection.emit(startCol, startRow, endCol, endRow, self.zLevel)
-            if (startCol == endCol) and (startRow == endRow):
-                self.activeItemChanged.emit(startCol, startRow, self.zLevel)
+            self.selectionChanged.emit(startCol, startRow, endCol, endRow, self.zLevel)
                 
         elif startRow == rows and startCol == cols:
             print("Clicked corner. No actions")
