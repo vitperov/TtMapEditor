@@ -90,9 +90,7 @@ class PropertiesPanel(QWidget):
     def __init__(self, category):
         QWidget.__init__(self)
 
-        self.x = None
-        self.y = None
-        self.zLevel = None
+        self.selectionRange = None
         self._category = category
 
         layout = QVBoxLayout()
@@ -114,23 +112,21 @@ class PropertiesPanel(QWidget):
     def setModel(self, model):
         self.mapModel = model
 
-    def onSquaresSelected(self, startCol, startRow, endCol, endRow, zLevel):
-        x = startCol  # This is a simplification, adjust based on your requirements.
-        y = startRow  # This is a simplification, adjust based on your requirements.
-        self.x = x
-        self.y = y
-        self.xEnd = endCol
-        self.yEnd = endRow
-        self.zLevel = zLevel
+    def onSquaresSelected(self, selectionRange):
+        self.selectionRange = selectionRange
+
+        startCol = selectionRange.startCol
+        startRow = selectionRange.startRow
+        endCol = selectionRange.endCol
+        endRow = selectionRange.endRow
+        zLevel = selectionRange.zLevel
 
         for i in reversed(range(self.properties.count())):
             self.properties.itemAt(i).widget().setParent(None)
 
-        selectionRange = SelectionRange(startCol, startRow, endCol, endRow, zLevel)
-        
         if startCol == endCol and startRow == endRow:
-            items = self.mapModel.getSquareItems(x, y, zLevel)
-            self.coordinatesLbl.setText("X: " + str(x) + " Y: " + str(y) + " Zlevel: " + str(zLevel))
+            items = self.mapModel.getSquareItems(startCol, startRow, zLevel)
+            self.coordinatesLbl.setText("X: " + str(startCol) + " Y: " + str(startRow) + " Zlevel: " + str(zLevel))
             multi_select = False
         else:
             items = self.mapModel.getAreaSquareUniqueItems(selectionRange)
@@ -146,10 +142,11 @@ class PropertiesPanel(QWidget):
             self.properties.addWidget(itemWg)
 
     def addObject(self):
-        if self.x is not None and self.y is not None and self.zLevel is not None:
-            obj = self.mapModel.createObjectAt(self.x, self.y, self.zLevel)
-            self.onSquaresSelected(self.x, self.y, self.xEnd, self.yEnd, self.zLevel)
+        if self.selectionRange is not None:
+            obj = self.mapModel.createObjectAt(self.selectionRange.startCol, self.selectionRange.startRow, self.selectionRange.zLevel)
+            self.onSquaresSelected(self.selectionRange)
             self.updatedEntireMap.emit()
-            
+
     def update(self):
-        self.onSquaresSelected(self.x, self.y, self.xEnd, self.yEnd, self.zLevel)
+        if self.selectionRange:
+            self.onSquaresSelected(self.selectionRange)
