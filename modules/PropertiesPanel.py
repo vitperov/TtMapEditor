@@ -13,12 +13,18 @@ from modules.MapModelGeneral import SelectionRange
 class PropertiesItem(QWidget):
     updateAllProperties = pyqtSignal()  # Signal to notify when properties are updated
 
-    def __init__(self, objModel, objCollection, mapModel, category, multi_select=False, tilesize=64, parent=None):
+    def __init__(self, objModel, objCollection, mapModel, selectionRange, category, tilesize=64, parent=None):
         super(PropertiesItem, self).__init__(parent)  # Initialize QWidget directly
         self._model = objModel
         self._mapModel = mapModel
         self._category = category
+        self._selectionRange = selectionRange
         
+        multi_select = not (
+            self._selectionRange.startCol == self._selectionRange.endCol and 
+            self._selectionRange.startRow == self._selectionRange.endRow
+        )
+
         sqType = self._model.getProperty('model')
         if multi_select:
             sqType += " (multiple squares)"
@@ -68,7 +74,7 @@ class PropertiesItem(QWidget):
         if dlg.exec_() == QDialog.Accepted:
             chosenRotation = dlg.selectedRotation
             if chosenRotation is not None:
-                self._model.setProperty('rotation', str(chosenRotation))
+                self._mapModel.setGroupProperty(self._selectionRange, self._model.getProperty('model'), 'rotation', str(chosenRotation))
                 self._mapModel.updateEntireMap()
                 self.modelPicture.updatePixmap()
 
@@ -77,7 +83,7 @@ class PropertiesItem(QWidget):
         if dlg.exec_() == QDialog.Accepted:
             chosenModel = dlg.selectedModel
             if chosenModel is not None:
-                self._model.setProperty('model', chosenModel)
+                self._mapModel.setGroupProperty(self._selectionRange, self._model.getProperty('model'), 'model', chosenModel)
                 self._mapModel.updateEntireMap()
                 self.modelPicture.updatePixmap()
 
@@ -127,17 +133,15 @@ class PropertiesPanel(QWidget):
         if startCol == endCol and startRow == endRow:
             items = self.mapModel.getSquareItems(startCol, startRow, zLevel)
             self.coordinatesLbl.setText("X: " + str(startCol) + " Y: " + str(startRow) + " Zlevel: " + str(zLevel))
-            multi_select = False
         else:
             items = self.mapModel.getAreaSquareUniqueItems(selectionRange)
             width = abs(endCol - startCol) + 1
             height = abs(endRow - startRow) + 1
             totalItems = width * height
             self.coordinatesLbl.setText(f"{totalItems} squares selected")
-            multi_select = True
         
         for itemModel in items:
-            itemWg = PropertiesItem(itemModel, self.mapModel._objCollection, self.mapModel, self._category, multi_select)
+            itemWg = PropertiesItem(itemModel, self.mapModel._objCollection, self.mapModel, self.selectionRange, self._category)
             itemWg.updateAllProperties.connect(self.update)
             self.properties.addWidget(itemWg)
 
