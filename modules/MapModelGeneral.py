@@ -225,6 +225,12 @@ class MapModelGeneral(QObject):
         self._squares.append(obj)
         return obj
 
+    def createObjectsInSelection(self, selectionRange):
+        """Creates a new object in each square within the specified selection range."""
+        for row in range(selectionRange.startRow, selectionRange.endRow + 1):
+            for col in range(selectionRange.startCol, selectionRange.endCol + 1):
+                self.createObjectAt(col, row, selectionRange.zLevel)
+
     def deleteRow(self, rowId): # _squares nice here, but what about _objects?
         # delete row
         self._squares[:] = filter(lambda item: item.y != rowId, self._squares)

@@ -147,7 +147,7 @@ class PropertiesPanel(QWidget):
 
     def addObject(self):
         if self.selectionRange is not None:
-            obj = self.mapModel.createObjectAt(self.selectionRange.startCol, self.selectionRange.startRow, self.selectionRange.zLevel)
+            self.mapModel.createObjectsInSelection(self.selectionRange)
             self.onSquaresSelected(self.selectionRange)
             self.updatedEntireMap.emit()
 
