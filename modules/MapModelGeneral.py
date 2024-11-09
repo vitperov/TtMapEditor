@@ -431,3 +431,9 @@ class MapModelGeneral(QObject):
             
     def updateEntireMap(self):
         self.updatedEntireMap.emit()
+        
+    def setGroupProperty(self, startX, startY, endX, endY, z, modelFilter, property, value):
+        for square in self._squares:
+            if startX <= square.x <= endX and startY <= square.y <= endY and square.z == z:
+                if square.properties['model'] == modelFilter:
+                    square.setProperty(property, value)
