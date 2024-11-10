@@ -8,17 +8,26 @@ from functools import partial
 from modules.SimpleSquareItem import SimpleSquareItem
 from modules.ChooseRotationDlg import ChooseRotationDlg
 from modules.ChooseModelDlg import ChooseModelDlg
+from modules.MapModelGeneral import SelectionRange
 
 class PropertiesItem(QWidget):
     updateAllProperties = pyqtSignal()  # Signal to notify when properties are updated
 
-    def __init__(self, objModel, objCollection, mapModel, category, tilesize=64, parent=None):
+    def __init__(self, objModel, objCollection, mapModel, selectionRange, category, tilesize=64, parent=None):
         super(PropertiesItem, self).__init__(parent)  # Initialize QWidget directly
         self._model = objModel
         self._mapModel = mapModel
         self._category = category
+        self._selectionRange = selectionRange
         
+        multi_select = not (
+            self._selectionRange.startCol == self._selectionRange.endCol and 
+            self._selectionRange.startRow == self._selectionRange.endRow
+        )
+
         sqType = self._model.getProperty('model')
+        if multi_select:
+            sqType += " (multiple squares)"
 
         # Create a layout for the widget
         layout = QVBoxLayout(self)
@@ -29,9 +38,13 @@ class PropertiesItem(QWidget):
         groupBoxLayout = QHBoxLayout()  # Change to QHBoxLayout for horizontal arrangement
         groupBox.setLayout(groupBoxLayout)
         layout.addWidget(groupBox)
+        
+        # Change groupbox background if multiple squares are selected
+        if multi_select:
+            groupBox.setStyleSheet("background-color: #A5CEC0")
 
         # Add SimpleSquareItem
-        self.modelPicture = SimpleSquareItem(objModel, objCollection, tilesize)
+        self.modelPicture = SimpleSquareItem(objModel, objCollection, tilesize, multi_select)
         groupBoxLayout.addWidget(self.modelPicture)
 
         # Create a vertical layout to stack buttons
@@ -61,7 +74,7 @@ class PropertiesItem(QWidget):
         if dlg.exec_() == QDialog.Accepted:
             chosenRotation = dlg.selectedRotation
             if chosenRotation is not None:
-                self._model.setProperty('rotation', str(chosenRotation))
+                self._mapModel.setGroupProperty(self._selectionRange, self._model.getProperty('model'), 'rotation', str(chosenRotation))
                 self._mapModel.updateEntireMap()
                 self.modelPicture.updatePixmap()
 
@@ -70,7 +83,7 @@ class PropertiesItem(QWidget):
         if dlg.exec_() == QDialog.Accepted:
             chosenModel = dlg.selectedModel
             if chosenModel is not None:
-                self._model.setProperty('model', chosenModel)
+                self._mapModel.setGroupProperty(self._selectionRange, self._model.getProperty('model'), 'model', chosenModel)
                 self._mapModel.updateEntireMap()
                 self.modelPicture.updatePixmap()
 
@@ -83,9 +96,7 @@ class PropertiesPanel(QWidget):
     def __init__(self, category):
         QWidget.__init__(self)
 
-        self.x = None
-        self.y = None
-        self.zLevel = None
+        self.selectionRange = None
         self._category = category
 
         layout = QVBoxLayout()
@@ -107,27 +118,39 @@ class PropertiesPanel(QWidget):
     def setModel(self, model):
         self.mapModel = model
 
-    def showSquareProperties(self, x, y, z):
-        self.x = x
-        self.y = y
-        self.zLevel = z
+    def onSquaresSelected(self, selectionRange):
+        self.selectionRange = selectionRange
+
+        startCol = selectionRange.startCol
+        startRow = selectionRange.startRow
+        endCol = selectionRange.endCol
+        endRow = selectionRange.endRow
+        zLevel = selectionRange.zLevel
 
         for i in reversed(range(self.properties.count())):
             self.properties.itemAt(i).widget().setParent(None)
 
-        items = self.mapModel.getSquareItems(x, y, z)
+        if startCol == endCol and startRow == endRow:
+            items = self.mapModel.getSquareItems(startCol, startRow, zLevel)
+            self.coordinatesLbl.setText("X: " + str(startCol) + " Y: " + str(startRow) + " Zlevel: " + str(zLevel))
+        else:
+            items = self.mapModel.getAreaSquareUniqueItems(selectionRange)
+            width = abs(endCol - startCol) + 1
+            height = abs(endRow - startRow) + 1
+            totalItems = width * height
+            self.coordinatesLbl.setText(f"{totalItems} squares selected")
+        
         for itemModel in items:
-            self.coordinatesLbl.setText("X: " + str(x) + " Y: " + str(y) + " Zlevel: " + str(z))
-
-            itemWg = PropertiesItem(itemModel, self.mapModel._objCollection, self.mapModel, self._category)
+            itemWg = PropertiesItem(itemModel, self.mapModel._objCollection, self.mapModel, self.selectionRange, self._category)
             itemWg.updateAllProperties.connect(self.update)
             self.properties.addWidget(itemWg)
 
     def addObject(self):
-        if self.x is not None and self.y is not None and self.zLevel is not None:
-            obj = self.mapModel.createObjectAt(self.x, self.y, self.zLevel)
-            self.showSquareProperties(self.x, self.y, self.zLevel)
+        if self.selectionRange is not None:
+            self.mapModel.createObjectsInSelection(self.selectionRange)
+            self.onSquaresSelected(self.selectionRange)
             self.updatedEntireMap.emit()
-            
+
     def update(self):
-        self.showSquareProperties(self.x, self.y, self.zLevel)
+        if self.selectionRange:
+            self.onSquaresSelected(self.selectionRange)

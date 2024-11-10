@@ -42,7 +42,8 @@ class IntervalRespawnGenerator(GeneratorPluginBase):
         print("Done " + str(self.generatedModel))
         
     def clear_generated(self):
-        return super().clear_generated()
+        #return super().clear_generated()
+        print("Not implemented")
 
     def placeRespawn(self, row, col):
         obj = MapObjectModelGeneral()

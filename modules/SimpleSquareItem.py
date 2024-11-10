@@ -4,11 +4,12 @@ from PyQt5.QtCore import QSize
 from pyqtgraph.Qt import QtCore
 
 class SimpleSquareItem(QWidget):
-    def __init__(self, model, objCollection, tilesize):
+    def __init__(self, model, objCollection, tilesize, multi_select=False):
         super(SimpleSquareItem, self).__init__()
         self._model = model
         self._objCollection = objCollection
         self._tilesize = tilesize
+        self._multi_select = multi_select
         
         self.initUI()
 

@@ -24,6 +24,14 @@ class ObjectRotation(str, Enum):
     deg180  = '180'
     deg270  = '270'
 
+class SelectionRange:
+    def __init__(self, startCol, startRow, endCol, endRow, zLevel):
+        self.startCol = startCol
+        self.startRow = startRow
+        self.endCol = endCol
+        self.endRow = endRow
+        self.zLevel = zLevel
+
 class MapObjectModelGeneral(QObject):
     changed = pyqtSignal()
 
@@ -151,7 +159,7 @@ class MapModelGeneral(QObject):
         self.editorWidth = 0
         self.editorHeight = 0;
         self._squares = list()
-        self._objects = list()
+        #self._objects = list()
         self._updateCallback = self.updateEntireMap
 
     def setUpdatedCallback(self, callback):
@@ -188,8 +196,17 @@ class MapModelGeneral(QObject):
                 items.append(square)
         return items
 
-    # TODO: used only for house square and deletes object, not sqare
-    # We should rename it, or better refactor everything and use only objects
+    def getAreaSquareUniqueItems(self, selectionRange):
+        items = list()
+        seen_models = set()
+        for square in self._squares:
+            if selectionRange.startCol <= square.x <= selectionRange.endCol and selectionRange.startRow <= square.y <= selectionRange.endRow and square.z == selectionRange.zLevel:
+                model = square.properties['model']
+                if model not in seen_models:
+                    seen_models.add(model)
+                    items.append(square)
+        return items
+
     def deleteSquareById(self, id):
         print("Deleting entire square, id=" + str(id))
         N = len(self._squares);
@@ -207,6 +224,12 @@ class MapModelGeneral(QObject):
         obj.z = z
         self._squares.append(obj)
         return obj
+
+    def createObjectsInSelection(self, selectionRange):
+        """Creates a new object in each square within the specified selection range."""
+        for row in range(selectionRange.startRow, selectionRange.endRow + 1):
+            for col in range(selectionRange.startCol, selectionRange.endCol + 1):
+                self.createObjectAt(col, row, selectionRange.zLevel)
 
     def deleteRow(self, rowId): # _squares nice here, but what about _objects?
         # delete row
@@ -260,16 +283,6 @@ class MapModelGeneral(QObject):
         if self._updateCallback:
             self._updateCallback()
             
-    #def recalculateMapSize(self):
-    #    maxX = 0
-    #    maxY = 0
-    #    for square in self._squares:
-    #        maxX = max(maxX, square.x)
-    #        maxY = max(maxY, square.y)
-    #        
-    #    self.width = maxX + 1
-    #    self.height = maxY + 1
-
     def getAllSquares(self, zLevel):
         items = list()
         for square in self._squares:
@@ -277,13 +290,9 @@ class MapModelGeneral(QObject):
                 items.append(square)
         return items
         
-    def getAllObjects(self):
-        return self._objects
-        
-    # iterates (squares + objects)
     def getAllObjectOfType(self, modelType):
         result = []
-        for obj in self._objects + self._squares:
+        for obj in self._squares:
             if (obj.properties.get('model') == modelType or obj.modelSuper == modelType):
                 result.append(obj)
         return result
@@ -292,90 +301,16 @@ class MapModelGeneral(QObject):
         return [self.height, self.width]
 
     def addMapObject(self, obj):
-        self._objects.append(obj)
-        
-    def removeMapObject(self, objOrId, modelOrType = '*'):
-        '''
-        Remove the map object:
-        objOrId - the object or the string id of object
-        modelOrType - filter by model generator class or model generator class name
-        '''
-        tmp = None
-        actualModel = None
-        try:
-            if (isinstance(objOrId, Number)):
-                objOrId = str(objOrId)
-            if (isinstance(objOrId, str)):
-                tmp = MapObjectModelGeneral(id = objOrId)
-                if (tmp in self._objects):
-                    tmp = self._objects[self._objects.index(tmp)]
-                elif (tmp in self._squares):
-                    tmp = self._squares[self._squares.index(tmp)]
-                else:
-                    return False
-            else:
-                tmp = objOrId
-            try:
-                if (tmp.modelSuper is not None):
-                    print('tmp.model: ', tmp.model, tmp.modelSuper)
-            except:
-                pass
-            actualModel = tmp.model;  tmp.model = tmp.modelSuper if (tmp.modelSuper is not None) else tmp.model # It is because of strange LandLotContent
-            #print('tmp0: ', tmp)
-            #print('modelOrType: ', modelOrType)
-            if (isinstance(modelOrType, str)):
-                #print('str', modelOrType, tmp.model)
-                #print('*' != modelOrType)
-                #print(tmp.model != modelOrType)
-                #print(tmp.__class__.__name__ != modelOrType)
-                #print((isclass(tmp.model) and tmp.model.__name__ != modelOrType))
-                if ('*' != modelOrType and tmp.model != modelOrType and tmp.__class__.__name__ != modelOrType and (not isclass(tmp.model) or (isclass(tmp.model) and tmp.model.__name__ != modelOrType))):
-                    #print('str bad')
-                    return None
-                #print('str good')
-            elif (not isinstance(tmp, modelOrType) and tmp.model != modelOrType):
-                #print('type bad: ', tmp, modelOrType)
-                return None
-            #print('good')
-            if (tmp in self._objects):
-                self._objects.remove(tmp)
-            else:
-                self._squares.remove(tmp)
-            return True
-        finally:
-            if (actualModel is not None and (tmp is not None) and isinstance(tmp, MapObjectModelGeneral)):
-                tmp.model = actualModel
-        
-    def removeAllMapObjects(self, modelOrType):
-        was = None
-        try:
-            if ('*' == modelOrType):
-                print('* is not allowed here')
-                return was
-            was = False
-            tmps = list(self._objects) + list(self._squares)
-            for obj in tmps:
-                if (self.removeMapObject(obj, modelOrType)): ##### if (self.removeMapObject(obj.id, modelOrType)):
-                    was = True
-        except:
-            #print(e1)
-            print(traceback.format_exc())
-        finally:
-            return was
+        self._squares.append(obj)
 
     def toSerializableObj(self):
         squares = list()
         for square in self._squares:
             squares.append(square.toSerializableObj())
 
-        objects = list()
-        for obj in self._objects:
-            objects.append(obj.toSerializableObj())
-
         obj = dict()
         obj['version'] = 1
         obj['squares'] = squares
-        obj['objects'] = objects
         obj['width']   = self.width
         obj['height']  = self.height
 
@@ -390,12 +325,6 @@ class MapModelGeneral(QObject):
             obj = self._sqareModel()
             obj.restoreFromJson(square)
             self._squares.append(obj)
-
-        self._objects = list()
-        for jsObj in js['objects']:
-            obj = self._sqareModel()
-            obj.restoreFromJson(jsObj)
-            self._objects.append(obj)
 
     def saveMap(self, filename):
         extension = '.json'
@@ -422,3 +351,9 @@ class MapModelGeneral(QObject):
             
     def updateEntireMap(self):
         self.updatedEntireMap.emit()
+        
+    def setGroupProperty(self, selectionRange, modelFilter, property, value):
+        for square in self._squares:
+            if selectionRange.startCol <= square.x <= selectionRange.endCol and selectionRange.startRow <= square.y <= selectionRange.endRow and square.z == selectionRange.zLevel:
+                if square.properties['model'] == modelFilter:
+                    square.setProperty(property, value)

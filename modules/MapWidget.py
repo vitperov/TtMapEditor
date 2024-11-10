@@ -8,16 +8,18 @@ from modules.MapItemDrawer import *
 from modules.DeleteButtonItem import *
 
 import math
+from modules.MapModelGeneral import SelectionRange
 
 class MapWidget(QWidget):
-    activeItemChanged = pyqtSignal(int, int, int)
     deleteRow         = pyqtSignal(int)
     deleteColumn      = pyqtSignal(int)
+    selectionChanged  = pyqtSignal(SelectionRange)
 
     def __init__(self):
         QWidget.__init__(self)
         self._model = None
-        self.zLevel = 0;
+        self.zLevel = 0
+        #self.isMultipleSelect = False
 
         self._layout = QVBoxLayout()
         self._model = None
@@ -25,7 +27,8 @@ class MapWidget(QWidget):
         self.setLayout(self._layout)
 
         self.label = QtWidgets.QLabel()
-        self.label.mousePressEvent = self.onMouseClick
+        self.label.mousePressEvent = self.onMousePress
+        self.label.mouseReleaseEvent = self.onMouseRelease
 
         self._canvas = QtGui.QPixmap(640, 480)
         self._canvas.fill(Qt.white)
@@ -33,32 +36,61 @@ class MapWidget(QWidget):
         self._layout.addWidget(self.label)
         self._layout.addStretch()
 
+        self.selectedRow = None
+        self.selectedCol = None
+        self.startPoint = None
+        self.endPoint = None
+
         self.updateCanvas()
 
     def updateCanvas(self):
         self.label.setPixmap(self._canvas)
 
-    def onMouseClick(self, event):
+    def onMousePress(self, event):
         x = event.pos().x()
         y = event.pos().y()
-        print("Clicked X=" + str(x) + "; Y=" + str(y))
-        col = int(x / self.pixPerTile)
-        row = int(y / self.pixPerTile)
-        print("Clicked row=" + str(row) + "; col=" + str(col))
+        self.startPoint = (x, y)
+
+    def onMouseRelease(self, event):
+        if not self.startPoint:
+            return
+
+        x1, y1 = self.startPoint
+        x2 = event.pos().x()
+        y2 = event.pos().y()
+
+        print(f"Mouse press point: ({x1}, {y1})")
+        print(f"Mouse release point: ({x2}, {y2})")
+
+        startCol = int(min(x1, x2) / self.pixPerTile)
+        endCol = int(max(x1, x2) / self.pixPerTile)
+        startRow = int(min(y1, y2) / self.pixPerTile)
+        endRow = int(max(y1, y2) / self.pixPerTile)
+
+        print(f"Selected area converted to cell coordinates: Start({startCol}, {startRow}), End({endCol}, {endRow})")
 
         [rows, cols] = self._model.size()
-        if row < rows and col < cols:
-            self.activeItemChanged.emit(col, row, self.zLevel)
-        elif row == rows and col == cols:
+
+        self.endPoint = (endCol, endRow)
+
+        if startRow < rows and startCol < cols:
+            self.selectedRow = startRow
+            self.selectedCol = startCol
+            selectionRange = SelectionRange(startCol, startRow, endCol, endRow, self.zLevel)
+            self.selectionChanged.emit(selectionRange)
+                
+        elif startRow == rows and startCol == cols:
             print("Clicked corner. No actions")
-        elif row == rows:
-            print("Delete column idx=" + str(col))
-            self.deleteColumn.emit(col)
-        elif cols == cols:
-            print("Delete row idx=" + str(row))
-            self.deleteRow.emit(row)
-        else:
-            print("Error click outside canvas")
+        elif startRow == rows:
+            print("Delete column idx=" + str(startCol))
+            self.deleteColumn.emit(startCol)
+        elif startCol == cols:
+            print("Delete row idx=" + str(startRow))
+            self.deleteRow.emit(startRow)
+
+        self.redrawAll()
+        self.startPoint = None
+        self.endPoint = None
 
     def setModel(self, model):
         self._model = model
@@ -70,8 +102,8 @@ class MapWidget(QWidget):
             rows = rows + 1
             cols = cols + 1
 
-        maxWidth = 1400;
-        maxHeight = 900;
+        maxWidth = 1400
+        maxHeight = 900
 
         wPixPerSquare = math.floor(maxWidth / cols)
         hPixPerSquare = math.floor(maxHeight / rows)
@@ -81,6 +113,38 @@ class MapWidget(QWidget):
 
         self._canvas = QtGui.QPixmap(cols*self.pixPerTile, rows*self.pixPerTile)
         self._canvas.fill(QtGui.QColor('#ADD8E6')) # light blue
+
+        # Draw dashed lines between squares
+        painter = QtGui.QPainter(self._canvas)
+        pen = QtGui.QPen(QtGui.QColor('#000000'))  # black color
+        pen.setStyle(QtCore.Qt.DashLine)
+        pen.setWidth(1)
+        painter.setPen(pen)
+
+        for x in range(0, cols*self.pixPerTile, self.pixPerTile):
+            painter.drawLine(x, 0, x, rows*self.pixPerTile)
+        for y in range(0, rows*self.pixPerTile, self.pixPerTile):
+            painter.drawLine(0, y, cols*self.pixPerTile, y)
+
+        if self.selectedRow is not None and self.selectedCol is not None:
+            # Draw a red rectangle around the selected square
+            selectionPen = QtGui.QPen(QtGui.QColor('#FF0000'))  # red color
+            selectionPen.setStyle(QtCore.Qt.SolidLine)
+            selectionPen.setWidth(2)
+            painter.setPen(selectionPen)
+
+            if self.endPoint:
+                startCol, startRow = self.selectedCol, self.selectedRow
+                endCol, endRow = self.endPoint
+                x = startCol * self.pixPerTile
+                y = startRow * self.pixPerTile
+                w = (endCol - startCol + 1) * self.pixPerTile
+                h = (endRow - startRow + 1) * self.pixPerTile
+                painter.drawRect(x, y, w, h)
+            else:
+                painter.drawRect(self.selectedCol * self.pixPerTile, self.selectedRow * self.pixPerTile, self.pixPerTile, self.pixPerTile)
+
+        painter.end()
         self.updateCanvas()
 
     def redrawAll(self):
@@ -88,10 +152,10 @@ class MapWidget(QWidget):
         print("=============== NEW CANVAS==============+")
         self._createNewCanvas(editMode=True)
         mapSquares = self._model.getAllSquares(self.zLevel)
-        mapObjects = self._model.getAllObjects()
-        mapAll = (mapSquares + mapObjects)
-        print('len of mapAll: ', len(mapAll))
-        for squareModel in mapAll:
+        #mapObjects = self._model.getAllObjects()
+        #mapAll = (mapSquares + mapObjects)
+        #print('len of mapAll: ', len(mapAll))
+        for squareModel in mapSquares:
             # Don not store. It's one-time object that just draws an object
             item = MapItemDrawer(squareModel, self._canvas, self.pixPerTile, self._model._objCollection, self.updateCanvas)
 
@@ -105,5 +169,8 @@ class MapWidget(QWidget):
             item = DeleteButtonItem(self._canvas, self.pixPerTile, w, y)
             # no need to store, will be garbage-collected
 
-
         self.updateCanvas()
+
+    #def onMultipleSelectionChanged(self, isMultiple):
+    #    self.isMultipleSelect = isMultiple
+    #    print(f"Multiple selection changed: {isMultiple}")
