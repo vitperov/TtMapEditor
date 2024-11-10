@@ -108,11 +108,41 @@ class MapWidget(QWidget):
         pen.setWidth(1)
         painter.setPen(pen)
 
+        self.drawGrid(painter, cols, rows)
+
+        self.drawCurrentSelection(painter)
+
+        painter.end()
+        self.updateCanvas()
+
+    def drawGrid(self, painter, cols, rows):
         for x in range(0, cols*self.pixPerTile, self.pixPerTile):
             painter.drawLine(x, 0, x, rows*self.pixPerTile)
         for y in range(0, rows*self.pixPerTile, self.pixPerTile):
             painter.drawLine(0, y, cols*self.pixPerTile, y)
 
+    def redrawAll(self):
+        [h, w] = self._model.size()
+        print("=============== NEW CANVAS==============+")
+        self._createNewCanvas(editMode=True)
+        mapSquares = self._model.getAllSquares(self.selectionRange.zLevel)
+        for squareModel in mapSquares:
+            # Don not store. It's one-time object that just draws an object
+            item = MapItemDrawer(squareModel, self._canvas, self.pixPerTile, self._model._objCollection, self.updateCanvas)
+
+        # column delete buttons
+        for x in range(w):
+            item = DeleteButtonItem(self._canvas, self.pixPerTile, x, h)
+            # no need to store, will be garbage-collected
+
+        # row delete buttons
+        for y in range(h):
+            item = DeleteButtonItem(self._canvas, self.pixPerTile, w, y)
+            # no need to store, will be garbage-collected
+
+        self.updateCanvas()
+
+    def drawCurrentSelection(self, painter):
         if self.selectionRange.startRow is not None and self.selectionRange.startCol is not None:
             # Draw a red rectangle around the selected square
             selectionPen = QtGui.QPen(QtGui.QColor('#FF0000'))  # red color
@@ -130,34 +160,3 @@ class MapWidget(QWidget):
                 painter.drawRect(x, y, w, h)
             else:
                 painter.drawRect(self.selectionRange.startCol * self.pixPerTile, self.selectionRange.startRow * self.pixPerTile, self.pixPerTile, self.pixPerTile)
-
-        painter.end()
-        self.updateCanvas()
-
-    def redrawAll(self):
-        [h, w] = self._model.size()
-        print("=============== NEW CANVAS==============+")
-        self._createNewCanvas(editMode=True)
-        mapSquares = self._model.getAllSquares(self.selectionRange.zLevel)
-        #mapObjects = self._model.getAllObjects()
-        #mapAll = (mapSquares + mapObjects)
-        #print('len of mapAll: ', len(mapAll))
-        for squareModel in mapSquares:
-            # Don not store. It's one-time object that just draws an object
-            item = MapItemDrawer(squareModel, self._canvas, self.pixPerTile, self._model._objCollection, self.updateCanvas)
-
-        # column delete buttons
-        for x in range(w):
-            item = DeleteButtonItem(self._canvas, self.pixPerTile, x, h)
-            # no need to store, will be garbage-collected
-
-        # row delete buttons
-        for y in range(h):
-            item = DeleteButtonItem(self._canvas, self.pixPerTile, w, y)
-            # no need to store, will be garbage-collected
-
-        self.updateCanvas()
-
-    #def onMultipleSelectionChanged(self, isMultiple):
-    #    self.isMultipleSelect = isMultiple
-    #    print(f"Multiple selection changed: {isMultiple}")
