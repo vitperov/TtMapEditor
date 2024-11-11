@@ -26,6 +26,9 @@ class MapItemDrawer:
             self.drawPixmap()
 
     def drawPixmap(self):
+        if self.sqType == "None":
+            return
+
         rotation    = self._model.getProperty('rotation')
 
         imgFile = self._objCollection.getIcon(self.sqType)
