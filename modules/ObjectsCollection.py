@@ -3,11 +3,13 @@ import json
 from typing import List, Dict, Set
 
 class MapObject:
-    def __init__(self, name: str, categories: str, iconFile: str, contour: str):
+    def __init__(self, name: str, categories: str, iconFile: str, contour: str, w: int = 1, h: int = 1):
         self.name = name
         self.categories = categories
         self.iconFile   = iconFile
         self.contour    = contour
+        self.w = w
+        self.h = h
 
     @classmethod
     def from_json(cls, json_data: Dict, base_path: str):
@@ -16,6 +18,8 @@ class MapObject:
             categories=json_data.get('categories', ''),
             iconFile=os.path.join(base_path, json_data.get('iconFile', '')),
             contour=json_data.get('contour', ''),
+            w=json_data.get('w', 1),
+            h=json_data.get('h', 1),
         )
         
     def isContour(self):
