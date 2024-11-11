@@ -36,9 +36,6 @@ class MapWidget(QWidget):
 
         self.selectionRange = SelectionRange(None, None, None, None, 0)
 
-        self.updateCanvas()
-
-    def updateCanvas(self):
         self.label.setPixmap(self._canvas)
 
     def onMousePress(self, event):
@@ -101,21 +98,15 @@ class MapWidget(QWidget):
         self._canvas = QtGui.QPixmap(cols*self.pixPerTile, rows*self.pixPerTile)
         self._canvas.fill(QtGui.QColor('#ADD8E6')) # light blue
 
-        # Draw dashed lines between squares
-        painter = QtGui.QPainter(self._canvas)
+        # At least show light-blue filled rectangle in case there will be errors later
+        self.label.setPixmap(self._canvas)
+
+    def drawGrid(self, painter, cols, rows):
         pen = QtGui.QPen(QtGui.QColor('#000000'))  # black color
         pen.setStyle(QtCore.Qt.DashLine)
         pen.setWidth(1)
         painter.setPen(pen)
 
-        self.drawGrid(painter, cols, rows)
-
-        self.drawCurrentSelection(painter)
-
-        painter.end()
-        self.updateCanvas()
-
-    def drawGrid(self, painter, cols, rows):
         for x in range(0, cols*self.pixPerTile, self.pixPerTile):
             painter.drawLine(x, 0, x, rows*self.pixPerTile)
         for y in range(0, rows*self.pixPerTile, self.pixPerTile):
@@ -131,7 +122,7 @@ class MapWidget(QWidget):
         mapSquares = self._model.getAllSquares(self.selectionRange.zLevel)
         for squareModel in mapSquares:
             # Don not store. It's one-time object that just draws an object
-            item = MapItemDrawer(squareModel, painter, self.pixPerTile, self._model._objCollection, self.updateCanvas)
+            item = MapItemDrawer(squareModel, painter, self.pixPerTile, self._model._objCollection)
 
         # column delete buttons
         for x in range(w):
@@ -142,16 +133,20 @@ class MapWidget(QWidget):
         for y in range(h):
             item = DeleteButtonItem(painter, self.pixPerTile, w, y)
             # no need to store, will be garbage-collected
+            
+        self.drawGrid(painter, w, h)
+
+        self.drawCurrentSelection(painter)
 
         painter.end()
-        self.updateCanvas()
+        self.label.setPixmap(self._canvas)
 
     def drawCurrentSelection(self, painter):
         if self.selectionRange.startRow is not None and self.selectionRange.startCol is not None:
             # Draw a red rectangle around the selected square
             selectionPen = QtGui.QPen(QtGui.QColor('#FF0000'))  # red color
-            selectionPen.setStyle(QtCore.Qt.SolidLine)
-            selectionPen.setWidth(2)
+            selectionPen.setStyle(QtCore.Qt.DashLine)
+            selectionPen.setWidth(4)
             painter.setPen(selectionPen)
 
             if self.selectionRange.endRow is not None and self.selectionRange.endCol is not None:

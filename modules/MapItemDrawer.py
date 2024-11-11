@@ -4,7 +4,7 @@ from PyQt5.QtCore import *
 from pyqtgraph.Qt import QtCore, QtGui
 
 class MapItemDrawer:
-    def __init__(self, model, painter, tilesize, objCollection, redrawClbk):
+    def __init__(self, model, painter, tilesize, objCollection):
 
         self._model = model
         self._objCollection = objCollection
@@ -12,7 +12,6 @@ class MapItemDrawer:
         self._tilesize = tilesize
         self._col = model.x
         self._row = model.y
-        self._redrawClbk = redrawClbk;
 
         size = QSize(self._tilesize, self._tilesize)
         
@@ -47,9 +46,11 @@ class MapItemDrawer:
         y = self._row * self._tilesize
         
         self._painter.drawPixmap(x, y, scaledPixmap)
-        self._redrawClbk()
         
     def drawContour(self):
+        if self.sqType == "None":
+            return
+
         sqTypeDescription = self._objCollection.getObject(self.sqType)
         contourColor = sqTypeDescription.contour
 
@@ -60,10 +61,8 @@ class MapItemDrawer:
 
         color = QtGui.QColor(contourColor)
 
-        self._painter.setPen(QtGui.QPen(color, 1))  # Set pen color and thickness
+        self._painter.setPen(QtGui.QPen(color, 2))  # Set pen color and thickness
 
         # Draw the rectangle contour
         #print(f"{sqType} -> {contourColor} -> {x} {y} {width} {height}")
         self._painter.drawRect(x, y, width, height)
-
-        self._redrawClbk()
