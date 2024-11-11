@@ -125,21 +125,25 @@ class MapWidget(QWidget):
         [h, w] = self._model.size()
         print("=============== NEW CANVAS==============+")
         self._createNewCanvas(editMode=True)
+
+        painter = QtGui.QPainter(self._canvas)
+
         mapSquares = self._model.getAllSquares(self.selectionRange.zLevel)
         for squareModel in mapSquares:
             # Don not store. It's one-time object that just draws an object
-            item = MapItemDrawer(squareModel, self._canvas, self.pixPerTile, self._model._objCollection, self.updateCanvas)
+            item = MapItemDrawer(squareModel, painter, self.pixPerTile, self._model._objCollection, self.updateCanvas)
 
         # column delete buttons
         for x in range(w):
-            item = DeleteButtonItem(self._canvas, self.pixPerTile, x, h)
+            item = DeleteButtonItem(painter, self.pixPerTile, x, h)
             # no need to store, will be garbage-collected
 
         # row delete buttons
         for y in range(h):
-            item = DeleteButtonItem(self._canvas, self.pixPerTile, w, y)
+            item = DeleteButtonItem(painter, self.pixPerTile, w, y)
             # no need to store, will be garbage-collected
 
+        painter.end()
         self.updateCanvas()
 
     def drawCurrentSelection(self, painter):
