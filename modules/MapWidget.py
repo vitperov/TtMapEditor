@@ -74,7 +74,7 @@ class MapWidget(QWidget):
             self.deleteRow.emit(self.selectionRange.startRow)
 
         self.redrawAll()
-        self.selectionRange = SelectionRange(None, None, None, None, 0)
+        self.selectionRange = SelectionRange(None, None, None, None, self.selectionRange.zLevel)
 
     def setModel(self, model):
         self._model = model
@@ -114,11 +114,11 @@ class MapWidget(QWidget):
 
     def redrawAll(self):
         [h, w] = self._model.size()
-        print("=============== NEW CANVAS==============+")
         self._createNewCanvas(editMode=True)
 
         painter = QtGui.QPainter(self._canvas)
 
+        print("Drawing objects of level: " + str(self.selectionRange.zLevel))
         mapSquares = self._model.getAllSquares(self.selectionRange.zLevel)
         for squareModel in mapSquares:
             # Don not store. It's one-time object that just draws an object
