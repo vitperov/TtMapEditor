@@ -357,3 +357,11 @@ class MapModelGeneral(QObject):
             if selectionRange.startCol <= square.x <= selectionRange.endCol and selectionRange.startRow <= square.y <= selectionRange.endRow and square.z == selectionRange.zLevel:
                 if square.properties['model'] == modelFilter:
                     square.setProperty(property, value)
+                    self.updateModelSize(square)
+
+    def updateModelSize(self, square):
+        model_name = square.getProperty('model')
+        map_object = self._objCollection.getObject(model_name)
+        if map_object:
+            square.w = map_object.w
+            square.h = map_object.h

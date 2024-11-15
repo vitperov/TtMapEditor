@@ -38,5 +38,5 @@ class HouseController:
         self._view.mapWidget.deleteColumn.connect(self._houseModel.deleteColumn)
 
     def _setZLevel(self, zLevel):
-        self._view.mapWidget.zLevel = zLevel
+        self._view.mapWidget.selectionRange.zLevel = zLevel
         self._view.mapWidget.redrawAll()

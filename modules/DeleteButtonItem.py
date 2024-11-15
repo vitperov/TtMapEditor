@@ -4,10 +4,10 @@ from PyQt5.QtCore import *
 from pyqtgraph.Qt import QtCore, QtGui
 
 class DeleteButtonItem(QObject):
-    def __init__(self, canvas, tilesize, col, row):
+    def __init__(self, painter, tilesize, col, row):
         QObject.__init__(self)
 
-        self._canvas = canvas
+        self._painter = painter
         self._tilesize = tilesize
         self._col = col
         self._row = row
@@ -30,8 +30,4 @@ class DeleteButtonItem(QObject):
         x = self._col * self._tilesize
         y = self._row * self._tilesize
         
-        painter = QtGui.QPainter(self._canvas)
-        painter.drawPixmap(x, y, scaledPixmap)
-        
-        painter.end()
-
+        self._painter.drawPixmap(x, y, scaledPixmap)
