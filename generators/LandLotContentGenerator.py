@@ -8,19 +8,16 @@ from modules.Terrain.TerrainGeneratorSettings import *
 
 TypeLandLot  = "LandLot"
 TypeHouse    = "House"
-TypeShed     = "Shed"
 TypeForest   = "Forest"
 TypeNone     = "None"
 
 class LandLotContentGenerator(GeneratorPluginBase):
     def __init__(self, mapModel):
         super().__init__(mapModel)
-        self.generatedModel = 'landLotContent' # It is really for any object like this?
 
     def generate(self):
         print("Generating landLotContent")
         houseProbability = float(self.settings['houseProbability'])
-        #shedProbability = float(self.settings['shedProbability'])
         forestProbability = float(self.settings['forestProbability'])
 
         landLots = self.mapModel.getAllObjectOfType(TypeLandLot)
@@ -36,7 +33,7 @@ class LandLotContentGenerator(GeneratorPluginBase):
         print("Done " + str(self.generatedModel))
         
     def clear_generated(self):
-        return super().clear_generated()
+        print("Not implemented")
 
 class LandLotGenerator():
     def __init__(self, model, startPt, size):
@@ -64,8 +61,6 @@ class LandLotGenerator():
 
         return True
 
-    #def clear_generated(self):
-    #    return super().clear_generated()
 
     def generate(self, houseProbability, forestProbability):
         generateHouse = (random() < houseProbability)
@@ -75,16 +70,6 @@ class LandLotGenerator():
                            TypeHouse)
 
             self.placedObjects.append(house)
-
-        #generateShed = (random() < shedProbability)
-        #if generateShed:
-        #    shed = LandLotObject(self)
-        #    shed.generate(self.oldSettings.shed.size,
-        #                  SquareType.Shed,
-        #                  "shed")
-        #
-        #    self.placedObjects.append(shed)
-
 
         self.generateForest(forestProbability)
 
@@ -127,9 +112,6 @@ class LandLotObject(LandLotLwObject):
         self.generatedModel = 'landLotContent'
         LandLotLwObject.__init__(self, landLot, keepout=1)
 
-    #def clear_generated(self):
-    #    return super().clear_generated()
-
     def generate(self, size, objModelName, objModelVariant):
         # can we pass landObj and get it's size?
         self.size = size
@@ -148,7 +130,7 @@ class LandLotObject(LandLotLwObject):
         print("    Obj placed at: " + str(self.localPos) + "; size=" + str(size))
 
         obj = MapObjectModelGeneral()
-        obj.init(self.globalPosition().x, self.globalPosition().y, objModelName, ObjectRotation.deg0, size.w, size.h, modelSuper=self.generatedModel)
+        obj.init(self.globalPosition().x, self.globalPosition().y, objModelName, ObjectRotation.deg0, size.w, size.h)
         obj.setProperty('variant',objModelVariant)
         self._randomizeProperty(obj, 'rotation')
         self.landLot.model.addMapObject(obj)

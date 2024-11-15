@@ -7,17 +7,6 @@ import json
 import uuid # we use it as string
 from numbers import Number # not only integer
 
-def isclass (obj):
-    """Return true if the obj is a class.
-    Class objects provide these attributes:
-        __doc__         documentation string
-        __module__      name of module in which this class was defined"""
-    try:
-        import types
-        return isinstance(obj, (type, types.ClassType,))
-    except:
-        return isinstance(obj, (type,))
-
 class ObjectRotation(str, Enum):
     deg0    = '0'
     deg90   = '90'
@@ -90,36 +79,6 @@ class MapObjectModelGeneral(QObject):
         obj['model'] = self.properties['model']
 
         return obj
-        
-    def __hash__(self):
-        return hash(self.toSerializableObj())
-        
-    def __eq__(self, other):
-        try:
-            if isinstance(other, self.__class__):
-                #print('self', self.__dict__)
-                #print('other', other.__dict__)
-                if (self.id == other.id):
-                    return True
-                tmp_self = dict(self.__dict__)
-                tmp_other = dict(other.__dict__)
-                del tmp_self['id']
-                del tmp_other['id']
-                return tmp_self == tmp_other
-        except Exception as e1:
-            print(traceback.format_exc())
-            #raise e1
-        return None #return NotImplemented
-            
-    def __lt__(self, other):
-        if ((self.x) == (other.x) and (self.y) == (other.y)):
-            return self.id < other.id
-        return ((self.x) < (other.x) or (self.y) < (other.y))
-        
-    def __gt__(self, other):
-        if ((self.x) == (other.x) and (self.y) == (other.y)):
-            return self.id > other.id
-        return ((self.x) > (other.x) or (self.y) > (other.y))
 
     def getProperty(self, name):
         return self.properties[name]
@@ -159,7 +118,6 @@ class MapModelGeneral(QObject):
         self.editorWidth = 0
         self.editorHeight = 0;
         self._squares = list()
-        #self._objects = list()
         self._updateCallback = self.updateEntireMap
 
     def setUpdatedCallback(self, callback):
