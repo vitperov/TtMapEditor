@@ -20,6 +20,10 @@ class SelectionRange:
         self.endCol = endCol
         self.endRow = endRow
         self.zLevel = zLevel
+    
+    @classmethod
+    def fromStartPointAndSize(cls, startPoint, size, zLevel):
+        return cls(startPoint.x, startPoint.y, startPoint.x + size.w - 1, startPoint.y + size.h - 1, zLevel)
 
 class MapObjectModelGeneral(QObject):
     changed = pyqtSignal()
@@ -38,9 +42,6 @@ class MapObjectModelGeneral(QObject):
         self.classnames['model']      = str
         self.properties['model']      = "Empty"
 
-        self.classnames['variant']      = str
-        self.properties['variant']      = ""
-
         self.id = str(id) if (id is not None) else str(uuid.uuid4())
 
         self.x = 0
@@ -49,17 +50,14 @@ class MapObjectModelGeneral(QObject):
         self.w = 1
         self.h = 1
 
-    def init(self, x, y, model, rotation=ObjectRotation.deg0, w=1, h=1, variant="", id=None, modelSuper=None):
+    def init(self, x, y, model, rotation=ObjectRotation.deg0, w=1, h=1, id=None):
         self.id = str(id) if (id is not None) else str(uuid.uuid4()) # FIXED: id was missing
         self.x = x
         self.y = y
         self.z = 0
-        self.modelSuper = None if (modelSuper is None or not(modelSuper)) else modelSuper # It is just model super replacer on comparation e.g. for LandLotContent
-        #self.modelGenerator = modelGenerator # model generator type
-        self.model = model # model generator type
-        self.properties['model']    = model # model name (where it is used?)
+
+        self.properties['model']    = model
         self.properties['rotation'] = rotation
-        self.properties['variant'] = variant
         self.w = w
         self.h = h
 
@@ -102,6 +100,13 @@ class MapObjectModelGeneral(QObject):
 
         for propName, propClass in self.classnames.items():
             self.properties[propName] = propClass(js.get(propName,""))
+            
+    def setSize(self, size):
+        self.w = size.w
+        self.h = size.h
+        
+    def setModel(self, model):
+        self.properties['model'] = model
 
 class MapModelGeneral(QObject):
     updatedEntireMap = pyqtSignal()
@@ -132,12 +137,6 @@ class MapModelGeneral(QObject):
 
         if self._updateCallback is not None:
             self._updateCallback()
-
-    def createEmpySquareAt(self, row, column):
-        obj = self._sqareModel()
-        obj.y = row
-        obj.x = column
-        self._squares.append(obj)
 
     def getSquare(self, x, y):
         #FIXME: depricated. Should use getSquareItems instead
@@ -175,6 +174,13 @@ class MapModelGeneral(QObject):
                     self._updateCallback()
                 return
 
+    #FIXME: These 3 functions do almost the same
+    def createEmpySquareAt(self, row, column):
+        obj = self._sqareModel()
+        obj.y = row
+        obj.x = column
+        self._squares.append(obj)
+
     def createObjectAt(self, x, y, z):
         obj = self._sqareModel()
         obj.x = x
@@ -183,11 +189,37 @@ class MapModelGeneral(QObject):
         self._squares.append(obj)
         return obj
 
+    def addMapObject(self, obj):
+        self._squares.append(obj)
+    
+    # ---------------
+
     def createObjectsInSelection(self, selectionRange):
         """Creates a new object in each square within the specified selection range."""
         for row in range(selectionRange.startRow, selectionRange.endRow + 1):
             for col in range(selectionRange.startCol, selectionRange.endCol + 1):
                 self.createObjectAt(col, row, selectionRange.zLevel)
+
+    def deleteObjectsInSelection(self, selectionRange, model=None):
+        """Deletes all objects within the specified selection range. If model is provided, only delete objects with the matching model."""
+        if model is None:
+            self._squares[:] = [
+                square for square in self._squares
+                if not (selectionRange.startCol <= square.x <= selectionRange.endCol and 
+                        selectionRange.startRow <= square.y <= selectionRange.endRow and 
+                        square.z == selectionRange.zLevel)
+            ]
+        else:
+            self._squares[:] = [
+                square for square in self._squares
+                if not (selectionRange.startCol <= square.x <= selectionRange.endCol and 
+                        selectionRange.startRow <= square.y <= selectionRange.endRow and 
+                        square.z == selectionRange.zLevel and
+                        square.properties['model'] == model)
+            ]
+
+        if self._updateCallback:
+            self._updateCallback()
 
     def deleteRow(self, rowId): # _squares nice here, but what about _objects?
         # delete row
@@ -257,9 +289,6 @@ class MapModelGeneral(QObject):
 
     def size(self):
         return [self.height, self.width]
-
-    def addMapObject(self, obj):
-        self._squares.append(obj)
 
     def toSerializableObj(self):
         squares = list()

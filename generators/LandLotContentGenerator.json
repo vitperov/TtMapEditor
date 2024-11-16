@@ -8,6 +8,10 @@
     "forestProbability": {
       "type": "float",
       "value": "0.2"
+    },
+    "houseModels": {
+      "type": "str",
+      "value": "house1,house2"
     }
   }
 }
