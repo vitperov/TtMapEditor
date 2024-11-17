@@ -7,6 +7,9 @@ import json
 import uuid # we use it as string
 from numbers import Number # not only integer
 
+from modules.GeometryPrimitives import *
+
+
 class ObjectRotation(str, Enum):
     deg0    = '0'
     deg90   = '90'
@@ -34,7 +37,6 @@ class MapObjectModelGeneral(QObject):
         self.properties = dict()
         
         self.model = "Empty"
-        self.modelSuper = None
 
         self.classnames['rotation']  = ObjectRotation
         self.properties['rotation']  = ObjectRotation.deg0
@@ -104,6 +106,15 @@ class MapObjectModelGeneral(QObject):
     def setSize(self, size):
         self.w = size.w
         self.h = size.h
+
+    def getSize(self): # consider rotation
+        size = AreaSize(self.w, self.h)
+        rotation = int(self.properties['rotation'].value);
+        rotatedSize = size.rotated(rotation)
+        return rotatedSize
+        
+    def getStartPt(self):
+        return Point(self.x, self.y)
         
     def setModel(self, model):
         self.properties['model'] = model
@@ -275,10 +286,14 @@ class MapModelGeneral(QObject):
                 items.append(square)
         return items
         
-    def getAllObjectOfType(self, modelType):
+    def getAllObjectOfType(self, modelType, selectionRange=None):
         result = []
         for obj in self._squares:
-            if (obj.properties.get('model') == modelType or obj.modelSuper == modelType):
+            isInSelectionRange = (selectionRange is None or
+                                  (selectionRange.startCol <= obj.x <= selectionRange.endCol and
+                                   selectionRange.startRow <= obj.y <= selectionRange.endRow and
+                                   obj.z == selectionRange.zLevel))
+            if isInSelectionRange and (obj.properties.get('model') == modelType):
                 result.append(obj)
         return result
 
@@ -347,3 +362,14 @@ class MapModelGeneral(QObject):
         if map_object:
             square.w = map_object.w
             square.h = map_object.h
+
+    def overwriteEverythingWith(self, selectionRange, modelType):
+        """Deletes all objects within the specified selection range and fills it with new objects of the given model type."""
+        self.deleteObjectsInSelection(selectionRange)
+        for row in range(selectionRange.startRow, selectionRange.endRow + 1):
+            for col in range(selectionRange.startCol, selectionRange.endCol + 1):
+                new_square = self.createObjectAt(col, row, selectionRange.zLevel)
+                new_square.setModel(modelType)
+
+        if self._updateCallback:
+            self._updateCallback()

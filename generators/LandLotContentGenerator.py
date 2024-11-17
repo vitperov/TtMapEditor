@@ -33,7 +33,18 @@ class LandLotContentGenerator(GeneratorPluginBase):
         print("Done " + str(self.generatedModel))
         
     def clear_generated(self):
-        print("Not implemented")
+        landLots = self.mapModel.getAllObjectOfType(TypeLandLot)
+
+        for lot in landLots:
+            startPt = Point(lot.x, lot.y)
+            size    = AreaSize(lot.w, lot.h)
+            zLevel = 0
+            selectionRange = SelectionRange.fromStartPointAndSize(startPt, size, zLevel)
+            self.mapModel.overwriteEverythingWith(selectionRange, TypeGrass)
+            
+            # lot obj was deleted after overwriteEverythingWith(). Restore it
+            self.mapModel.addMapObject(lot)
+
 
 class LandLotGenerator():
     def __init__(self, model, startPt, size):
@@ -47,10 +58,6 @@ class LandLotGenerator():
         print("Shrinked rect=" + str(self.allowedRect))
 
         self.placedObjects = []
-
-        # Depricated should be removed
-        #self.oldSettings = TerrainGeneratorSettings()
-        #self.oldSettings.loadFromFile()
 
     def canPlaceObjectAt(self, objRect):
         for obj in self.placedObjects:
@@ -137,12 +144,10 @@ class LandLotObject(LandLotLwObject):
         obj.setModel(objModelName)
         obj.setSize(size)
         self._randomizeProperty(obj, 'rotation')
-        print("Adding map object: " + str(obj.toSerializableObj()))
-        #self.landLot.model.addMapObject(obj)
+        #print("Adding map object: " + str(obj.toSerializableObj()))
 
-        # FIXME: move it into model
-        rotation = int(obj.properties['rotation'].value);
-        rotatedSize = size.rotated(rotation)
+        rotatedSize = obj.getSize()
+        rotation = int(obj.properties['rotation'].value)
         print("Rotation " + str(rotation) + ": size=" + str(size) + " -> " + str(rotatedSize))
 
         #delete grass under the object
