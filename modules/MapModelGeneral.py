@@ -202,21 +202,16 @@ class MapModelGeneral(QObject):
 
     def deleteObjectsInSelection(self, selectionRange, model=None):
         """Deletes all objects within the specified selection range. If model is provided, only delete objects with the matching model."""
-        if model is None:
-            self._squares[:] = [
-                square for square in self._squares
-                if not (selectionRange.startCol <= square.x <= selectionRange.endCol and 
-                        selectionRange.startRow <= square.y <= selectionRange.endRow and 
-                        square.z == selectionRange.zLevel)
-            ]
-        else:
-            self._squares[:] = [
-                square for square in self._squares
-                if not (selectionRange.startCol <= square.x <= selectionRange.endCol and 
-                        selectionRange.startRow <= square.y <= selectionRange.endRow and 
-                        square.z == selectionRange.zLevel and
-                        square.properties['model'] == model)
-            ]
+        i = 0
+        while i < len(self._squares):
+            square = self._squares[i]
+            if (selectionRange.startCol <= square.x <= selectionRange.endCol and 
+                selectionRange.startRow <= square.y <= selectionRange.endRow and 
+                square.z == selectionRange.zLevel and
+                (model is None or square.properties['model'] == model)):
+                del self._squares[i]
+            else:
+                i += 1
 
         if self._updateCallback:
             self._updateCallback()
