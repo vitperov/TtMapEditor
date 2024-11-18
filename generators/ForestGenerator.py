@@ -61,8 +61,9 @@ class ForestGeneratorHelper():
         
         for obj in objects:
             if obj.properties.get('model') != TypeGrass:
-                for x in range(obj.x, obj.x + obj.w):
-                    for y in range(obj.y, obj.y + obj.h):
+                size = obj.getSize()
+                for x in range(obj.x, obj.x + size.w):
+                    for y in range(obj.y, obj.y + size.h):
                         self.occupiedSquares.append(Point(x, y))
 
     def generate(self, forestProbability):
