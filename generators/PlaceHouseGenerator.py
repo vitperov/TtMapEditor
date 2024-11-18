@@ -44,6 +44,8 @@ class LandLotContentGenerator(GeneratorPluginBase):
             # lot obj was deleted after overwriteEverythingWith(). Restore it
             self.mapModel.addMapObject(lot)
 
+        self.mapModel.updateEntireMap()
+
 
 class LandLotGenerator():
     def __init__(self, model, startPt, size):

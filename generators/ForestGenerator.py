@@ -32,7 +32,6 @@ class ForestGenerator(GeneratorPluginBase):
         print("Done " + str(self.generatedModel))
         
     def clear_generated(self):
-        print("Deleting forest...")
         landLots = self.mapModel.getAllObjectOfType(TypeLandLot)
 
         for lot in landLots:
@@ -42,6 +41,8 @@ class ForestGenerator(GeneratorPluginBase):
             selectionRange = SelectionRange.fromStartPointAndSize(startPt, size, zLevel)
             # Forest -> Grass
             self.mapModel.setGroupProperty(selectionRange, TypeForest, "model", TypeGrass)
+            
+        self.mapModel.updateEntireMap()
 
 class ForestGeneratorHelper():
     def __init__(self, model, startPt, size):
