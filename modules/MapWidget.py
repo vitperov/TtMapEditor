@@ -79,6 +79,14 @@ class MapWidget(QWidget):
     def setModel(self, model):
         self._model = model
 
+    def addColumn(self):
+        if self._model is not None:
+            self._model.addColumn()
+
+    def addRow(self):
+        if self._model is not None:
+            self._model.addRow()
+
     def _createNewCanvas(self, editMode=False):
         [rows, cols] = self._model.size()
 

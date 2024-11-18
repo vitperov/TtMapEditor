@@ -27,8 +27,8 @@ class HouseController:
         self._view.actionsPanel.newMap.connect(self._houseModel.newMap)
         self._view.actionsPanel.openMap.connect(self._houseModel.openMap)
         self._view.actionsPanel.saveMap.connect(self._houseModel.saveMap)
-        self._view.actionsPanel.addColumn.connect(self._houseModel.addColumn)
-        self._view.actionsPanel.addRow.connect(self._houseModel.addRow)
+        self._view.actionsPanel.addColumn.connect(self._view.mapWidget.addColumn)
+        self._view.actionsPanel.addRow.connect(self._view.mapWidget.addRow)
         self._view.actionsPanel.zLevelChanged.connect(self._setZLevel)
 
         self._houseModel.updatedEntireMap.connect(self._view.mapWidget.redrawAll)

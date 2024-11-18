@@ -261,21 +261,37 @@ class MapModelGeneral(QObject):
 
         self._updateCallback()
 
-    def addRow(self):
-        """Adds a new row at the bottom of the map."""
-        for column in range(self.width):
-            self.createEmpySquareAt(self.height, column)  # New row at the end
+    def addRow(self, before=None):
+        """Adds a new row at the specified position or at the bottom of the map."""
+        if before is None:
+            for column in range(self.width):
+                self.createEmpySquareAt(self.height, column)  # New row at the end
+            self.height += 1  # Increase the height count
+        else:
+            for square in self._squares:
+                if square.y >= before:
+                    square.y += 1
+            for column in range(self.width):
+                self.createEmpySquareAt(before, column)  # New row at the specified position
+            self.height += 1
 
-        self.height += 1  # Increase the height count
         if self._updateCallback:
             self._updateCallback()
 
-    def addColumn(self):
-        """Adds a new column to the right side of the map."""
-        for row in range(self.height):
-            self.createEmpySquareAt(row, self.width)  # New column on the right
+    def addColumn(self, before=None):
+        """Adds a new column at the specified position or to the right side of the map."""
+        if before is None:
+            for row in range(self.height):
+                self.createEmpySquareAt(row, self.width)  # New column on the right
+            self.width += 1  # Increase the width count
+        else:
+            for square in self._squares:
+                if square.x >= before:
+                    square.x += 1
+            for row in range(self.height):
+                self.createEmpySquareAt(row, before)  # New column at the specified position
+            self.width += 1
 
-        self.width += 1  # Increase the width count
         if self._updateCallback:
             self._updateCallback()
             
