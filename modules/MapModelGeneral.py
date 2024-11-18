@@ -293,7 +293,7 @@ class MapModelGeneral(QObject):
                                   (selectionRange.startCol <= obj.x <= selectionRange.endCol and
                                    selectionRange.startRow <= obj.y <= selectionRange.endRow and
                                    obj.z == selectionRange.zLevel))
-            if isInSelectionRange and (obj.properties.get('model') == modelType):
+            if isInSelectionRange and (modelType is None or obj.properties.get('model') == modelType):
                 result.append(obj)
         return result
 

@@ -1,0 +1,9 @@
+{
+  "order": "2",
+  "schema": {
+    "forestProbability": {
+      "type": "float",
+      "value": "0.2"
+    }
+  }
+}

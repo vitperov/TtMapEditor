@@ -17,7 +17,6 @@ class LandLotContentGenerator(GeneratorPluginBase):
     def generate(self):
         print("Generating landLotContent")
         houseProbability = float(self.settings['houseProbability'])
-        forestProbability = float(self.settings['forestProbability'])
         houseModels = self.settings['houseModels'].split(',')
 
         landLots = self.mapModel.getAllObjectOfType(TypeLandLot)
@@ -26,7 +25,7 @@ class LandLotContentGenerator(GeneratorPluginBase):
             startPt = Point(lot.x, lot.y)
             size    = AreaSize(lot.w, lot.h)
             generator = LandLotGenerator(self.mapModel, startPt, size)
-            generator.generate(houseProbability, forestProbability, houseModels)
+            generator.generate(houseProbability, houseModels)
 
         self.mapModel.updateEntireMap()
 
@@ -69,7 +68,7 @@ class LandLotGenerator():
         return True
 
 
-    def generate(self, houseProbability, forestProbability, houseModels):
+    def generate(self, houseProbability, houseModels):
         generateHouse = (random() < houseProbability)
         if generateHouse:
             print("  Generating house")
@@ -79,21 +78,6 @@ class LandLotGenerator():
             self.placedObjects.append(house)
         else:
             print("  NOT generating house")
-
-        self.generateForest(forestProbability)
-
-    def generateForest(self, forestProbability):
-        rc = self.landLotRect
-        for x in range(rc.pt.x, rc.pt.x + rc.sz.w):
-            for y in range(rc.pt.y, rc.pt.y + rc.sz.h):
-                treeRect = Rectangle(Point(x,y), AreaSize(1,1))
-                if self.canPlaceObjectAt(treeRect):
-                    generateTree = (random() < forestProbability)
-                    if generateTree:
-                        # Intentionally not appending into self.placedObjects
-                        obj = LandLotLwObject(self, Point(x,y), AreaSize(1, 1), keepout=0)
-                        self.editor.fillArea(obj.globalPosition(),
-                            obj.size, 'model', TypeForest)
 
 
 class LandLotLwObject():
