@@ -24,12 +24,30 @@ class Point:
         self.y = y
 
     def __add__(self, pt):
+        # return new point to avoid references
         return Point(self.x + pt.x,
                      self.y + pt.y)
 
     def __iadd__(self, pt):
-        return Point(self.x + pt.x,
-                     self.y + pt.y)
+        self.x += pt.x
+        self.y += pt.y
+        return self
+
+    def __sub__(self, pt):
+        # return new point to avoid references
+        return Point(self.x - pt.x,
+                     self.y - pt.y)
+
+    def __isub__(self, pt):
+        self.x -= pt.x
+        self.y -= pt.y
+        return self
+
+    def __eq__(self, other):
+        return isinstance(other, Point) and self.x == other.x and self.y == other.y
+
+    def __hash__(self):
+        return hash((self.x, self.y))
 
     def __repr__(self):
         return "(" + str(self.x) + ", " + str(self.y) + ")"

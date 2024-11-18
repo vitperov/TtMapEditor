@@ -46,12 +46,12 @@ class ForestGenerator(GeneratorPluginBase):
 
 class ForestGeneratorHelper():
     def __init__(self, model, startPt, size):
-        #self.generatedModel = 'landLotContent'
         self.model = model
         self.editor = MapEditHelper(model)
         self.startPt = startPt
         self.size = size
         self.zLevel = 0
+        self.largeObjsKeepout = 1;
 
         self.occupiedSquares = []
 
@@ -60,10 +60,17 @@ class ForestGeneratorHelper():
         objects = self.model.getAllObjectOfType(None, selectionRange)
         
         for obj in objects:
-            if obj.properties.get('model') != TypeGrass:
+            objModel = obj.properties.get('model')
+            if objModel != TypeGrass and objModel != TypeLandLot:
+                objStart = Point(obj.x, obj.y)
                 size = obj.getSize()
-                for x in range(obj.x, obj.x + size.w):
-                    for y in range(obj.y, obj.y + size.h):
+                if size.w > 1 and size.h > 1:
+                    size.w += 2 * self.largeObjsKeepout
+                    size.h += 2 * self.largeObjsKeepout
+                    objStart -= Point(self.largeObjsKeepout, self.largeObjsKeepout)
+                    
+                for x in range(objStart.x, objStart.x + size.w):
+                    for y in range(objStart.y, objStart.y + size.h):
                         self.occupiedSquares.append(Point(x, y))
 
     def generate(self, forestProbability):
