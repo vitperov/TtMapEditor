@@ -118,6 +118,9 @@ class MapObjectModelGeneral(QObject):
         
     def setModel(self, model):
         self.properties['model'] = model
+        
+    def getModel(self):
+        return self.properties['model']
 
 class MapModelGeneral(QObject):
     updatedEntireMap = pyqtSignal()
