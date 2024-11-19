@@ -7,21 +7,17 @@ from modules.Terrain.MapEditHelper import *
 from modules.Terrain.TerrainGeneratorSettings import *
 
 TypeLandLot  = "LandLot"
-TypeHouse    = "House"
-TypeShed     = "Shed"
 TypeForest   = "Forest"
-TypeNone     = "None"
+TypeGrass    = "Grass"
 
 class LandLotContentGenerator(GeneratorPluginBase):
     def __init__(self, mapModel):
         super().__init__(mapModel)
-        self.generatedModel = 'landLotContent' # It is really for any object like this?
 
     def generate(self):
         print("Generating landLotContent")
         houseProbability = float(self.settings['houseProbability'])
-        #shedProbability = float(self.settings['shedProbability'])
-        forestProbability = float(self.settings['forestProbability'])
+        houseModels = self.settings['houseModels'].split(',')
 
         landLots = self.mapModel.getAllObjectOfType(TypeLandLot)
         print("    found " + str(len(landLots)) + " land lots")
@@ -29,14 +25,27 @@ class LandLotContentGenerator(GeneratorPluginBase):
             startPt = Point(lot.x, lot.y)
             size    = AreaSize(lot.w, lot.h)
             generator = LandLotGenerator(self.mapModel, startPt, size)
-            generator.generate(houseProbability, forestProbability)
+            generator.generate(houseProbability, houseModels)
 
         self.mapModel.updateEntireMap()
 
         print("Done " + str(self.generatedModel))
         
     def clear_generated(self):
-        return super().clear_generated()
+        landLots = self.mapModel.getAllObjectOfType(TypeLandLot)
+
+        for lot in landLots:
+            startPt = Point(lot.x, lot.y)
+            size    = AreaSize(lot.w, lot.h)
+            zLevel = 0
+            selectionRange = SelectionRange.fromStartPointAndSize(startPt, size, zLevel)
+            self.mapModel.overwriteEverythingWith(selectionRange, TypeGrass)
+            
+            # lot obj was deleted after overwriteEverythingWith(). Restore it
+            self.mapModel.addMapObject(lot)
+
+        self.mapModel.updateEntireMap()
+
 
 class LandLotGenerator():
     def __init__(self, model, startPt, size):
@@ -51,10 +60,6 @@ class LandLotGenerator():
 
         self.placedObjects = []
 
-        # Depricated should be removed
-        self.oldSettings = TerrainGeneratorSettings()
-        self.oldSettings.loadFromFile()
-
     def canPlaceObjectAt(self, objRect):
         for obj in self.placedObjects:
             objKeepout = obj.localRectWithKeepout()
@@ -64,47 +69,21 @@ class LandLotGenerator():
 
         return True
 
-    #def clear_generated(self):
-    #    return super().clear_generated()
 
-    def generate(self, houseProbability, forestProbability):
+    def generate(self, houseProbability, houseModels):
         generateHouse = (random() < houseProbability)
         if generateHouse:
+            print("  Generating house")
             house = LandLotObject(self)
-            house.generateObjVariant(self.oldSettings.landLotSettings.house,
-                           TypeHouse)
+            house.generateObjVariant(houseModels, self.model._objCollection)
 
             self.placedObjects.append(house)
-
-        #generateShed = (random() < shedProbability)
-        #if generateShed:
-        #    shed = LandLotObject(self)
-        #    shed.generate(self.oldSettings.shed.size,
-        #                  SquareType.Shed,
-        #                  "shed")
-        #
-        #    self.placedObjects.append(shed)
-
-
-        self.generateForest(forestProbability)
-
-    def generateForest(self, forestProbability):
-        rc = self.landLotRect
-        for x in range(rc.pt.x, rc.pt.x + rc.sz.w):
-            for y in range(rc.pt.y, rc.pt.y + rc.sz.h):
-                treeRect = Rectangle(Point(x,y), AreaSize(1,1))
-                if self.canPlaceObjectAt(treeRect):
-                    generateTree = (random() < forestProbability)
-                    if generateTree:
-                        # Intentionally not appending into self.placedObjects
-                        obj = LandLotLwObject(self, Point(x,y), AreaSize(1, 1), keepout=0)
-                        self.editor.fillArea(obj.globalPosition(),
-                            obj.size, 'model', TypeForest)
+        else:
+            print("  NOT generating house")
 
 
 class LandLotLwObject():
     def __init__(self, landLot, localPos=None, size=None, keepout=0):
-        self.generatedModel = 'landLotContent'
         self.landLot = landLot
         self.objKeepout = keepout
         self.localPos = localPos
@@ -127,10 +106,7 @@ class LandLotObject(LandLotLwObject):
         self.generatedModel = 'landLotContent'
         LandLotLwObject.__init__(self, landLot, keepout=1)
 
-    #def clear_generated(self):
-    #    return super().clear_generated()
-
-    def generate(self, size, objModelName, objModelVariant):
+    def generate(self, size, objModelName):
         # can we pass landObj and get it's size?
         self.size = size
 
@@ -147,25 +123,30 @@ class LandLotObject(LandLotLwObject):
 
         print("    Obj placed at: " + str(self.localPos) + "; size=" + str(size))
 
-        obj = MapObjectModelGeneral()
-        obj.init(self.globalPosition().x, self.globalPosition().y, objModelName, ObjectRotation.deg0, size.w, size.h, modelSuper=self.generatedModel)
-        obj.setProperty('variant',objModelVariant)
+        #obj = MapObjectModelGeneral()
+        #obj.init(self.globalPosition().x, self.globalPosition().y, objModelName, ObjectRotation.deg0, size.w, size.h)
+        zLevel = 0
+        obj = self.landLot.model.createObjectAt(self.globalPosition().x, self.globalPosition().y, zLevel)
+        obj.setModel(objModelName)
+        obj.setSize(size)
         self._randomizeProperty(obj, 'rotation')
-        self.landLot.model.addMapObject(obj)
+        #print("Adding map object: " + str(obj.toSerializableObj()))
 
-        rotation = int(obj.properties['rotation'].value);
-        rotatedSize = size.rotated(rotation)
+        rotatedSize = obj.getSize()
+        rotation = int(obj.properties['rotation'].value)
         print("Rotation " + str(rotation) + ": size=" + str(size) + " -> " + str(rotatedSize))
 
         #delete grass under the object
-        self.landLot.editor.fillArea(self.globalPosition(),
-            rotatedSize, 'model', TypeNone)
+        zLevel = 0
+        selectionRange = SelectionRange.fromStartPointAndSize(self.globalPosition(), rotatedSize, zLevel)
+        self.landLot.model.deleteObjectsInSelection(selectionRange, TypeForest)
+        self.landLot.model.deleteObjectsInSelection(selectionRange, TypeGrass)
 
         return True
 
-    def _chooseObjVariant(self, landObj):
-        nVariants = landObj.nVariants()
-        sumProbability = landObj.sumProbability()
+    def _chooseObjVariant(self, objModelVariants):
+        nVariants = len(objModelVariants)
+        sumProbability = 1
         print(f"nVariants={nVariants}, sumProbability={sumProbability}")
 
         normalizationF = 1.0 / sumProbability
@@ -173,8 +154,9 @@ class LandLotObject(LandLotLwObject):
         rnd = random()
         accumulatedProbability = 0
         for variantIdx in range(nVariants):
-            variant = landObj.variants[variantIdx]
-            accumulatedProbability += variant.probability * normalizationF
+            variant = objModelVariants[variantIdx]
+            variantProbability = 1.0 / nVariants
+            accumulatedProbability += variantProbability * normalizationF
             #print(str(rnd) + "-> [" + variant.modelName + "] = "+ str(variant.probability) + "/" + str(accumulatedProbability))
             if rnd < accumulatedProbability:
                 return variantIdx
@@ -190,10 +172,14 @@ class LandLotObject(LandLotLwObject):
         newValue = propClass(newValueStr)
         obj.properties[propertyName] = newValue
 
-    def generateObjVariant(self, landObj, objModelName):
-        variantIdx = self._chooseObjVariant(landObj)
-        variant = landObj.variants[variantIdx]
-        self.generate(variant.size, objModelName, variant.modelName)
+    def generateObjVariant(self, objModelVariants, objCollection):
+        variantIdx = self._chooseObjVariant(objModelVariants)
+        objModelName = objModelVariants[variantIdx]
+        map_object = objCollection.getObject(objModelName)
+        if map_object is None:
+            raise Exception("Object model variant not found: " + objModelName)
+        
+        self.generate(AreaSize(map_object.w, map_object.h), objModelName)
 
 #TODO: move to some library
 def genRandomObjPlace(landLotRect, objSize):

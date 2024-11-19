@@ -74,10 +74,25 @@ class MapWidget(QWidget):
             self.deleteRow.emit(self.selectionRange.startRow)
 
         self.redrawAll()
-        self.selectionRange = SelectionRange(None, None, None, None, self.selectionRange.zLevel)
 
     def setModel(self, model):
         self._model = model
+
+    def addColumn(self, before):
+        index = self.selectionRange.startCol
+        if index is not None:
+            if before:
+                self._model.addColumn(index)
+            else:
+                self._model.addColumn(index + 1)
+
+    def addRow(self, before):
+        index = self.selectionRange.startRow
+        if index is not None:
+            if before:
+                self._model.addRow(index)
+            else:
+                self._model.addRow(index + 1)
 
     def _createNewCanvas(self, editMode=False):
         [rows, cols] = self._model.size()

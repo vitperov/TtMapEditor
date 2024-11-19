@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal, QSize
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFileDialog, QComboBox, QLabel
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFileDialog, QComboBox, QLabel, QMenu
 from PyQt5.QtGui import QIcon
 from functools import partial
 
@@ -8,8 +8,8 @@ class HouseToolbar(QWidget):
     newMap = pyqtSignal(int, int)
     saveMap = pyqtSignal(str)
     openMap = pyqtSignal(str)
-    addColumn = pyqtSignal()
-    addRow = pyqtSignal()
+    addColumn = pyqtSignal(bool)
+    addRow = pyqtSignal(bool)
     zLevelChanged = pyqtSignal(int)
     #changedSelection = pyqtSignal(bool)
 
@@ -41,6 +41,17 @@ class HouseToolbar(QWidget):
         self._addRowBtn = QPushButton("")
         self._addRowBtn.setIcon(QIcon("resources/add-row.png"))
         self._addRowBtn.setIconSize(self.ICON_SIZE)
+
+        # Add dropdown to buttons
+        self._addColumnMenu = QMenu()
+        self._addColumnMenu.addAction("Before", partial(self._addColumn, True))
+        self._addColumnMenu.addAction("After", partial(self._addColumn, False))
+        self._addColumnBtn.setMenu(self._addColumnMenu)
+
+        self._addRowMenu = QMenu()
+        self._addRowMenu.addAction("Before", partial(self._addRow, True))
+        self._addRowMenu.addAction("After", partial(self._addRow, False))
+        self._addRowBtn.setMenu(self._addRowMenu)
 
         #self._singleSelectionBtn = QPushButton()
         #self._singleSelectionBtn.setCheckable(True)
@@ -76,8 +87,6 @@ class HouseToolbar(QWidget):
         self._newBtn.clicked.connect(self._newFile)
         self._openBtn.clicked.connect(self._openFile)
         self._saveBtn.clicked.connect(self._saveFile)
-        self._addColumnBtn.clicked.connect(self._addColumn)
-        self._addRowBtn.clicked.connect(self._addRow)
 
     def _newFile(self):
         print("new map")
@@ -95,13 +104,13 @@ class HouseToolbar(QWidget):
             print(name)
             self.openMap.emit(name)
 
-    def _addColumn(self):
-        print("add column")
-        self.addColumn.emit()
+    def _addColumn(self, before):
+        print(f"add column {'before' if before else 'after'}")
+        self.addColumn.emit(before)
 
-    def _addRow(self):
-        print("add row")
-        self.addRow.emit()
+    def _addRow(self, before):
+        print(f"add row {'before' if before else 'after'}")
+        self.addRow.emit(before)
 
     def _floorChanged(self, index):
         model_z_level = index
