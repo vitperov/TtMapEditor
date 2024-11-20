@@ -3,11 +3,11 @@ from modules.GeneratorPluginBase import *
 from random import random
 
 TypeGrass  = "Grass"
+TypeBerries = 'Berries'
 
 class BerriesGenerator(GeneratorPluginBase):
     def __init__(self, mapModel):
         super().__init__(mapModel)
-        self.generatedModel = 'Berries'
 
     def generate(self):
         print("Generating berries")
@@ -36,12 +36,17 @@ class BerriesGenerator(GeneratorPluginBase):
 
         self.mapModel.updateEntireMap()
 
-        print("Done " + str(self.generatedModel))
         
     def clear_generated(self):
-        return super().clear_generated()
+        zLevel = 0
+        allSquares = self.mapModel.getAllSquares(zLevel)
+        for square in allSquares:
+            if square.getModel() == TypeBerries:
+                self.mapModel.deleteSquareById(square.id)
+
+        self.mapModel.updateEntireMap()
 
     def _placeBerries(self, row, col):
         obj = MapObjectModelGeneral()
-        obj.init(col, row, model = self.generatedModel) #, modelGenerator = BerriesGenerator)
+        obj.init(col, row, model = TypeBerries)
         self.mapModel.addMapObject(obj)
