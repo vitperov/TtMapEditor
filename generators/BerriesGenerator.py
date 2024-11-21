@@ -12,31 +12,17 @@ class BerriesGenerator(GeneratorPluginBase):
     def generate(self):
         print("Generating berries")
         probability = float(self.settings['probability'])
-        def isGrassSquare(row, col):
-            if row < 0:
-                return False
-            if row >= self.mapModel.height:
-                return False
-            if col < 0:
-                return False
-            if col >= self.mapModel.width:
-                return False
-
-            square = self.mapModel.getSquare(col, row)
-            sqType = square.getProperty('model')
-
-            return sqType == TypeGrass
-
-        for col in range(self.mapModel.width):
-            for row in range(self.mapModel.height):
-                if isGrassSquare(row, col):
-                    generate = (random() < probability)
-                    if generate:
-                        self._placeBerries(row,col)
+        
+        zLevel = 0
+        allSquares = self.mapModel.getAllSquares(zLevel)
+        for obj in allSquares:
+            if obj.getModel() == TypeGrass:
+                generate = (random() < probability)
+                if generate:
+                    self._placeBerries(obj.x, obj.y)
 
         self.mapModel.updateEntireMap()
 
-        
     def clear_generated(self):
         zLevel = 0
         allSquares = self.mapModel.getAllSquares(zLevel)
@@ -46,7 +32,7 @@ class BerriesGenerator(GeneratorPluginBase):
 
         self.mapModel.updateEntireMap()
 
-    def _placeBerries(self, row, col):
+    def _placeBerries(self, x, y):
         obj = MapObjectModelGeneral()
-        obj.init(col, row, model = TypeBerries)
+        obj.init(x, y, model = TypeBerries)
         self.mapModel.addMapObject(obj)
