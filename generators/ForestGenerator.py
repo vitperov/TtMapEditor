@@ -79,6 +79,8 @@ class ForestGeneratorHelper():
                 if Point(x, y) not in self.occupiedSquares:
                     generateTree = (random() < forestProbability)
                     if generateTree:
-                        obj = self.model.createObjectAt(x, y, self.zLevel)
-                        obj.setModel(TypeForest)
-                        
+                        squareItems = self.model.getSquareItems(x, y, self.zLevel)
+                        for obj in squareItems:
+                            if obj.getModel() == TypeGrass:
+                                obj.setModel(TypeForest)
+                       
