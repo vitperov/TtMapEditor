@@ -47,27 +47,59 @@ class PropertiesItem(QWidget):
         self.modelPicture = SimpleSquareItem(objModel, objCollection, tilesize, multi_select)
         groupBoxLayout.addWidget(self.modelPicture)
 
-        # Create a vertical layout to stack buttons
-        buttonLayout = QVBoxLayout()
+        # Create a grid layout for control buttons
+        buttonLayout = QGridLayout()
         groupBoxLayout.addLayout(buttonLayout)
         
         # Model Button
         modelBtn = QPushButton()
         modelBtn.setIcon(self.style().standardIcon(QStyle.SP_FileDialogDetailedView))
         modelBtn.clicked.connect(self.showChooseModelDlg)
-        buttonLayout.addWidget(modelBtn)
+        buttonLayout.addWidget(modelBtn, 0, 0)
 
         # Rotation Button
         rotationBtn = QPushButton()
         rotationBtn.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
         rotationBtn.clicked.connect(self.showChooseRotationDlg)
-        buttonLayout.addWidget(rotationBtn)
+        buttonLayout.addWidget(rotationBtn, 1, 0)
 
         # Remove Button
         removeBtn = QPushButton()
         removeBtn.setIcon(self.style().standardIcon(QStyle.SP_DialogCancelButton))
-        buttonLayout.addWidget(removeBtn)
+        buttonLayout.addWidget(removeBtn, 2, 0)
         removeBtn.clicked.connect(partial(self.removeObject, self._model.id))
+
+        # Move Up Button
+        moveUpBtn = QPushButton()
+        moveUpBtn.setIcon(self.style().standardIcon(QStyle.SP_ArrowUp))
+        moveUpBtn.clicked.connect(partial(self.moveObject, 0, -1))
+        buttonLayout.addWidget(moveUpBtn, 0, 1)
+
+        # Move Down Button
+        moveDownBtn = QPushButton()
+        moveDownBtn.setIcon(self.style().standardIcon(QStyle.SP_ArrowDown))
+        moveDownBtn.clicked.connect(partial(self.moveObject, 0, 1))
+        buttonLayout.addWidget(moveDownBtn, 1, 1)
+
+        # Move Left Button
+        moveLeftBtn = QPushButton()
+        moveLeftBtn.setIcon(self.style().standardIcon(QStyle.SP_ArrowLeft))
+        moveLeftBtn.clicked.connect(partial(self.moveObject, -1, 0))
+        buttonLayout.addWidget(moveLeftBtn, 2, 1)
+
+        # Move Right Button
+        moveRightBtn = QPushButton()
+        moveRightBtn.setIcon(self.style().standardIcon(QStyle.SP_ArrowRight))
+        moveRightBtn.clicked.connect(partial(self.moveObject, 1, 0))
+        buttonLayout.addWidget(moveRightBtn, 1, 2)
+
+    def moveObject(self, x_offset, y_offset):
+        self._model.x += x_offset
+        self._model.y += y_offset
+        self.updateAllProperties.emit()
+
+        # Update the model in the map and redraw
+        self._mapModel.updateEntireMap()
 
     def showChooseRotationDlg(self):
         dlg = ChooseRotationDlg(self._model, self._mapModel._objCollection, 64)
