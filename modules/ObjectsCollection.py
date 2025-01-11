@@ -1,18 +1,28 @@
 import os
 import json
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Any
+
+class AdditionalPropertyObj:
+    def __init__(self, name: str, type: str):
+        self.name = name
+        self.type = type
 
 class MapObject:
-    def __init__(self, name: str, categories: str, iconFile: str, contour: str, w: int = 1, h: int = 1):
+    def __init__(self, name: str, categories: str, iconFile: str, contour: str, w: int = 1, h: int = 1, additional_properties: List[AdditionalPropertyObj] = None):
         self.name = name
         self.categories = categories
-        self.iconFile   = iconFile
-        self.contour    = contour
+        self.iconFile = iconFile
+        self.contour = contour
         self.w = w
         self.h = h
+        self.additional_properties = additional_properties if additional_properties is not None else []
 
     @classmethod
     def from_json(cls, json_data: Dict, base_path: str):
+        additional_properties = [
+            AdditionalPropertyObj(prop.get('name', ''), prop.get('type', ''))
+            for prop in json_data.get('additionalProperties', [])
+        ]
         return cls(
             name=json_data.get('name', ''),
             categories=json_data.get('categories', ''),
@@ -20,6 +30,7 @@ class MapObject:
             contour=json_data.get('contour', ''),
             w=json_data.get('w', 1),
             h=json_data.get('h', 1),
+            additional_properties=additional_properties
         )
         
     def isContour(self):
@@ -72,3 +83,10 @@ class ObjectsCollection:
         
     def getObject(self, objname: str) -> MapObject:
         return self.objects.get(objname)
+
+    def getAdditionalProperties(self, objname: str) -> List[AdditionalPropertyObj]:
+        map_object = self.objects.get(objname)
+        if map_object:
+            return map_object.additional_properties
+        else:
+            return []
