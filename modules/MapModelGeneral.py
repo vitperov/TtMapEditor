@@ -28,6 +28,11 @@ class SelectionRange:
     def fromStartPointAndSize(cls, startPoint, size, zLevel):
         return cls(startPoint.x, startPoint.y, startPoint.x + size.w - 1, startPoint.y + size.h - 1, zLevel)
 
+class AdditionalPropertyValue:
+    def __init__(self, name: str, value: Any):
+        self.name = name
+        self.value = value
+
 class MapObjectModelGeneral(QObject):
     changed = pyqtSignal()
 
@@ -35,6 +40,7 @@ class MapObjectModelGeneral(QObject):
         QObject.__init__(self)
         self.classnames = dict()
         self.properties = dict()
+        self.additional_properties: Dict[str, AdditionalPropertyValue] = dict()
         
         self.model = "Empty"
 
@@ -78,6 +84,11 @@ class MapObjectModelGeneral(QObject):
         obj['id'] = self.id
         obj['model'] = self.properties['model']
 
+        if self.additional_properties:
+            obj['additionalProperties'] = {
+                name: prop.value for name, prop in self.additional_properties.items()
+            }
+
         return obj
 
     def getProperty(self, name):
@@ -87,6 +98,9 @@ class MapObjectModelGeneral(QObject):
         variableClass = self.classnames[name]
         self.properties[name] = variableClass(value)
         self.changed.emit()
+
+    def getAdditionalProperties(self) -> List[AdditionalPropertyValue]:
+        return list(self.additional_properties.values())
 
     def restoreFromJson(self, js):
         self.x = js['x']
@@ -102,6 +116,10 @@ class MapObjectModelGeneral(QObject):
 
         for propName, propClass in self.classnames.items():
             self.properties[propName] = propClass(js.get(propName,""))
+
+        additional_properties = js.get('additionalProperties', {})
+        for name, value in additional_properties.items():
+            self.additional_properties[name] = AdditionalPropertyValue(name, value)
             
     def setSize(self, size):
         self.w = size.w
