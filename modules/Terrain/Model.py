@@ -3,7 +3,7 @@ from PyQt5.QtCore import *
 
 from modules.MapModelGeneral import *
 from modules.ObjectsCollection import *
-from modules.GeneratorPluginsLoader import *
+from modules.GeneratorPluginsModel.GeneratorPluginsLoader import *
 from modules.ApplicationSettings.ApplicationSettingsModel import ApplicationSettingsModel
 
 class Model:
@@ -21,5 +21,3 @@ class Model:
         self.generators = GeneratorPluginsLoader(self.map)
         self.generators.loadPluginsFrom(pluginsDir)
         #print("Generator plugins found: " + str(self.generators.generators))
-   
-

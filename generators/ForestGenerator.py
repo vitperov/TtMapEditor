@@ -1,4 +1,4 @@
-from modules.GeneratorPluginBase import *
+from modules.GeneratorPluginsModel.GeneratorPluginBase import *
 
 from random import randrange, random
 
@@ -83,4 +83,3 @@ class ForestGeneratorHelper():
                         for obj in squareItems:
                             if obj.getModel() == TypeGrass:
                                 obj.setModel(TypeForest)
-                       

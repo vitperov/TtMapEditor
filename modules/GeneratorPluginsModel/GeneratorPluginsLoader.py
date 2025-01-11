@@ -3,7 +3,7 @@ import os
 import pkgutil
 import warnings
 
-from modules.GeneratorPluginBase import *
+from modules.GeneratorPluginsModel.GeneratorPluginBase import *
 
 class GeneratorPluginsLoader:
     def __init__(self, mapModel):

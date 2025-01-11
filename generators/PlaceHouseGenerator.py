@@ -1,4 +1,4 @@
-from modules.GeneratorPluginBase import *
+from modules.GeneratorPluginsModel.GeneratorPluginBase import *
 
 from random import randrange, random
 

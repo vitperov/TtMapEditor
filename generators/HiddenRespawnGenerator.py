@@ -1,4 +1,4 @@
-from modules.GeneratorPluginBase import *
+from modules.GeneratorPluginsModel.GeneratorPluginBase import *
 
 from random import random
 
@@ -59,4 +59,3 @@ class HiddenRespawnGenerator(GeneratorPluginBase):
         obj = MapObjectModelGeneral()
         obj.init(col, row, model=self.generatedModel)
         self.mapModel.addMapObject(obj)
-

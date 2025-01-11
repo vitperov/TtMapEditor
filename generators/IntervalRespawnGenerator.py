@@ -1,4 +1,4 @@
-from modules.GeneratorPluginBase import *
+from modules.GeneratorPluginsModel.GeneratorPluginBase import *
 
 from random import random
 
@@ -64,4 +64,3 @@ class IntervalRespawnGenerator(GeneratorPluginBase):
             if houseRect.isPointInside(Point(col,row)):
                 return True
         return False
-
