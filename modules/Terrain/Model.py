@@ -14,7 +14,8 @@ class Model:
         self.objCollection = ObjectsCollection([nativeMapObjectsDir, externalMapObjectsDir])
         #print("Map objects found: " + str(self.objCollection.allObjectTypes()))
 
-        self.map = MapModelGeneral(MapObjectModelGeneral, self.objCollection)
+        texturesCollection = None # Not implemented for Terrain
+        self.map = MapModelGeneral(MapObjectModelGeneral, self.objCollection, texturesCollection)
         
         pluginsDir = 'generators'
         self.generators = GeneratorPluginsLoader(self.map)

@@ -124,14 +124,16 @@ class MapObjectModelGeneral(QObject):
 
 class MapModelGeneral(QObject):
     updatedEntireMap = pyqtSignal()
-    def __init__(self, squareModel, objCollection):
+    def __init__(self, squareModel, objCollection, texturesCollection):
         """
         squareModel is MapObjectModelGeneral
         objCollection is ?
+        texturesCollection is TexturesCollection
         """
         QObject.__init__(self)
         self._sqareModel = squareModel
         self._objCollection = objCollection
+        self._texturesCollection = texturesCollection
         self.width = 0
         self.height = 0
         self.editorWidth = 0
