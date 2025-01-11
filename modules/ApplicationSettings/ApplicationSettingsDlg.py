@@ -39,6 +39,18 @@ class ApplicationSettingsDlg(QDialog):
         layout.addWidget(self.generatorsDirLabel)
         layout.addLayout(generatorsDirLayout)
 
+        # Input for additionalTexturesDir with directory chooser button
+        self.texturesDirLabel = QLabel("Additional Textures Directory:")
+        texturesDirLayout = QHBoxLayout()
+        self.texturesDirInput = QLineEdit()
+        self.texturesDirInput.setText(self.settingsModel.getAdditionalTexturesDir())  # Load existing value
+        self.texturesDirButton = QPushButton("Browse")
+        self.texturesDirButton.clicked.connect(self.chooseTexturesDir)  # Connect to directory chooser
+        texturesDirLayout.addWidget(self.texturesDirInput)
+        texturesDirLayout.addWidget(self.texturesDirButton)
+        layout.addWidget(self.texturesDirLabel)
+        layout.addLayout(texturesDirLayout)
+
         # Save button layout
         buttonLayout = QHBoxLayout()
         buttonLayout.addStretch()  # Push button to the right
@@ -61,8 +73,15 @@ class ApplicationSettingsDlg(QDialog):
         if directory:
             self.generatorsDirInput.setText(directory)
 
+    def chooseTexturesDir(self):
+        # Open directory chooser dialog for additionalTexturesDir
+        directory = QFileDialog.getExistingDirectory(self, "Select Additional Textures Directory")
+        if directory:
+            self.texturesDirInput.setText(directory)
+
     def saveSettings(self):
         # Update settings model with new values
         self.settingsModel.setAdditionalMapObjectsDir(self.mapObjectsDirInput.text())
         self.settingsModel.setAdditionalGeneratorsDir(self.generatorsDirInput.text())
+        self.settingsModel.setAdditionalTexturesDir(self.texturesDirInput.text())
         self.accept()  # Close dialog after saving
