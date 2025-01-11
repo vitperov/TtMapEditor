@@ -29,7 +29,7 @@ class SelectionRange:
         return cls(startPoint.x, startPoint.y, startPoint.x + size.w - 1, startPoint.y + size.h - 1, zLevel)
 
 class AdditionalPropertyValue:
-    def __init__(self, name: str, value: Any):
+    def __init__(self, name: str, value: str):
         self.name = name
         self.value = value
 
@@ -99,7 +99,7 @@ class MapObjectModelGeneral(QObject):
         self.properties[name] = variableClass(value)
         self.changed.emit()
 
-    def getAdditionalProperties(self) -> List[AdditionalPropertyValue]:
+    def getAdditionalProperties(self):
         return list(self.additional_properties.values())
 
     def restoreFromJson(self, js):

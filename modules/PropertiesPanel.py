@@ -20,6 +20,7 @@ class PropertiesItem(QWidget):
         self._mapModel = mapModel
         self._category = category
         self._selectionRange = selectionRange
+        self._objCollection = objCollection
         
         multi_select = not (
             self._selectionRange.startCol == self._selectionRange.endCol and 
@@ -131,7 +132,7 @@ class PropertiesItem(QWidget):
         self.updateAllProperties.emit()
 
     def showProperties(self):
-        dlg = AdditionalPropertiesDlg(self)
+        dlg = AdditionalPropertiesDlg(self._objCollection, self._model, self)
         if dlg.exec_() == QDialog.Accepted:
             print("Additional properties accepted")
 
