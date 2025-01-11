@@ -9,6 +9,7 @@ from modules.SimpleSquareItem import SimpleSquareItem
 from modules.ChooseRotationDlg import ChooseRotationDlg
 from modules.ChooseModelDlg import ChooseModelDlg
 from modules.MapModelGeneral import SelectionRange
+from modules.AdditionalPropertiesDlg import AdditionalPropertiesDlg
 
 class PropertiesItem(QWidget):
     updateAllProperties = pyqtSignal()  # Signal to notify when properties are updated
@@ -93,6 +94,12 @@ class PropertiesItem(QWidget):
         moveRightBtn.clicked.connect(partial(self.moveObject, 1, 0))
         buttonLayout.addWidget(moveRightBtn, 1, 2)
 
+        # Show Properties Button
+        showPropertiesBtn = QPushButton()
+        showPropertiesBtn.setIcon(self.style().standardIcon(QStyle.SP_FileDialogDetailedView))
+        showPropertiesBtn.clicked.connect(self.showProperties)
+        buttonLayout.addWidget(showPropertiesBtn, 0, 2) # Add the button at the top right corner
+
     def moveObject(self, x_offset, y_offset):
         self._model.x += x_offset
         self._model.y += y_offset
@@ -122,6 +129,11 @@ class PropertiesItem(QWidget):
     def removeObject(self, id):
         self._mapModel.deleteSquareById(id)
         self.updateAllProperties.emit()
+
+    def showProperties(self):
+        dlg = AdditionalPropertiesDlg(self)
+        if dlg.exec_() == QDialog.Accepted:
+            print("Additional properties accepted")
 
 class PropertiesPanel(QWidget):
     updatedEntireMap = pyqtSignal()
