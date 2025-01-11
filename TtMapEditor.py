@@ -6,14 +6,14 @@ from PyQt5.QtCore import QSize
 import sys
 import os
 
-from modules.MapModelGeneral import *
+from modules.commonModels.MapModelGeneral import *
 from modules.Terrain.TerrainEditorView import *
 from modules.Terrain.TerrainMapController import *
 from modules.Terrain.Model import *
 from modules.House.HouseView import *
 from modules.House.HouseController import *
-from modules.ObjectsCollection import *
-from modules.TexturesCollection import TexturesCollection
+from modules.commonModels.ObjectsCollection import *
+from modules.commonModels.TexturesCollection import TexturesCollection
 from modules.ApplicationSettings.ApplicationSettingsDlg import ApplicationSettingsDlg
 from modules.ApplicationSettings.ApplicationSettingsModel import ApplicationSettingsModel
 

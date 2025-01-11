@@ -374,7 +374,7 @@ class MapModelGeneral(QObject):
     def openMap(self, filename):
         extension = '.json'
         if not filename.endswith(extension):
-            filename = filename + extension
+            filename = extension + filename
 
         print("Loading map from " + filename)
 

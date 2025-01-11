@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QWidget, QHBoxLayout
-from modules.ObjectsCollection import ObjectsCollection
-from modules.MapModelGeneral import MapObjectModelGeneral
+from modules.commonModels.ObjectsCollection import ObjectsCollection
+from modules.commonModels.MapModelGeneral import MapObjectModelGeneral
 
 class UnknownTypeWidget(QWidget):
     def __init__(self, name, type, value, parent=None):

@@ -1,8 +1,8 @@
 from enum import Enum
 from PyQt5.QtCore import *
 
-from modules.MapModelGeneral import *
-from modules.ObjectsCollection import *
+from modules.commonModels.MapModelGeneral import *
+from modules.commonModels.ObjectsCollection import *
 from modules.GeneratorPluginsModel.GeneratorPluginsLoader import *
 from modules.ApplicationSettings.ApplicationSettingsModel import ApplicationSettingsModel
 

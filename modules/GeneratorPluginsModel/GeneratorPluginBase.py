@@ -2,7 +2,7 @@ import os
 import json
 import inspect
 
-from modules.MapModelGeneral import *
+from modules.commonModels.MapModelGeneral import *
 
 class GeneratorPluginBase:
     def __init__(self, mapModel):

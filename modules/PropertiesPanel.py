@@ -1,3 +1,4 @@
+from modules.commonModels.MapModelGeneral import SelectionRange
 from PyQt5 import QtWidgets, QtGui
 from pyqtgraph.Qt import QtCore
 
@@ -8,7 +9,6 @@ from functools import partial
 from modules.SimpleSquareItem import SimpleSquareItem
 from modules.ChooseRotationDlg import ChooseRotationDlg
 from modules.ChooseModelDlg import ChooseModelDlg
-from modules.MapModelGeneral import SelectionRange
 from modules.AdditionalPropertiesDlg import AdditionalPropertiesDlg
 
 class PropertiesItem(QWidget):
