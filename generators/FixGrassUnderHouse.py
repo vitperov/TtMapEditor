@@ -2,7 +2,6 @@ from modules.GeneratorPluginsModel.GeneratorPluginBase import *
 
 from modules.GeometryPrimitives import *
 from modules.Terrain.MapEditHelper import *
-from modules.Terrain.TerrainGeneratorSettings import *
 
 TypeForest   = "Forest"
 TypeGrass    = "Grass"

@@ -4,7 +4,6 @@ from random import randrange, random
 
 from modules.GeometryPrimitives import *
 from modules.Terrain.MapEditHelper import *
-from modules.Terrain.TerrainGeneratorSettings import *
 
 TypeLandLot  = "LandLot"
 TypeForest   = "Forest"

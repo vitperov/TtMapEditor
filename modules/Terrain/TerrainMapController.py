@@ -12,8 +12,6 @@ import numpy
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from modules.Terrain.TerrainGeneratorSettingsDlg import *
-
 class TerrainMapController:
     def __init__(self, view, model):
         self._view = view

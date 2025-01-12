@@ -1,9 +1,8 @@
 from copy import copy
 import math
 
-from modules.SerializableSettings import *
 
-class AreaSize(DictLoadableObject):
+class AreaSize():
     def __init__(self, w=0, h=0):
         self.w = w
         self.h = h
