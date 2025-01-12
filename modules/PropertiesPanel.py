@@ -96,10 +96,12 @@ class PropertiesItem(QWidget):
         buttonLayout.addWidget(moveRightBtn, 1, 2)
 
         # Show Properties Button
-        showPropertiesBtn = QPushButton()
-        showPropertiesBtn.setIcon(self.style().standardIcon(QStyle.SP_FileDialogDetailedView))
-        showPropertiesBtn.clicked.connect(self.showProperties)
-        buttonLayout.addWidget(showPropertiesBtn, 0, 2) # Add the button at the top right corner
+        additionalProps = self._objCollection.getAdditionalProperties(self._model.getProperty('model'))
+        if additionalProps:
+            showPropertiesBtn = QPushButton()
+            showPropertiesBtn.setIcon(self.style().standardIcon(QStyle.SP_FileDialogListView))
+            showPropertiesBtn.clicked.connect(self.showProperties)
+            buttonLayout.addWidget(showPropertiesBtn, 0, 2)
 
     def moveObject(self, x_offset, y_offset):
         self._model.x += x_offset
