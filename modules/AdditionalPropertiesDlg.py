@@ -25,7 +25,7 @@ class UnknownTypeWidget(QWidget):
 class TextureTypeWidget(QWidget):
     ICON_SIZE = 48
 
-    def __init__(self, name, type, value, texturesCollection, parent=None):
+    def __init__(self, name, type, value, texturesCollection, mapObjectModel, parent=None):
         super(TextureTypeWidget, self).__init__(parent)
         layout = QHBoxLayout()
         self.setLayout(layout)
@@ -34,6 +34,7 @@ class TextureTypeWidget(QWidget):
         self.type = type
         self.value = value
         self.texturesCollection = texturesCollection
+        self.mapObjectModel = mapObjectModel
 
         name_label = QLabel(f"Name: {self.name}")
         type_label = QLabel(f"Type: {self.type}")
@@ -60,6 +61,7 @@ class TextureTypeWidget(QWidget):
             selected_texture = dlg.selectedTexture
             if selected_texture:
                 self.value = selected_texture
+                self.mapObjectModel.setAdditioanalProperty(self.name, self.value)
                 self.update_icon()
 
     def update_icon(self):
@@ -78,6 +80,7 @@ class AdditionalPropertiesDlg(QDialog):
         self.setWindowTitle("Additional Properties")
         
         self.texturesCollection = texturesCollection
+        self.mapObjectModel = mapObjectModel
         
         layout = QVBoxLayout()
         self.setLayout(layout)
@@ -91,12 +94,12 @@ class AdditionalPropertiesDlg(QDialog):
         # Display the properties in the GUI
         for prop in additionalProps:
             # Retrieve value from MapObjectModelGeneral if it exists
-            propValue = mapObjectModel.additional_properties.get(prop.name, None)
+            propValue = next((p for p in mapObjectModel.additional_properties if p.name == prop.name), None)
             value_display = propValue.value if propValue else "Not Set"
 
             # Create a widget to show property name, type, and value
             if prop.type == "texture":
-                widget = TextureTypeWidget(prop.name, prop.type, value_display, self.texturesCollection)
+                widget = TextureTypeWidget(prop.name, prop.type, value_display, self.texturesCollection, self.mapObjectModel)
             else:
                 widget = UnknownTypeWidget(prop.name, prop.type, value_display)
             layout.addWidget(widget)
