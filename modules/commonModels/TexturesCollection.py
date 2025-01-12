@@ -23,8 +23,8 @@ class TexturesCollection:
     def _load_textures(self):
         for searchpath in self.searchpaths:
             for root, dirs, files in os.walk(searchpath):
-                if 'texture.json' in files:
-                    with open(os.path.join(root, 'texture.json'), 'r') as file:
+                if 'object.json' in files:
+                    with open(os.path.join(root, 'object.json'), 'r') as file:
                         data = json.load(file)
                         texture_object = TextureObject.from_json(data, root)
                         self.textures[texture_object.name] = texture_object
