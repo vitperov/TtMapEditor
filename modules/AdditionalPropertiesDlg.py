@@ -1,8 +1,11 @@
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QWidget, QHBoxLayout
-from PyQt5 import QtGui
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QWidget, QHBoxLayout, QPushButton
+from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5.QtCore import pyqtSignal
 from modules.commonModels.ObjectsCollection import ObjectsCollection
 from modules.commonModels.MapModelGeneral import MapObjectModelGeneral
+from modules.ChooseTextureDlg import ChooseTextureDlg
 import os
+
 
 class UnknownTypeWidget(QWidget):
     def __init__(self, name, type, value, parent=None):
@@ -18,26 +21,56 @@ class UnknownTypeWidget(QWidget):
         layout.addWidget(type_label)
         layout.addWidget(value_label)
 
+
 class TextureTypeWidget(QWidget):
+    ICON_SIZE = 48
+
     def __init__(self, name, type, value, texturesCollection, parent=None):
         super(TextureTypeWidget, self).__init__(parent)
         layout = QHBoxLayout()
         self.setLayout(layout)
         
-        name_label = QLabel(f"Name: {name}")
-        type_label = QLabel(f"Type: {type}")
+        self.name = name
+        self.type = type
+        self.value = value
+        self.texturesCollection = texturesCollection
+
+        name_label = QLabel(f"Name: {self.name}")
+        type_label = QLabel(f"Type: {self.type}")
         
         layout.addWidget(name_label)
         layout.addWidget(type_label)
         
-        iconPath = texturesCollection.getIcon(value)
-        icon_label = QLabel()
+        iconPath = self.texturesCollection.getIcon(self.value)
+        self.icon_button = QPushButton()
         if iconPath and os.path.exists(iconPath):
             pixmap = QtGui.QPixmap(iconPath)
         else:
-            pixmap = QtGui.QPixmap()  # Empty pixmap if no valid icon path
-        icon_label.setPixmap(pixmap)
-        layout.addWidget(icon_label)
+            pixmap = self.style().standardIcon(QtWidgets.QStyle.SP_DialogCancelButton).pixmap(self.ICON_SIZE, self.ICON_SIZE)
+        pixmap = pixmap.scaled(self.ICON_SIZE, self.ICON_SIZE)
+        self.icon_button.setIcon(QtGui.QIcon(pixmap))
+        self.icon_button.setIconSize(QtCore.QSize(self.ICON_SIZE, self.ICON_SIZE))
+        layout.addWidget(self.icon_button)
+
+        self.icon_button.clicked.connect(self.on_icon_clicked)
+
+    def on_icon_clicked(self):
+        dlg = ChooseTextureDlg(self.texturesCollection, self)
+        if dlg.exec_() == QDialog.Accepted:
+            selected_texture = dlg.selectedTexture
+            if selected_texture:
+                self.value = selected_texture
+                self.update_icon()
+
+    def update_icon(self):
+        iconPath = self.texturesCollection.getIcon(self.value)
+        if iconPath and os.path.exists(iconPath):
+            pixmap = QtGui.QPixmap(iconPath)
+        else:
+            pixmap = self.style().standardIcon(QtWidgets.QStyle.SP_DialogCancelButton).pixmap(self.ICON_SIZE, self.ICON_SIZE)
+        pixmap = pixmap.scaled(self.ICON_SIZE, self.ICON_SIZE)
+        self.icon_button.setIcon(QtGui.QIcon(pixmap))
+
 
 class AdditionalPropertiesDlg(QDialog):
     def __init__(self, objCollection, mapObjectModel, texturesCollection, parent=None):
