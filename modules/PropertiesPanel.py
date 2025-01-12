@@ -1,4 +1,4 @@
-from modules.commonModels.MapModelGeneral import SelectionRange
+from modules.commonModels.SelectionRange import *
 from PyQt5 import QtWidgets, QtGui
 from pyqtgraph.Qt import QtCore
 
