@@ -1,4 +1,3 @@
-
 from PyQt5.QtCore import *
 
 import traceback
@@ -9,6 +8,10 @@ import uuid
 from modules.GeometryPrimitives import *
 from modules.commonModels.ObjectRotation import *
 
+class AdditionalPropertyValue:
+    def __init__(self, name: str, value: str):
+        self.name = name
+        self.value = value
 
 class MapObjectModelGeneral(QObject):
     changed = pyqtSignal()
@@ -17,7 +20,7 @@ class MapObjectModelGeneral(QObject):
         QObject.__init__(self)
         self.classnames = dict()
         self.properties = dict()
-        self.additional_properties: Dict[str, AdditionalPropertyValue] = dict()
+        self.additional_properties: List[AdditionalPropertyValue] = []
         
         self.model = "Empty"
 
@@ -63,7 +66,7 @@ class MapObjectModelGeneral(QObject):
 
         if self.additional_properties:
             obj['additionalProperties'] = {
-                name: prop.value for name, prop in self.additional_properties.items()
+                prop.name: prop.value for prop in self.additional_properties
             }
 
         return obj
@@ -77,7 +80,16 @@ class MapObjectModelGeneral(QObject):
         self.changed.emit()
 
     def getAdditionalProperties(self):
-        return list(self.additional_properties.values())
+        return self.additional_properties
+
+    def setAdditioanalProperty(self, name, value):
+        for prop in self.additional_properties:
+            if prop.name == name:
+                prop.value = value
+                self.changed.emit()
+                return
+        self.additional_properties.append(AdditionalPropertyValue(name, value))
+        self.changed.emit()
 
     def restoreFromJson(self, js):
         self.x = js['x']
@@ -96,8 +108,8 @@ class MapObjectModelGeneral(QObject):
 
         additional_properties = js.get('additionalProperties', {})
         for name, value in additional_properties.items():
-            self.additional_properties[name] = AdditionalPropertyValue(name, value)
-            
+            self.setAdditioanalProperty(name, value) 
+
     def setSize(self, size):
         self.w = size.w
         self.h = size.h

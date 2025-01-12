@@ -7,11 +7,6 @@ from modules.GeometryPrimitives import *
 from modules.commonModels.MapObjectModelGeneral import *
 from modules.commonModels.SelectionRange import *
 
-class AdditionalPropertyValue:
-    def __init__(self, name: str, value: str):
-        self.name = name
-        self.value = value
-
 class MapModelGeneral(QObject):
     updatedEntireMap = pyqtSignal()
     def __init__(self, squareModel, objCollection, texturesCollection):
