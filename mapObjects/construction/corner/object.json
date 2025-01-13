@@ -1,5 +1,15 @@
 {
     "name": "Corner",
     "categories": "indoor",
-    "iconFile": "Corner.png"
+    "iconFile": "Corner.png",
+    "additionalProperties": [
+        {
+            "type": "texture",
+            "name": "internalTexture"
+        },
+        {
+            "type": "texture",
+            "name": "externalTexture"
+        }
+    ]
 }

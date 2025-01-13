@@ -1,5 +1,15 @@
 {
     "name": "DoorInternal",
     "categories": "indoor",
-    "iconFile": "DoorInternal.png"
+    "iconFile": "DoorInternal.png",
+    "additionalProperties": [
+        {
+            "type": "texture",
+            "name": "internalTexture"
+        },
+        {
+            "type": "texture",
+            "name": "externalTexture"
+        }
+    ]
 }
