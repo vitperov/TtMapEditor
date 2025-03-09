@@ -10,11 +10,6 @@ from modules.commonModels.SelectionRange import *
 class MapModelGeneral(QObject):
     updatedEntireMap = pyqtSignal()
     def __init__(self, squareModel, objCollection, texturesCollection):
-        """
-        squareModel is MapObjectModelGeneral
-        objCollection is ?
-        texturesCollection is TexturesCollection
-        """
         QObject.__init__(self)
         self._sqareModel = squareModel
         self._objCollection = objCollection
@@ -40,7 +35,6 @@ class MapModelGeneral(QObject):
             self._updateCallback()
 
     def getSquare(self, x, y):
-        #FIXME: depricated. Should use getSquareItems instead
         for square in self._squares:
             if square.x == x and square.y == y:
                 return square
@@ -75,7 +69,6 @@ class MapModelGeneral(QObject):
                     self._updateCallback()
                 return
 
-    #FIXME: These 3 functions do almost the same
     def createEmpySquareAt(self, row, column):
         obj = self._sqareModel()
         obj.y = row
@@ -93,16 +86,12 @@ class MapModelGeneral(QObject):
     def addMapObject(self, obj):
         self._squares.append(obj)
     
-    # ---------------
-
     def createObjectsInSelection(self, selectionRange):
-        """Creates a new object in each square within the specified selection range."""
         for row in range(selectionRange.startRow, selectionRange.endRow + 1):
             for col in range(selectionRange.startCol, selectionRange.endCol + 1):
                 self.createObjectAt(col, row, selectionRange.zLevel)
 
     def deleteObjectsInSelection(self, selectionRange, model=None):
-        """Deletes all objects within the specified selection range. If model is provided, only delete objects with the matching model."""
         i = 0
         while i < len(self._squares):
             square = self._squares[i]
@@ -117,16 +106,13 @@ class MapModelGeneral(QObject):
         if self._updateCallback:
             self._updateCallback()
 
-    def deleteRow(self, rowId): # _squares nice here, but what about _objects?
-        # delete row
+    def deleteRow(self, rowId):
         self._squares[:] = filter(lambda item: item.y != rowId, self._squares)
 
-        # shift coordinates
         for square in self._squares:
             if square.y > rowId:
                 square.y = square.y - 1
 
-        # add empy row at the end
         for column in range(self.width):
             self.createEmpySquareAt(self.height - 1, column)
             
@@ -135,15 +121,12 @@ class MapModelGeneral(QObject):
         self._updateCallback()
 
     def deleteColumn(self, columnId):
-        #delete column
         self._squares[:] = filter(lambda item: item.x != columnId, self._squares)
 
-        # shift coordinates
         for square in self._squares:
             if square.x > columnId:
                 square.x = square.x - 1
 
-        # add empy column at the end
         for row in range(self.height):
             self.createEmpySquareAt(row, self.width - 1)
             
@@ -152,34 +135,32 @@ class MapModelGeneral(QObject):
         self._updateCallback()
 
     def addRow(self, before=None):
-        """Adds a new row at the specified position or at the bottom of the map."""
         if before is None:
             for column in range(self.width):
-                self.createEmpySquareAt(self.height, column)  # New row at the end
-            self.height += 1  # Increase the height count
+                self.createEmpySquareAt(self.height, column)
+            self.height += 1
         else:
             for square in self._squares:
                 if square.y >= before:
                     square.y += 1
             for column in range(self.width):
-                self.createEmpySquareAt(before, column)  # New row at the specified position
+                self.createEmpySquareAt(before, column)
             self.height += 1
 
         if self._updateCallback:
             self._updateCallback()
 
     def addColumn(self, before=None):
-        """Adds a new column at the specified position or to the right side of the map."""
         if before is None:
             for row in range(self.height):
-                self.createEmpySquareAt(row, self.width)  # New column on the right
-            self.width += 1  # Increase the width count
+                self.createEmpySquareAt(row, self.width)
+            self.width += 1
         else:
             for square in self._squares:
                 if square.x >= before:
                     square.x += 1
             for row in range(self.height):
-                self.createEmpySquareAt(row, before)  # New column at the specified position
+                self.createEmpySquareAt(row, before)
             self.width += 1
 
         if self._updateCallback:
@@ -259,7 +240,11 @@ class MapModelGeneral(QObject):
         for square in self._squares:
             if selectionRange.startCol <= square.x <= selectionRange.endCol and selectionRange.startRow <= square.y <= selectionRange.endRow and square.z == selectionRange.zLevel:
                 if square.properties['model'] == modelFilter:
-                    square.setProperty(property, value)
+                    if property == 'additionalProperties':
+                        for prop_name, prop_value in value.items():
+                            square.setAdditioanalProperty(prop_name, prop_value)
+                    else:
+                        square.setProperty(property, value)
                     self.updateModelSize(square)
 
     def updateModelSize(self, square):
@@ -270,7 +255,6 @@ class MapModelGeneral(QObject):
             square.h = map_object.h
 
     def overwriteEverythingWith(self, selectionRange, modelType):
-        """Deletes all objects within the specified selection range and fills it with new objects of the given model type."""
         self.deleteObjectsInSelection(selectionRange)
         for row in range(selectionRange.startRow, selectionRange.endRow + 1):
             for col in range(selectionRange.startCol, selectionRange.endCol + 1):

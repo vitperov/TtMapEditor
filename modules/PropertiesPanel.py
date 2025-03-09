@@ -134,7 +134,8 @@ class PropertiesItem(QWidget):
         self.updateAllProperties.emit()
 
     def showProperties(self):
-        dlg = AdditionalPropertiesDlg(self._objCollection, self._model, self._mapModel._texturesCollection, self)
+        modelType = self._model.getProperty('model')
+        dlg = AdditionalPropertiesDlg(self._objCollection, self._mapModel, self._mapModel._texturesCollection, self._selectionRange, modelType, self)
         if dlg.exec_() == QDialog.Accepted:
             print("Additional properties accepted")
 

@@ -25,7 +25,7 @@ class UnknownTypeWidget(QWidget):
 class TextureTypeWidget(QWidget):
     ICON_SIZE = 48
 
-    def __init__(self, name, type, value, texturesCollection, mapObjectModel, parent=None):
+    def __init__(self, name, type, value, texturesCollection, mapModel, selectionRange, modelType, parent=None):
         super(TextureTypeWidget, self).__init__(parent)
         layout = QHBoxLayout()
         self.setLayout(layout)
@@ -34,7 +34,9 @@ class TextureTypeWidget(QWidget):
         self.type = type
         self.value = value
         self.texturesCollection = texturesCollection
-        self.mapObjectModel = mapObjectModel
+        self.mapModel = mapModel
+        self.selectionRange = selectionRange
+        self.modelType = modelType
 
         name_label = QLabel(f"Name: {self.name}")
         type_label = QLabel(f"Type: {self.type}")
@@ -60,8 +62,8 @@ class TextureTypeWidget(QWidget):
         if dlg.exec_() == QDialog.Accepted:
             selected_texture = dlg.selectedTexture
             if selected_texture:
+                self.mapModel.setGroupProperty(self.selectionRange, self.modelType, 'additionalProperties', {self.name: selected_texture})
                 self.value = selected_texture
-                self.mapObjectModel.setAdditioanalProperty(self.name, self.value)
                 self.update_icon()
 
     def update_icon(self):
@@ -75,31 +77,34 @@ class TextureTypeWidget(QWidget):
 
 
 class AdditionalPropertiesDlg(QDialog):
-    def __init__(self, objCollection, mapObjectModel, texturesCollection, parent=None):
+    def __init__(self, objCollection, mapModel, texturesCollection, selectionRange, modelType, parent=None):
         super(AdditionalPropertiesDlg, self).__init__(parent)
         self.setWindowTitle("Additional Properties")
         
         self.texturesCollection = texturesCollection
-        self.mapObjectModel = mapObjectModel
+        self.mapModel = mapModel
+        self.selectionRange = selectionRange
         
         layout = QVBoxLayout()
         self.setLayout(layout)
-        
-        # Get the model type from the map object model
-        objType = mapObjectModel.getProperty('model')
 
-        # Fetch additional properties for the object type
-        additionalProps = objCollection.getAdditionalProperties(objType)
+        additionalProps = objCollection.getAdditionalProperties(modelType)
 
-        # Display the properties in the GUI
         for prop in additionalProps:
-            # Retrieve value from MapObjectModelGeneral if it exists
-            propValue = next((p for p in mapObjectModel.additional_properties if p.name == prop.name), None)
-            value_display = propValue.value if propValue else "Not Set"
+            selectedSquares = self.mapModel.getAllObjectOfType(modelType, self.selectionRange)
+            propValue = None
+            if selectedSquares:
+                for square in selectedSquares:
+                    for additional_prop in square.additional_properties:
+                        if additional_prop.name == prop.name:
+                            propValue = additional_prop.value
+                            break
+                    if propValue is not None:
+                        break
+            value_display = propValue if propValue else "Not Set"
 
-            # Create a widget to show property name, type, and value
             if prop.type == "texture":
-                widget = TextureTypeWidget(prop.name, prop.type, value_display, self.texturesCollection, self.mapObjectModel)
+                widget = TextureTypeWidget(prop.name, prop.type, value_display, self.texturesCollection, self.mapModel, self.selectionRange, modelType)
             else:
                 widget = UnknownTypeWidget(prop.name, prop.type, value_display)
             layout.addWidget(widget)
