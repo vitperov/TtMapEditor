@@ -1,10 +1,9 @@
-from modules.GeneratorPluginBase import *
+from modules.GeneratorPluginsModel.GeneratorPluginBase import *
 
 from random import randrange, random
 
 from modules.GeometryPrimitives import *
 from modules.Terrain.MapEditHelper import *
-from modules.Terrain.TerrainGeneratorSettings import *
 
 TypeLandLot  = "LandLot"
 TypeForest   = "Forest"
@@ -83,4 +82,3 @@ class ForestGeneratorHelper():
                         for obj in squareItems:
                             if obj.getModel() == TypeGrass:
                                 obj.setModel(TypeForest)
-                       

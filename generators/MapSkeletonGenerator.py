@@ -1,4 +1,4 @@
-from modules.GeneratorPluginBase import *
+from modules.GeneratorPluginsModel.GeneratorPluginBase import *
 
 from random import random
 
@@ -96,4 +96,3 @@ class MapSkeletonGenerator(GeneratorPluginBase):
         obj = MapObjectModelGeneral()
         obj.init(x, y, "LandLot", ObjectRotation.deg0, self.landLotWidth, self.landLotHeight)
         self.mapModel.addMapObject(obj)
-

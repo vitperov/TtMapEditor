@@ -1,3 +1,4 @@
+from modules.commonModels.SelectionRange import *
 from PyQt5 import QtWidgets, QtGui
 from pyqtgraph.Qt import QtCore
 
@@ -8,7 +9,7 @@ from functools import partial
 from modules.SimpleSquareItem import SimpleSquareItem
 from modules.ChooseRotationDlg import ChooseRotationDlg
 from modules.ChooseModelDlg import ChooseModelDlg
-from modules.MapModelGeneral import SelectionRange
+from modules.AdditionalPropertiesDlg import AdditionalPropertiesDlg
 
 class PropertiesItem(QWidget):
     updateAllProperties = pyqtSignal()  # Signal to notify when properties are updated
@@ -19,6 +20,7 @@ class PropertiesItem(QWidget):
         self._mapModel = mapModel
         self._category = category
         self._selectionRange = selectionRange
+        self._objCollection = objCollection
         
         multi_select = not (
             self._selectionRange.startCol == self._selectionRange.endCol and 
@@ -93,6 +95,14 @@ class PropertiesItem(QWidget):
         moveRightBtn.clicked.connect(partial(self.moveObject, 1, 0))
         buttonLayout.addWidget(moveRightBtn, 1, 2)
 
+        # Show Properties Button
+        additionalProps = self._objCollection.getAdditionalProperties(self._model.getProperty('model'))
+        if additionalProps:
+            showPropertiesBtn = QPushButton()
+            showPropertiesBtn.setIcon(self.style().standardIcon(QStyle.SP_FileDialogListView))
+            showPropertiesBtn.clicked.connect(self.showProperties)
+            buttonLayout.addWidget(showPropertiesBtn, 0, 2)
+
     def moveObject(self, x_offset, y_offset):
         self._model.x += x_offset
         self._model.y += y_offset
@@ -122,6 +132,12 @@ class PropertiesItem(QWidget):
     def removeObject(self, id):
         self._mapModel.deleteSquareById(id)
         self.updateAllProperties.emit()
+
+    def showProperties(self):
+        modelType = self._model.getProperty('model')
+        dlg = AdditionalPropertiesDlg(self._objCollection, self._mapModel, self._mapModel._texturesCollection, self._selectionRange, modelType, self)
+        if dlg.exec_() == QDialog.Accepted:
+            print("Additional properties accepted")
 
 class PropertiesPanel(QWidget):
     updatedEntireMap = pyqtSignal()

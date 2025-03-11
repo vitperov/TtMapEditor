@@ -1,5 +1,11 @@
 {
     "name": "FlatRoofHalf",
     "categories": "roof",
-    "iconFile": "FlatRoof.png"
+    "iconFile": "FlatRoof.png",
+    "additionalProperties": [
+        {
+            "type": "texture",
+            "name": "externalTexture"
+        }
+    ]
 }

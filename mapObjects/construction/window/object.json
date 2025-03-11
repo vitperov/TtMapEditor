@@ -1,5 +1,15 @@
 {
     "name": "Window",
     "categories": "indoor",
-    "iconFile": "Window.png"
+    "iconFile": "Window.png",
+    "additionalProperties": [
+        {
+            "type": "texture",
+            "name": "internalTexture"
+        },
+        {
+            "type": "texture",
+            "name": "externalTexture"
+        }
+    ]
 }

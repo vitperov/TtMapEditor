@@ -8,7 +8,7 @@ from modules.MapItemDrawer import *
 from modules.DeleteButtonItem import *
 
 import math
-from modules.MapModelGeneral import SelectionRange
+from modules.commonModels.SelectionRange import *
 
 class MapWidget(QWidget):
     deleteRow         = pyqtSignal(int)

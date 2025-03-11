@@ -33,11 +33,17 @@ class ApplicationSettingsModel:
         self.settings["additionalGeneratorsDir"] = value
         self._saveSettings()
 
+    # Getter and Setter for additionalTexturesDir
+    def getAdditionalTexturesDir(self):
+        return self.settings.get("additionalTexturesDir", "")
+
+    def setAdditionalTexturesDir(self, value):
+        self.settings["additionalTexturesDir"] = value
+        self._saveSettings()
+
     def _saveSettings(self):
         # Ensure directory exists
         os.makedirs(os.path.dirname(self.settings_file), exist_ok=True)
         # Write updated settings to file
         with open(self.settings_file, "w") as f:
             json.dump(self.settings, f, indent=4)
-
-

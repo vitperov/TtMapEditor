@@ -1,137 +1,19 @@
-from enum import Enum
-
 from PyQt5.QtCore import *
 
 import traceback
 import json
-import uuid # we use it as string
-from numbers import Number # not only integer
 
 from modules.GeometryPrimitives import *
-
-
-class ObjectRotation(str, Enum):
-    deg0    = '0'
-    deg90   = '90'
-    deg180  = '180'
-    deg270  = '270'
-
-class SelectionRange:
-    def __init__(self, startCol, startRow, endCol, endRow, zLevel):
-        self.startCol = startCol
-        self.startRow = startRow
-        self.endCol = endCol
-        self.endRow = endRow
-        self.zLevel = zLevel
-    
-    @classmethod
-    def fromStartPointAndSize(cls, startPoint, size, zLevel):
-        return cls(startPoint.x, startPoint.y, startPoint.x + size.w - 1, startPoint.y + size.h - 1, zLevel)
-
-class MapObjectModelGeneral(QObject):
-    changed = pyqtSignal()
-
-    def __init__(self, id=None): # TODO FIX: why second init??
-        QObject.__init__(self)
-        self.classnames = dict()
-        self.properties = dict()
-        
-        self.model = "Empty"
-
-        self.classnames['rotation']  = ObjectRotation
-        self.properties['rotation']  = ObjectRotation.deg0
-
-        self.classnames['model']      = str
-        self.properties['model']      = "Empty"
-
-        self.id = str(id) if (id is not None) else str(uuid.uuid4())
-
-        self.x = 0
-        self.y = 0
-        self.z = 0
-        self.w = 1
-        self.h = 1
-
-    def init(self, x, y, model, rotation=ObjectRotation.deg0, w=1, h=1, id=None):
-        self.id = str(id) if (id is not None) else str(uuid.uuid4()) # FIXED: id was missing
-        self.x = x
-        self.y = y
-        self.z = 0
-
-        self.properties['model']    = model
-        self.properties['rotation'] = rotation
-        self.w = w
-        self.h = h
-
-    def toSerializableObj(self):
-        # properties are enums, they can't be directly converted to int
-        obj = dict()
-        for name, prop in self.properties.items():
-            value = prop
-            obj[name] = value
-
-        obj['x'] =  self.x
-        obj['y'] =  self.y
-        obj['z'] =  self.z
-        obj['w'] =  self.w
-        obj['h'] =  self.h
-        obj['id'] = self.id
-        obj['model'] = self.properties['model']
-
-        return obj
-
-    def getProperty(self, name):
-        return self.properties[name]
-
-    def setProperty(self, name, value):
-        variableClass = self.classnames[name]
-        self.properties[name] = variableClass(value)
-        self.changed.emit()
-
-    def restoreFromJson(self, js):
-        self.x = js['x']
-        self.y = js['y']
-        self.z = js.get('z', 0)
-        self.w = js.get('w', 1)
-        self.h = js.get('h', 1)
-
-        if ('id' in js) and (len(js['id'])) > 0:
-            self.id = js['id']
-        else:
-            self.id = str(uuid.uuid4())
-
-        for propName, propClass in self.classnames.items():
-            self.properties[propName] = propClass(js.get(propName,""))
-            
-    def setSize(self, size):
-        self.w = size.w
-        self.h = size.h
-
-    def getSize(self): # consider rotation
-        size = AreaSize(self.w, self.h)
-        rotation = int(self.properties['rotation'].value);
-        rotatedSize = size.rotated(rotation)
-        return rotatedSize
-        
-    def getStartPt(self):
-        return Point(self.x, self.y)
-        
-    def setModel(self, model):
-        self.properties['model'] = model
-        
-    def getModel(self):
-        return self.properties['model']
+from modules.commonModels.MapObjectModelGeneral import *
+from modules.commonModels.SelectionRange import *
 
 class MapModelGeneral(QObject):
     updatedEntireMap = pyqtSignal()
-    def __init__(self, squareModel, objCollection):
-        """
-        squareModel is MapObjectModelGeneral
-        objCollection is ?
-        """
+    def __init__(self, squareModel, objCollection, texturesCollection):
         QObject.__init__(self)
         self._sqareModel = squareModel
         self._objCollection = objCollection
+        self._texturesCollection = texturesCollection
         self.width = 0
         self.height = 0
         self.editorWidth = 0
@@ -153,7 +35,6 @@ class MapModelGeneral(QObject):
             self._updateCallback()
 
     def getSquare(self, x, y):
-        #FIXME: depricated. Should use getSquareItems instead
         for square in self._squares:
             if square.x == x and square.y == y:
                 return square
@@ -188,7 +69,6 @@ class MapModelGeneral(QObject):
                     self._updateCallback()
                 return
 
-    #FIXME: These 3 functions do almost the same
     def createEmpySquareAt(self, row, column):
         obj = self._sqareModel()
         obj.y = row
@@ -206,16 +86,12 @@ class MapModelGeneral(QObject):
     def addMapObject(self, obj):
         self._squares.append(obj)
     
-    # ---------------
-
     def createObjectsInSelection(self, selectionRange):
-        """Creates a new object in each square within the specified selection range."""
         for row in range(selectionRange.startRow, selectionRange.endRow + 1):
             for col in range(selectionRange.startCol, selectionRange.endCol + 1):
                 self.createObjectAt(col, row, selectionRange.zLevel)
 
     def deleteObjectsInSelection(self, selectionRange, model=None):
-        """Deletes all objects within the specified selection range. If model is provided, only delete objects with the matching model."""
         i = 0
         while i < len(self._squares):
             square = self._squares[i]
@@ -230,16 +106,13 @@ class MapModelGeneral(QObject):
         if self._updateCallback:
             self._updateCallback()
 
-    def deleteRow(self, rowId): # _squares nice here, but what about _objects?
-        # delete row
+    def deleteRow(self, rowId):
         self._squares[:] = filter(lambda item: item.y != rowId, self._squares)
 
-        # shift coordinates
         for square in self._squares:
             if square.y > rowId:
                 square.y = square.y - 1
 
-        # add empy row at the end
         for column in range(self.width):
             self.createEmpySquareAt(self.height - 1, column)
             
@@ -248,15 +121,12 @@ class MapModelGeneral(QObject):
         self._updateCallback()
 
     def deleteColumn(self, columnId):
-        #delete column
         self._squares[:] = filter(lambda item: item.x != columnId, self._squares)
 
-        # shift coordinates
         for square in self._squares:
             if square.x > columnId:
                 square.x = square.x - 1
 
-        # add empy column at the end
         for row in range(self.height):
             self.createEmpySquareAt(row, self.width - 1)
             
@@ -265,34 +135,32 @@ class MapModelGeneral(QObject):
         self._updateCallback()
 
     def addRow(self, before=None):
-        """Adds a new row at the specified position or at the bottom of the map."""
         if before is None:
             for column in range(self.width):
-                self.createEmpySquareAt(self.height, column)  # New row at the end
-            self.height += 1  # Increase the height count
+                self.createEmpySquareAt(self.height, column)
+            self.height += 1
         else:
             for square in self._squares:
                 if square.y >= before:
                     square.y += 1
             for column in range(self.width):
-                self.createEmpySquareAt(before, column)  # New row at the specified position
+                self.createEmpySquareAt(before, column)
             self.height += 1
 
         if self._updateCallback:
             self._updateCallback()
 
     def addColumn(self, before=None):
-        """Adds a new column at the specified position or to the right side of the map."""
         if before is None:
             for row in range(self.height):
-                self.createEmpySquareAt(row, self.width)  # New column on the right
-            self.width += 1  # Increase the width count
+                self.createEmpySquareAt(row, self.width)
+            self.width += 1
         else:
             for square in self._squares:
                 if square.x >= before:
                     square.x += 1
             for row in range(self.height):
-                self.createEmpySquareAt(row, before)  # New column at the specified position
+                self.createEmpySquareAt(row, before)
             self.width += 1
 
         if self._updateCallback:
@@ -354,7 +222,7 @@ class MapModelGeneral(QObject):
     def openMap(self, filename):
         extension = '.json'
         if not filename.endswith(extension):
-            filename = filename + extension
+            filename = extension + filename
 
         print("Loading map from " + filename)
 
@@ -372,7 +240,11 @@ class MapModelGeneral(QObject):
         for square in self._squares:
             if selectionRange.startCol <= square.x <= selectionRange.endCol and selectionRange.startRow <= square.y <= selectionRange.endRow and square.z == selectionRange.zLevel:
                 if square.properties['model'] == modelFilter:
-                    square.setProperty(property, value)
+                    if property == 'additionalProperties':
+                        for prop_name, prop_value in value.items():
+                            square.setAdditioanalProperty(prop_name, prop_value)
+                    else:
+                        square.setProperty(property, value)
                     self.updateModelSize(square)
 
     def updateModelSize(self, square):
@@ -383,7 +255,6 @@ class MapModelGeneral(QObject):
             square.h = map_object.h
 
     def overwriteEverythingWith(self, selectionRange, modelType):
-        """Deletes all objects within the specified selection range and fills it with new objects of the given model type."""
         self.deleteObjectsInSelection(selectionRange)
         for row in range(selectionRange.startRow, selectionRange.endRow + 1):
             for col in range(selectionRange.startCol, selectionRange.endCol + 1):

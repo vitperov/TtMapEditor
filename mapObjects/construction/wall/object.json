@@ -1,5 +1,15 @@
 {
     "name": "Wall",
     "categories": "indoor",
-    "iconFile": "Wall.png"
+    "iconFile": "Wall.png",
+    "additionalProperties": [
+        {
+            "type": "texture",
+            "name": "internalTexture"
+        },
+        {
+            "type": "texture",
+            "name": "externalTexture"
+        }
+    ]
 }

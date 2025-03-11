@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QFont
@@ -6,13 +6,14 @@ from PyQt5.QtCore import QSize
 import sys
 import os
 
-from modules.MapModelGeneral import *
+from modules.commonModels.MapModelGeneral import *
 from modules.Terrain.TerrainEditorView import *
 from modules.Terrain.TerrainMapController import *
 from modules.Terrain.Model import *
 from modules.House.HouseView import *
 from modules.House.HouseController import *
-from modules.ObjectsCollection import *
+from modules.commonModels.ObjectsCollection import *
+from modules.commonModels.TexturesCollection import TexturesCollection
 from modules.ApplicationSettings.ApplicationSettingsDlg import ApplicationSettingsDlg
 from modules.ApplicationSettings.ApplicationSettingsModel import ApplicationSettingsModel
 
@@ -67,6 +68,7 @@ class TtMapEditor(QMainWindow):
         self.settingsButton.clicked.connect(self.showSettings)
         
         self.objCollection = None
+        self.texturesCollection = None
 
     def showTerrainEditor(self):
         self.model = Model()
@@ -79,12 +81,16 @@ class TtMapEditor(QMainWindow):
         nativeMapObjectsDir = os.path.join(os.path.dirname(__file__), 'mapObjects')
         externalMapObjectsDir = settings.getAdditionalMapObjectsDir()
         objCollection = ObjectsCollection([nativeMapObjectsDir, externalMapObjectsDir])
+
+        nativeTexturesDir = os.path.join(os.path.dirname(__file__), 'textures')
+        additionalTexturesDir = settings.getAdditionalTexturesDir()
+        self.texturesCollection = TexturesCollection([nativeTexturesDir, additionalTexturesDir])
         
-        self.model = MapModelGeneral(MapObjectModelGeneral, objCollection)
+        self.model = MapModelGeneral(MapObjectModelGeneral, objCollection, self.texturesCollection)
         view = HouseView()
         self.controller = HouseController(view=view, houseModel=self.model)
         self.setCentralWidget(view)
-    
+
     def showSettings(self):
         # Open the settings dialog
         settingsDialog = ApplicationSettingsDlg(self)
