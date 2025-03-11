@@ -1,5 +1,11 @@
 {
     "name": "PitchedRoofHalf",
     "categories": "roof",
-    "iconFile": "pitchedRoof.png"
+    "iconFile": "pitchedRoof.png",
+    "additionalProperties": [
+        {
+            "type": "texture",
+            "name": "externalTexture"
+        }
+    ]
 }

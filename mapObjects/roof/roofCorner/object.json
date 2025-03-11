@@ -1,5 +1,11 @@
 {
     "name": "RoofCorner",
     "categories": "roof",
-    "iconFile": "roofCorner.png"
+    "iconFile": "roofCorner.png",
+    "additionalProperties": [
+        {
+            "type": "texture",
+            "name": "externalTexture"
+        }
+    ]
 }
