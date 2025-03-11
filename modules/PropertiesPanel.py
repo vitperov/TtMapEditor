@@ -69,7 +69,7 @@ class PropertiesItem(QWidget):
         removeBtn = QPushButton()
         removeBtn.setIcon(self.style().standardIcon(QStyle.SP_DialogCancelButton))
         buttonLayout.addWidget(removeBtn, 2, 0)
-        removeBtn.clicked.connect(partial(self.removeObject, self._model.id))
+        removeBtn.clicked.connect(self.removeObject)
 
         # Move Up Button
         moveUpBtn = QPushButton()
@@ -129,8 +129,9 @@ class PropertiesItem(QWidget):
                 self._mapModel.updateEntireMap()
                 self.modelPicture.updatePixmap()
 
-    def removeObject(self, id):
-        self._mapModel.deleteSquareById(id)
+    def removeObject(self):
+        model_type = self._model.getProperty('model')
+        self._mapModel.deleteObjectsInSelection(self._selectionRange, model_type)
         self.updateAllProperties.emit()
 
     def showProperties(self):
