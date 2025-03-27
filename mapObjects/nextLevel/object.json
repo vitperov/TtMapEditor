@@ -1,5 +1,11 @@
 {
     "name": "nextLevel",
     "categories": "outdoor",
-    "iconFile": "nextLevel.png"
+    "iconFile": "nextLevel.png",
+    "additionalProperties": [
+        {
+            "type": "string",
+            "name": "destination"
+        }
+    ]
 }
