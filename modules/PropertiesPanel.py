@@ -151,16 +151,17 @@ class PropertiesPanel(QWidget):
         layout = QVBoxLayout()
         self.setLayout(layout)
 
-        self.coordinatesLbl = QLabel("X: ? Y: ?")
-        layout.addWidget(self.coordinatesLbl)
-
-        self.properties = QVBoxLayout()
-        layout.addLayout(self.properties)
-
         addBtn = QPushButton()
         addBtn.setIcon(QtGui.QIcon('resources/greenPlus.png'))
         layout.addWidget(addBtn)
         addBtn.clicked.connect(self.addObject)
+
+        self.coordinatesLbl = QLabel("X: ? Y: ?")
+        layout.addWidget(self.coordinatesLbl)
+
+        self.properties = QVBoxLayout()
+        self.properties.setSpacing(0)
+        layout.addLayout(self.properties)
 
         layout.addStretch()  # Add vertical spacer at the end
 
