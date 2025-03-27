@@ -68,8 +68,8 @@ class PropertiesItem(QWidget):
         # Remove Button
         removeBtn = QPushButton()
         removeBtn.setIcon(self.style().standardIcon(QStyle.SP_DialogCancelButton))
-        buttonLayout.addWidget(removeBtn, 2, 0)
         removeBtn.clicked.connect(self.removeObject)
+        buttonLayout.addWidget(removeBtn, 2, 0)
 
         # Move Up Button
         moveUpBtn = QPushButton()
@@ -102,6 +102,10 @@ class PropertiesItem(QWidget):
             showPropertiesBtn.setIcon(self.style().standardIcon(QStyle.SP_FileDialogListView))
             showPropertiesBtn.clicked.connect(self.showProperties)
             buttonLayout.addWidget(showPropertiesBtn, 0, 2)
+
+        # Set size policies for proper expansion
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        groupBox.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
     def moveObject(self, x_offset, y_offset):
         self._model.x += x_offset
@@ -159,11 +163,22 @@ class PropertiesPanel(QWidget):
         self.coordinatesLbl = QLabel("X: ? Y: ?")
         layout.addWidget(self.coordinatesLbl)
 
-        self.properties = QVBoxLayout()
-        self.properties.setSpacing(0)
-        layout.addLayout(self.properties)
+        # Create scroll area for properties
+        scroll = QScrollArea()
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)  # Allow horizontal scrolling if needed
+        scroll.setWidgetResizable(True)
 
-        layout.addStretch()  # Add vertical spacer at the end
+        # Container widget for properties
+        container = QWidget()
+        container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.properties = QVBoxLayout(container)
+        self.properties.setSpacing(0)
+        self.properties.setContentsMargins(0, 0, 0, 0)
+        scroll.setWidget(container)
+
+        layout.addWidget(scroll)
+        # Removed stretch to allow vertical expansion
 
     def setModel(self, model):
         self.mapModel = model
@@ -177,8 +192,12 @@ class PropertiesPanel(QWidget):
         endRow = selectionRange.endRow
         zLevel = selectionRange.zLevel
 
-        for i in reversed(range(self.properties.count())):
-            self.properties.itemAt(i).widget().setParent(None)
+        # Clear existing items safely
+        while self.properties.count():
+            item = self.properties.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
 
         if startCol == endCol and startRow == endRow:
             items = self.mapModel.getSquareItems(startCol, startRow, zLevel)
@@ -194,6 +213,9 @@ class PropertiesPanel(QWidget):
             itemWg = PropertiesItem(itemModel, self.mapModel._objCollection, self.mapModel, self.selectionRange, self._category)
             itemWg.updateAllProperties.connect(self.update)
             self.properties.addWidget(itemWg)
+
+        # Add stretch after items
+        self.properties.addStretch()
 
     def addObject(self):
         if self.selectionRange is not None:
