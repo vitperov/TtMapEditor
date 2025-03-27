@@ -35,6 +35,7 @@ class HouseController:
         self._view.actionsPanel.zLevelChanged.connect(self._setZLevel)
         self._view.actionsPanel.generateWallFrame.connect(self._generateWallFrame)
         self._view.actionsPanel.generateRoofFrame.connect(self._generateRoofFrame)
+        self._view.actionsPanel.generateRoofFrameHalf.connect(self._generateRoofFrameHalf)
 
         self._houseModel.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
         self._view.propPanel.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
@@ -54,4 +55,9 @@ class HouseController:
     def _generateRoofFrame(self):
         selection = self._view.mapWidget.selectionRange
         self._editorHelper.generateRoofFrame(selection)
+        self._view.mapWidget.redrawAll()
+
+    def _generateRoofFrameHalf(self):
+        selection = self._view.mapWidget.selectionRange
+        self._editorHelper.generateRoofFrameHalf(selection)
         self._view.mapWidget.redrawAll()

@@ -13,6 +13,7 @@ class HouseToolbar(QWidget):
     zLevelChanged = pyqtSignal(int)
     generateWallFrame = pyqtSignal()
     generateRoofFrame = pyqtSignal()
+    generateRoofFrameHalf = pyqtSignal()
 
     ICON_SIZE = QSize(32, 32)  # Common size constant for all icons
 
@@ -63,6 +64,10 @@ class HouseToolbar(QWidget):
         self._generateRoofBtn.setIcon(QIcon("resources/roof-frame.png"))
         self._generateRoofBtn.setIconSize(self.ICON_SIZE)
 
+        self._generateRoofHalfBtn = QPushButton("Generate Half Roof frame")
+        self._generateRoofHalfBtn.setIcon(QIcon("resources/roof-frame-half.png"))
+        self._generateRoofHalfBtn.setIconSize(self.ICON_SIZE)
+
         # Create dropdown for Floor
         self._floorComboBox = QComboBox()
         self._floorComboBox.addItems(map(str, [i * 0.5 for i in range(7)]))
@@ -76,6 +81,7 @@ class HouseToolbar(QWidget):
         self._layout.addWidget(self._addRowBtn)
         self._layout.addWidget(self._generateWallBtn)
         self._layout.addWidget(self._generateRoofBtn)
+        self._layout.addWidget(self._generateRoofHalfBtn)
         self._layout.addWidget(QLabel("Floor:"))
         self._layout.addWidget(self._floorComboBox)
         self._layout.addStretch()
@@ -86,6 +92,7 @@ class HouseToolbar(QWidget):
         self._saveBtn.clicked.connect(self._saveFile)
         self._generateWallBtn.clicked.connect(self.generateWallFrame.emit)
         self._generateRoofBtn.clicked.connect(self.generateRoofFrame.emit)
+        self._generateRoofHalfBtn.clicked.connect(self.generateRoofFrameHalf.emit)
 
     def _newFile(self):
         print("new map")
