@@ -11,7 +11,8 @@ class HouseToolbar(QWidget):
     addColumn = pyqtSignal(bool)
     addRow = pyqtSignal(bool)
     zLevelChanged = pyqtSignal(int)
-    #changedSelection = pyqtSignal(bool)
+    generateWallFrame = pyqtSignal()
+    generateRoofFrame = pyqtSignal()
 
     ICON_SIZE = QSize(32, 32)  # Common size constant for all icons
 
@@ -53,18 +54,14 @@ class HouseToolbar(QWidget):
         self._addRowMenu.addAction("After", partial(self._addRow, False))
         self._addRowBtn.setMenu(self._addRowMenu)
 
-        #self._singleSelectionBtn = QPushButton()
-        #self._singleSelectionBtn.setCheckable(True)
-        #self._singleSelectionBtn.setChecked(True)
-        #self._singleSelectionBtn.setIcon(QIcon("resources/single_selection.png"))
-        #self._singleSelectionBtn.setIconSize(self.ICON_SIZE)
-        #self._singleSelectionBtn.clicked.connect(self._onSingleSelection)
+        # Create frame generation buttons
+        self._generateWallBtn = QPushButton("Generate Wall frame")
+        self._generateWallBtn.setIcon(QIcon("resources/wall-frame.png"))
+        self._generateWallBtn.setIconSize(self.ICON_SIZE)
         
-        #self._multipleSelectionBtn = QPushButton()
-        #self._multipleSelectionBtn.setCheckable(True)
-        #self._multipleSelectionBtn.setIcon(QIcon("resources/multiple_selection.png"))
-        #self._multipleSelectionBtn.setIconSize(self.ICON_SIZE)
-        #self._multipleSelectionBtn.clicked.connect(self._onMultipleSelection)
+        self._generateRoofBtn = QPushButton("Generate Roof frame")
+        self._generateRoofBtn.setIcon(QIcon("resources/roof-frame.png"))
+        self._generateRoofBtn.setIconSize(self.ICON_SIZE)
 
         # Create dropdown for Floor
         self._floorComboBox = QComboBox()
@@ -77,8 +74,8 @@ class HouseToolbar(QWidget):
         self._layout.addWidget(self._saveBtn)
         self._layout.addWidget(self._addColumnBtn)
         self._layout.addWidget(self._addRowBtn)
-        #self._layout.addWidget(self._singleSelectionBtn)
-        #self._layout.addWidget(self._multipleSelectionBtn)
+        self._layout.addWidget(self._generateWallBtn)
+        self._layout.addWidget(self._generateRoofBtn)
         self._layout.addWidget(QLabel("Floor:"))
         self._layout.addWidget(self._floorComboBox)
         self._layout.addStretch()
@@ -87,6 +84,8 @@ class HouseToolbar(QWidget):
         self._newBtn.clicked.connect(self._newFile)
         self._openBtn.clicked.connect(self._openFile)
         self._saveBtn.clicked.connect(self._saveFile)
+        self._generateWallBtn.clicked.connect(self.generateWallFrame.emit)
+        self._generateRoofBtn.clicked.connect(self.generateRoofFrame.emit)
 
     def _newFile(self):
         print("new map")
@@ -116,15 +115,3 @@ class HouseToolbar(QWidget):
         model_z_level = index
         print("Floor changed to", model_z_level)
         self.zLevelChanged.emit(model_z_level)
-
-    def _onSingleSelection(self):
-        if self._multipleSelectionBtn.isChecked():
-            self._multipleSelectionBtn.setChecked(False)
-        print("Single Selection")
-        self.changedSelection.emit(False)
-
-    #def _onMultipleSelection(self):
-    #    if self._singleSelectionBtn.isChecked():
-    #        self._singleSelectionBtn.setChecked(False)
-    #    print("Multiple Selection")
-    #    self.changedSelection.emit(True)

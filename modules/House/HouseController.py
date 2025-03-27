@@ -10,10 +10,13 @@ import numpy
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
+from modules.commonModels.EditorHelper import EditorHelper
+
 class HouseController:
     def __init__(self, view, houseModel):
         self._view = view
         self._houseModel = houseModel
+        self._editorHelper = EditorHelper(self._houseModel)
 
         self._provideModel()
         self._connectSignals()
@@ -30,6 +33,8 @@ class HouseController:
         self._view.actionsPanel.addColumn.connect(self._view.mapWidget.addColumn)
         self._view.actionsPanel.addRow.connect(self._view.mapWidget.addRow)
         self._view.actionsPanel.zLevelChanged.connect(self._setZLevel)
+        self._view.actionsPanel.generateWallFrame.connect(self._generateWallFrame)
+        self._view.actionsPanel.generateRoofFrame.connect(self._generateRoofFrame)
 
         self._houseModel.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
         self._view.propPanel.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
@@ -39,4 +44,14 @@ class HouseController:
 
     def _setZLevel(self, zLevel):
         self._view.mapWidget.selectionRange.zLevel = zLevel
+        self._view.mapWidget.redrawAll()
+
+    def _generateWallFrame(self):
+        selection = self._view.mapWidget.selectionRange
+        self._editorHelper.generateWallFrame(selection)
+        self._view.mapWidget.redrawAll()
+
+    def _generateRoofFrame(self):
+        selection = self._view.mapWidget.selectionRange
+        self._editorHelper.generateRoofFrame(selection)
         self._view.mapWidget.redrawAll()
