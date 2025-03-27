@@ -31,7 +31,7 @@ class PropertiesPanel(QWidget):
         self.coordinatesLbl = QLabel("X: ? Y: ?")
         layout.addWidget(self.coordinatesLbl)
 
-        self.properties = QVBoxLayout()
+        self.properties = QGridLayout()
         self.properties.setSpacing(0)
         layout.addLayout(self.properties)
 
@@ -52,7 +52,7 @@ class PropertiesPanel(QWidget):
         for i in reversed(range(self.properties.count())):
             self.properties.itemAt(i).widget().setParent(None)
 
-        if startCol == endCol and startRow == endRow:
+        if startCol == endCol and startRow == startRow:
             items = self.mapModel.getSquareItems(startCol, startRow, zLevel)
             self.coordinatesLbl.setText("X: " + str(startCol) + " Y: " + str(startRow) + " Zlevel: " + str(zLevel))
         else:
@@ -62,10 +62,12 @@ class PropertiesPanel(QWidget):
             totalItems = width * height
             self.coordinatesLbl.setText(f"{totalItems} squares selected")
         
-        for itemModel in items:
+        MAX_ROWS = 9
+        for index, itemModel in enumerate(items):
             itemWg = PropertiesItem(itemModel, self.mapModel._objCollection, self.mapModel, self.selectionRange, self._category)
-            itemWg.updateAllProperties.connect(self.update)
-            self.properties.addWidget(itemWg)
+            row = index % MAX_ROWS
+            col = index // MAX_ROWS
+            self.properties.addWidget(itemWg, row, col)
 
     def addObject(self):
         if self.selectionRange is not None:

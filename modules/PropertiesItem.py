@@ -33,11 +33,15 @@ class PropertiesItem(QWidget):
 
         # Create a layout for the widget
         layout = QVBoxLayout(self)
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
 
-        # Set up the group box with a title
-        groupBox = QGroupBox(sqType, self)
+        # Set up the group box without a title (header removed)
+        groupBox = QGroupBox("", self)
         groupBoxLayout = QHBoxLayout()  # Change to QHBoxLayout for horizontal arrangement
+        groupBoxLayout.setSpacing(0)
+        groupBoxLayout.setContentsMargins(0, 0, 0, 0)
         groupBox.setLayout(groupBoxLayout)
         layout.addWidget(groupBox)
         
@@ -51,6 +55,8 @@ class PropertiesItem(QWidget):
 
         # Create a grid layout for control buttons
         buttonLayout = QGridLayout()
+        buttonLayout.setSpacing(0)
+        buttonLayout.setContentsMargins(0, 0, 0, 0)
         groupBoxLayout.addLayout(buttonLayout)
         
         # Model Button
