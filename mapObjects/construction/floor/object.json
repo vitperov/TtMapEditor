@@ -1,5 +1,11 @@
 {
     "name": "Floor",
     "categories": "indoor",
-    "iconFile": "Floor.png"
+    "iconFile": "Floor.png",
+    "additionalProperties": [
+        {
+            "type": "texture",
+            "name": "internalTexture"
+        }
+    ]
 }
