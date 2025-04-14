@@ -52,6 +52,8 @@ class IntervalRespawnGenerator(GeneratorPluginBase):
 
     def isForest(self, row, col):
         square = self.mapModel.getSquare(col, row)
+        if square is None:
+            return False
         sqType = square.getProperty('model')
 
         return sqType == TypeForest
