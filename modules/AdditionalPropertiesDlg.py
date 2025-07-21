@@ -76,6 +76,67 @@ class TextureTypeWidget(QWidget):
         self.icon_button.setIcon(QtGui.QIcon(pixmap))
 
 
+class StringTypeWidget(QWidget):
+    def __init__(self, name, type, value, mapModel, selectionRange, modelType, parent=None):
+        super(StringTypeWidget, self).__init__(parent)
+        self.name = name
+        self.type = type
+        self.value = value if value != "Not Set" else ""
+        self.mapModel = mapModel
+        self.selectionRange = selectionRange
+        self.modelType = modelType
+
+        layout = QHBoxLayout()
+        self.setLayout(layout)
+
+        name_label = QLabel(f"Name: {self.name}")
+        type_label = QLabel(f"Type: {self.type}")
+        self.line_edit = QtWidgets.QLineEdit(self.value)
+
+        layout.addWidget(name_label)
+        layout.addWidget(type_label)
+        layout.addWidget(self.line_edit)
+
+        self.line_edit.editingFinished.connect(self.on_edit_finished)
+
+    def on_edit_finished(self):
+        new_value = self.line_edit.text()
+        self.mapModel.setGroupProperty(self.selectionRange, self.modelType, 'additionalProperties', {self.name: new_value})
+        self.value = new_value
+
+
+class IntTypeWidget(QWidget):
+    def __init__(self, name, type, value, mapModel, selectionRange, modelType, parent=None):
+        super(IntTypeWidget, self).__init__(parent)
+        self.name = name
+        self.type = type
+        try:
+            self.value = int(value) if value != "Not Set" else 0
+        except (ValueError, TypeError):
+            self.value = 0
+        self.mapModel = mapModel
+        self.selectionRange = selectionRange
+        self.modelType = modelType
+
+        layout = QHBoxLayout()
+        self.setLayout(layout)
+
+        name_label = QLabel(f"Name: {self.name}")
+        type_label = QLabel(f"Type: {self.type}")
+        self.spin_box = QtWidgets.QSpinBox()
+        self.spin_box.setValue(self.value)
+
+        layout.addWidget(name_label)
+        layout.addWidget(type_label)
+        layout.addWidget(self.spin_box)
+
+        self.spin_box.valueChanged.connect(self.on_value_changed)
+
+    def on_value_changed(self, new_value):
+        self.mapModel.setGroupProperty(self.selectionRange, self.modelType, 'additionalProperties', {self.name: new_value})
+        self.value = new_value
+
+
 class AdditionalPropertiesDlg(QDialog):
     def __init__(self, objCollection, mapModel, texturesCollection, selectionRange, modelType, parent=None):
         super(AdditionalPropertiesDlg, self).__init__(parent)
@@ -101,10 +162,14 @@ class AdditionalPropertiesDlg(QDialog):
                             break
                     if propValue is not None:
                         break
-            value_display = propValue if propValue else "Not Set"
+            value_display = propValue if propValue is not None else "Not Set"
 
             if prop.type == "texture":
                 widget = TextureTypeWidget(prop.name, prop.type, value_display, self.texturesCollection, self.mapModel, self.selectionRange, modelType)
+            elif prop.type == "string":
+                widget = StringTypeWidget(prop.name, prop.type, value_display, self.mapModel, self.selectionRange, modelType)
+            elif prop.type == "int":
+                widget = IntTypeWidget(prop.name, prop.type, value_display, self.mapModel, self.selectionRange, modelType)
             else:
                 widget = UnknownTypeWidget(prop.name, prop.type, value_display)
             layout.addWidget(widget)
