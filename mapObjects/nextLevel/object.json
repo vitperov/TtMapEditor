@@ -4,8 +4,8 @@
     "iconFile": "nextLevel.png",
     "additionalProperties": [
         {
-            "type": "string",
-            "name": "destination"
+            "type": "int",
+            "name": "levelId"
         }
     ]
 }
