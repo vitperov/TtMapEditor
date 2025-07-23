@@ -1,5 +1,11 @@
 {
     "name": "playerRespawn",
     "categories": "outdoor",
-    "iconFile": "playerRespawn.png"
+    "iconFile": "playerRespawn.png",
+    "additionalProperties": [
+        {
+            "type": "int",
+            "name": "respawnId"
+        }
+    ]
 }
