@@ -109,6 +109,10 @@ class PropertiesItem(QWidget):
             showPropertiesBtn.clicked.connect(self.showProperties)
             buttonLayout.addWidget(showPropertiesBtn, 0, 2)
 
+    def _is_single_square_selection(self):
+        return (self._selectionRange.startCol == self._selectionRange.endCol and
+                self._selectionRange.startRow == self._selectionRange.endRow)
+
     def moveObject(self, x_offset, y_offset):
         self._model.x += x_offset
         self._model.y += y_offset
@@ -122,22 +126,42 @@ class PropertiesItem(QWidget):
         if dlg.exec_() == QDialog.Accepted:
             chosenRotation = dlg.selectedRotation
             if chosenRotation is not None:
-                self._mapModel.setGroupProperty(self._selectionRange, self._model.getProperty('model'), 'rotation', str(chosenRotation))
-                self._mapModel.updateEntireMap()
-                self.modelPicture.updatePixmap()
+                if self._is_single_square_selection():
+                    # Apply rotation only to the specific object instance
+                    self._model.setProperty('rotation', str(chosenRotation))
+                    self._mapModel.updateEntireMap()
+                    self.modelPicture.updatePixmap()
+                else:
+                    # Apply rotation to all objects of this type in the selection area
+                    self._mapModel.setGroupProperty(self._selectionRange, self._model.getProperty('model'), 'rotation', str(chosenRotation))
+                    self._mapModel.updateEntireMap()
+                    self.modelPicture.updatePixmap()
 
     def showChooseModelDlg(self):
         dlg = ChooseModelDlg(self._mapModel._objCollection, self._category, 64)
         if dlg.exec_() == QDialog.Accepted:
             chosenModel = dlg.selectedModel
             if chosenModel is not None:
-                self._mapModel.setGroupProperty(self._selectionRange, self._model.getProperty('model'), 'model', chosenModel)
-                self._mapModel.updateEntireMap()
-                self.modelPicture.updatePixmap()
+                if self._is_single_square_selection():
+                    # Change model only for the specific object instance
+                    self._model.setProperty('model', chosenModel)
+                    self._mapModel.updateModelSize(self._model)
+                    self._mapModel.updateEntireMap()
+                    self.modelPicture.updatePixmap()
+                else:
+                    # Change model for all objects of the old type in the selection area
+                    self._mapModel.setGroupProperty(self._selectionRange, self._model.getProperty('model'), 'model', chosenModel)
+                    self._mapModel.updateEntireMap()
+                    self.modelPicture.updatePixmap()
 
     def removeObject(self):
-        model_type = self._model.getProperty('model')
-        self._mapModel.deleteObjectsInSelection(self._selectionRange, model_type)
+        if self._is_single_square_selection():
+            # Remove only the specific object instance
+            self._mapModel.deleteSquareById(self._model.id)
+        else:
+            # Remove all objects of this type in the selection area
+            model_type = self._model.getProperty('model')
+            self._mapModel.deleteObjectsInSelection(self._selectionRange, model_type)
         self.updateAllProperties.emit()
 
     def showProperties(self):
