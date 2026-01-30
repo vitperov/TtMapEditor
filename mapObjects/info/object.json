@@ -1,0 +1,11 @@
+{
+    "name": "info",
+    "categories": "outdoor",
+    "iconFile": "info.png",
+    "additionalProperties": [
+        {
+            "type": "string",
+            "name": "infoMessage"
+        }
+    ]
+}

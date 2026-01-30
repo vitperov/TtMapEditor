@@ -4,8 +4,12 @@
     "iconFile": "nextLevel.png",
     "additionalProperties": [
         {
-            "type": "string",
-            "name": "destination"
+            "type": "int",
+            "name": "levelId"
+        },
+        {
+            "type": "int",
+            "name": "respawnId"
         }
     ]
 }

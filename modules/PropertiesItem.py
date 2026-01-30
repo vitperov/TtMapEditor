@@ -37,8 +37,8 @@ class PropertiesItem(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
 
-        # Set up the group box without a title (header removed)
-        groupBox = QGroupBox("", self)
+        # Set up the group box
+        groupBox = QGroupBox(sqType, self)
         groupBoxLayout = QHBoxLayout()  # Change to QHBoxLayout for horizontal arrangement
         groupBoxLayout.setSpacing(0)
         groupBoxLayout.setContentsMargins(0, 0, 0, 0)
