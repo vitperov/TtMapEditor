@@ -86,7 +86,7 @@ class TtMapEditor(QMainWindow):
         additionalTexturesDir = settings.getAdditionalTexturesDir()
         self.texturesCollection = TexturesCollection([nativeTexturesDir, additionalTexturesDir])
         
-        self.model = MapModelGeneral(MapObjectModelGeneral, objCollection, self.texturesCollection)
+        self.model = MapModelGeneral(MapObjectModelGeneral, objCollection, self.texturesCollection, basePrefab="House")
         view = HouseView()
         self.controller = HouseController(view=view, houseModel=self.model)
         self.setCentralWidget(view)

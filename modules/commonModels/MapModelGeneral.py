@@ -9,7 +9,7 @@ from modules.commonModels.SelectionRange import *
 
 class MapModelGeneral(QObject):
     updatedEntireMap = pyqtSignal()
-    def __init__(self, squareModel, objCollection, texturesCollection):
+    def __init__(self, squareModel, objCollection, texturesCollection, basePrefab=None):
         QObject.__init__(self)
         self._sqareModel = squareModel
         self._objCollection = objCollection
@@ -19,6 +19,11 @@ class MapModelGeneral(QObject):
         self.editorWidth = 0
         self.editorHeight = 0;
         self._squares = list()
+        # Hint to the runtime loader (CompoundObjectLoader): name of the
+        # base prefab to instantiate as the compound's root, or None for an
+        # empty GameObject root. Set per editor type (e.g. "House" for the
+        # House editor; None for Terrain). Round-trips through JSON.
+        self.basePrefab = basePrefab
         self._updateCallback = self.updateEntireMap
 
     def setUpdatedCallback(self, callback):
@@ -194,6 +199,8 @@ class MapModelGeneral(QObject):
 
         obj = dict()
         obj['version'] = 1
+        if self.basePrefab is not None:
+            obj['basePrefab'] = self.basePrefab
         obj['squares'] = squares
         obj['width']   = self.width
         obj['height']  = self.height
@@ -203,6 +210,9 @@ class MapModelGeneral(QObject):
     def restoreFromJson(self, js):
         self.width  = max(js['width'], self.editorWidth)
         self.height = max(js['height'], self.editorHeight)
+
+        if 'basePrefab' in js:
+            self.basePrefab = js['basePrefab']
 
         self._squares = list()
         for square in js['squares']:
