@@ -9,11 +9,12 @@ from modules.commonModels.SelectionRange import *
 
 class MapModelGeneral(QObject):
     updatedEntireMap = pyqtSignal()
-    def __init__(self, squareModel, objCollection, texturesCollection, basePrefab=None):
+    def __init__(self, squareModel, objCollection, texturesCollection, lootContainersCollection=None, basePrefab=None):
         QObject.__init__(self)
         self._sqareModel = squareModel
         self._objCollection = objCollection
         self._texturesCollection = texturesCollection
+        self._lootContainersCollection = lootContainersCollection
         self.width = 0
         self.height = 0
         self.editorWidth = 0

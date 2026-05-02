@@ -137,12 +137,52 @@ class IntTypeWidget(QWidget):
         self.value = new_value
 
 
+class LootContainerTypeWidget(QWidget):
+    def __init__(self, name, type, value, lootContainersCollection, mapModel, selectionRange, modelType, parent=None):
+        super(LootContainerTypeWidget, self).__init__(parent)
+        layout = QHBoxLayout()
+        self.setLayout(layout)
+
+        self.name = name
+        self.type = type
+        self.value = value if value != "Not Set" else ""
+        self.lootContainersCollection = lootContainersCollection
+        self.mapModel = mapModel
+        self.selectionRange = selectionRange
+        self.modelType = modelType
+
+        name_label = QLabel(f"Name: {self.name}")
+        type_label = QLabel(f"Type: {self.type}")
+
+        self.combo_box = QtWidgets.QComboBox()
+        self.combo_box.addItem("")
+        for container_name in self.lootContainersCollection.allContainerTypes():
+            self.combo_box.addItem(container_name)
+
+        idx = self.combo_box.findText(self.value)
+        if idx >= 0:
+            self.combo_box.setCurrentIndex(idx)
+        else:
+            self.combo_box.setCurrentIndex(0)
+
+        layout.addWidget(name_label)
+        layout.addWidget(type_label)
+        layout.addWidget(self.combo_box)
+
+        self.combo_box.currentTextChanged.connect(self.on_selection_changed)
+
+    def on_selection_changed(self, new_value):
+        self.mapModel.setGroupProperty(self.selectionRange, self.modelType, 'additionalProperties', {self.name: new_value})
+        self.value = new_value
+
+
 class AdditionalPropertiesDlg(QDialog):
-    def __init__(self, objCollection, mapModel, texturesCollection, selectionRange, modelType, parent=None):
+    def __init__(self, objCollection, mapModel, texturesCollection, lootContainersCollection, selectionRange, modelType, parent=None):
         super(AdditionalPropertiesDlg, self).__init__(parent)
         self.setWindowTitle("Additional Properties")
         
         self.texturesCollection = texturesCollection
+        self.lootContainersCollection = lootContainersCollection
         self.mapModel = mapModel
         self.selectionRange = selectionRange
         
@@ -166,6 +206,8 @@ class AdditionalPropertiesDlg(QDialog):
 
             if prop.type == "texture":
                 widget = TextureTypeWidget(prop.name, prop.type, value_display, self.texturesCollection, self.mapModel, self.selectionRange, modelType)
+            elif prop.type == "lootContainer":
+                widget = LootContainerTypeWidget(prop.name, prop.type, value_display, self.lootContainersCollection, self.mapModel, self.selectionRange, modelType)
             elif prop.type == "string":
                 widget = StringTypeWidget(prop.name, prop.type, value_display, self.mapModel, self.selectionRange, modelType)
             elif prop.type == "int":

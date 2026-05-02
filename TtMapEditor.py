@@ -14,6 +14,7 @@ from modules.House.HouseView import *
 from modules.House.HouseController import *
 from modules.commonModels.ObjectsCollection import *
 from modules.commonModels.TexturesCollection import TexturesCollection
+from modules.commonModels.LootContainersCollection import LootContainersCollection
 from modules.ApplicationSettings.ApplicationSettingsDlg import ApplicationSettingsDlg
 from modules.ApplicationSettings.ApplicationSettingsModel import ApplicationSettingsModel
 
@@ -85,8 +86,11 @@ class TtMapEditor(QMainWindow):
         nativeTexturesDir = os.path.join(os.path.dirname(__file__), 'textures')
         additionalTexturesDir = settings.getAdditionalTexturesDir()
         self.texturesCollection = TexturesCollection([nativeTexturesDir, additionalTexturesDir])
+
+        nativeLootContainersDir = os.path.join(os.path.dirname(__file__), 'lootContainers')
+        self.lootContainersCollection = LootContainersCollection([nativeLootContainersDir])
         
-        self.model = MapModelGeneral(MapObjectModelGeneral, objCollection, self.texturesCollection, basePrefab="House")
+        self.model = MapModelGeneral(MapObjectModelGeneral, objCollection, self.texturesCollection, self.lootContainersCollection, basePrefab="House")
         view = HouseView()
         self.controller = HouseController(view=view, houseModel=self.model)
         self.setCentralWidget(view)
