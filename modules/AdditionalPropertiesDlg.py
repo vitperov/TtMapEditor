@@ -137,6 +137,41 @@ class IntTypeWidget(QWidget):
         self.value = new_value
 
 
+class StringArrayTypeWidget(QWidget):
+    def __init__(self, name, type, value, mapModel, selectionRange, modelType, parent=None):
+        super(StringArrayTypeWidget, self).__init__(parent)
+        self.name = name
+        self.type = type
+        self.mapModel = mapModel
+        self.selectionRange = selectionRange
+        self.modelType = modelType
+
+        if isinstance(value, list):
+            display = ", ".join(str(v) for v in value)
+        elif value and value != "Not Set":
+            display = str(value)
+        else:
+            display = ""
+
+        layout = QHBoxLayout()
+        self.setLayout(layout)
+
+        name_label = QLabel(f"Name: {self.name}")
+        type_label = QLabel(f"Type: {self.type}")
+        self.line_edit = QtWidgets.QLineEdit(display)
+
+        layout.addWidget(name_label)
+        layout.addWidget(type_label)
+        layout.addWidget(self.line_edit)
+
+        self.line_edit.editingFinished.connect(self.on_edit_finished)
+
+    def on_edit_finished(self):
+        text = self.line_edit.text().strip()
+        new_value = [v.strip() for v in text.split(",") if v.strip()] if text else []
+        self.mapModel.setGroupProperty(self.selectionRange, self.modelType, 'additionalProperties', {self.name: new_value})
+
+
 class LootContainerTypeWidget(QWidget):
     def __init__(self, name, type, value, lootContainersCollection, mapModel, selectionRange, modelType, parent=None):
         super(LootContainerTypeWidget, self).__init__(parent)
@@ -212,6 +247,8 @@ class AdditionalPropertiesDlg(QDialog):
                 widget = StringTypeWidget(prop.name, prop.type, value_display, self.mapModel, self.selectionRange, modelType)
             elif prop.type == "int":
                 widget = IntTypeWidget(prop.name, prop.type, value_display, self.mapModel, self.selectionRange, modelType)
+            elif prop.type == "stringArray":
+                widget = StringArrayTypeWidget(prop.name, prop.type, value_display, self.mapModel, self.selectionRange, modelType)
             else:
                 widget = UnknownTypeWidget(prop.name, prop.type, value_display)
             layout.addWidget(widget)
