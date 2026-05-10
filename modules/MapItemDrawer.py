@@ -56,8 +56,10 @@ class MapItemDrawer:
 
         x = self._col * self._tilesize
         y = self._row * self._tilesize
-        width = self._model.w * self._tilesize
-        height = self._model.h * self._tilesize
+        
+        rotatedSize = self._model.getSize()
+        width = rotatedSize.w * self._tilesize
+        height = rotatedSize.h * self._tilesize
 
         color = QtGui.QColor(contourColor)
 

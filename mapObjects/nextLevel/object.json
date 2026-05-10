@@ -10,6 +10,14 @@
         {
             "type": "int",
             "name": "respawnId"
+        },
+        {
+            "type": "stringArray",
+            "name": "requireWorn"
+        },
+        {
+            "type": "stringArray",
+            "name": "requireInventory"
         }
     ]
 }
