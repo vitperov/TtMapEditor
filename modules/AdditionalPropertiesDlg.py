@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QWidget, QHBoxLayout, QPushButton
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QWidget, QHBoxLayout, QPushButton, QCheckBox
 from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtCore import pyqtSignal
 from modules.commonModels.ObjectsCollection import ObjectsCollection
@@ -137,6 +137,41 @@ class IntTypeWidget(QWidget):
         self.value = new_value
 
 
+class BoolTypeWidget(QWidget):
+    def __init__(self, name, type, value, mapModel, selectionRange, modelType, parent=None):
+        super(BoolTypeWidget, self).__init__(parent)
+        self.name = name
+        self.type = type
+        if isinstance(value, bool):
+            self.value = value
+        elif isinstance(value, str):
+            self.value = value.lower() in ("true", "1", "yes")
+        else:
+            self.value = False
+        self.mapModel = mapModel
+        self.selectionRange = selectionRange
+        self.modelType = modelType
+
+        layout = QHBoxLayout()
+        self.setLayout(layout)
+
+        name_label = QLabel(f"Name: {self.name}")
+        type_label = QLabel(f"Type: {self.type}")
+        self.checkbox = QCheckBox()
+        self.checkbox.setChecked(self.value)
+
+        layout.addWidget(name_label)
+        layout.addWidget(type_label)
+        layout.addWidget(self.checkbox)
+
+        self.checkbox.stateChanged.connect(self.on_state_changed)
+
+    def on_state_changed(self, state):
+        new_value = bool(self.checkbox.isChecked())
+        self.mapModel.setGroupProperty(self.selectionRange, self.modelType, 'additionalProperties', {self.name: new_value})
+        self.value = new_value
+
+
 class StringArrayTypeWidget(QWidget):
     def __init__(self, name, type, value, mapModel, selectionRange, modelType, parent=None):
         super(StringArrayTypeWidget, self).__init__(parent)
@@ -247,6 +282,8 @@ class AdditionalPropertiesDlg(QDialog):
                 widget = StringTypeWidget(prop.name, prop.type, value_display, self.mapModel, self.selectionRange, modelType)
             elif prop.type == "int":
                 widget = IntTypeWidget(prop.name, prop.type, value_display, self.mapModel, self.selectionRange, modelType)
+            elif prop.type == "bool":
+                widget = BoolTypeWidget(prop.name, prop.type, value_display, self.mapModel, self.selectionRange, modelType)
             elif prop.type == "stringArray":
                 widget = StringArrayTypeWidget(prop.name, prop.type, value_display, self.mapModel, self.selectionRange, modelType)
             else:
