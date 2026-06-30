@@ -246,6 +246,44 @@ class LootContainerTypeWidget(QWidget):
         self.value = new_value
 
 
+class EnumTypeWidget(QWidget):
+    def __init__(self, name, type, value, options, mapModel, selectionRange, modelType, parent=None):
+        super(EnumTypeWidget, self).__init__(parent)
+        layout = QHBoxLayout()
+        self.setLayout(layout)
+
+        self.name = name
+        self.type = type
+        self.value = value if value != "Not Set" else ""
+        self.options = options if options else []
+        self.mapModel = mapModel
+        self.selectionRange = selectionRange
+        self.modelType = modelType
+
+        name_label = QLabel(f"Name: {self.name}")
+        type_label = QLabel(f"Type: {self.type}")
+
+        self.combo_box = QtWidgets.QComboBox()
+        for option in self.options:
+            self.combo_box.addItem(option)
+
+        idx = self.combo_box.findText(self.value)
+        if idx >= 0:
+            self.combo_box.setCurrentIndex(idx)
+        else:
+            self.combo_box.setCurrentIndex(0)
+
+        layout.addWidget(name_label)
+        layout.addWidget(type_label)
+        layout.addWidget(self.combo_box)
+
+        self.combo_box.currentTextChanged.connect(self.on_selection_changed)
+
+    def on_selection_changed(self, new_value):
+        self.mapModel.setGroupProperty(self.selectionRange, self.modelType, 'additionalProperties', {self.name: new_value})
+        self.value = new_value
+
+
 class AdditionalPropertiesDlg(QDialog):
     def __init__(self, objCollection, mapModel, texturesCollection, lootContainersCollection, selectionRange, modelType, parent=None):
         super(AdditionalPropertiesDlg, self).__init__(parent)
@@ -286,6 +324,8 @@ class AdditionalPropertiesDlg(QDialog):
                 widget = BoolTypeWidget(prop.name, prop.type, value_display, self.mapModel, self.selectionRange, modelType)
             elif prop.type == "stringArray":
                 widget = StringArrayTypeWidget(prop.name, prop.type, value_display, self.mapModel, self.selectionRange, modelType)
+            elif prop.type == "enum":
+                widget = EnumTypeWidget(prop.name, prop.type, value_display, prop.options, self.mapModel, self.selectionRange, modelType)
             else:
                 widget = UnknownTypeWidget(prop.name, prop.type, value_display)
             layout.addWidget(widget)

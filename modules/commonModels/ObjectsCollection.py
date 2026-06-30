@@ -3,9 +3,10 @@ import json
 from typing import List, Dict, Set, Any
 
 class AdditionalPropertyObj:
-    def __init__(self, name: str, type: str):
+    def __init__(self, name: str, type: str, options: List[str] = None):
         self.name = name
         self.type = type
+        self.options = options if options is not None else []
 
 class MapObject:
     def __init__(self, name: str, categories: str, iconFile: str, contour: str, w: int = 1, h: int = 1, additional_properties: List[AdditionalPropertyObj] = None):
@@ -20,7 +21,7 @@ class MapObject:
     @classmethod
     def from_json(cls, json_data: Dict, base_path: str):
         additional_properties = [
-            AdditionalPropertyObj(prop.get('name', ''), prop.get('type', ''))
+            AdditionalPropertyObj(prop.get('name', ''), prop.get('type', ''), prop.get('options'))
             for prop in json_data.get('additionalProperties', [])
         ]
         return cls(

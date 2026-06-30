@@ -10,6 +10,11 @@
         {
             "type": "texture",
             "name": "externalTexture"
+        },
+        {
+            "type": "enum",
+            "name": "doorState",
+            "options": ["random", "opened", "closed"]
         }
     ]
 }
