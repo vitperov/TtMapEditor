@@ -2,5 +2,12 @@
     "name": "opponentRespawn",
     "categories": "outdoor",
     "iconFile": "opponentRespawn.png",
-    "mapFile": "opponentRespawn.png"
+    "mapFile": "opponentRespawn.png",
+    "additionalProperties": [
+        {
+            "type": "enum",
+            "name": "respawnType",
+            "options": ["repeat", "oneShot"]
+        }
+    ]
 }
