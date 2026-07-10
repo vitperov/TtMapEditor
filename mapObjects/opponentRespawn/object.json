@@ -8,6 +8,10 @@
             "type": "enum",
             "name": "respawnType",
             "options": ["repeat", "oneShot"]
+        },
+        {
+            "type": "bool",
+            "name": "spawnSleeping"
         }
     ]
 }
