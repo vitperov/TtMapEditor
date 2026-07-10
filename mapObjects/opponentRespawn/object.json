@@ -12,6 +12,10 @@
         {
             "type": "bool",
             "name": "spawnSleeping"
+        },
+        {
+            "type": "string",
+            "name": "modelName"
         }
     ]
 }
