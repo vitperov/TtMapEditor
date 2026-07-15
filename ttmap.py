@@ -365,6 +365,9 @@ def cmd_setprop(args):
     _, model = build_model(args.map)
     sel = _selection(args.rect, args.z)
     kv = _parse_kv(args.prop)
+    # Count matches BEFORE mutating: if a --prop changes 'model', the filter would
+    # no longer match afterwards and the report would wrongly say 0.
+    n = len(model.getAllObjectOfType(args.model, sel))
     additional = {}
     for key, value in kv.items():
         if key in BASE_PROPS:
@@ -375,7 +378,6 @@ def cmd_setprop(args):
         model.setGroupProperty(sel, args.model, 'additionalProperties', additional)
     out = args.out or args.map
     save_model(model, out)
-    n = len(model.getAllObjectOfType(args.model, sel))
     changes = ", ".join("%s=%s" % (k, v) for k, v in kv.items())
     print("updated %d %s squares (%s) in rect %s -> %s" % (n, args.model, changes, args.rect, out))
 
