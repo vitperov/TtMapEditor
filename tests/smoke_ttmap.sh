@@ -150,6 +150,60 @@ tt clear "$SK" --name BerriesGenerator
 assert_eq "$(count "$SK" Berries 0)" "0" "clear BerriesGenerator: removed berries"
 
 echo ""
+echo "== insert / remove (grow & shrink, border-preserving) =="
+G="$WORK/g.json"
+tt new "$G" --size 10 8
+tt fill "$G" --rect "0 0 10 8" --model Grass
+tt border "$G" --rect "0 0 10 8" --model Forest --width 1
+assert_eq "$(field "$G" width)"  "10" "insert: base width"
+assert_eq "$(field "$G" height)" "8"  "insert: base height"
+assert_eq "$(count "$G" Forest)" "32" "insert: base border ring (perimeter)"
+# insert 2 rows in the middle, copying interior row 3 -> border ring preserved
+tt insert "$G" --axis row --at 4 --count 2 --copy-from 3
+assert_eq "$(field "$G" height)" "10" "insert rows: height 8 -> 10"
+assert_eq "$(field "$G" width)"  "10" "insert rows: width unchanged"
+assert_eq "$(count "$G" Forest)" "36" "insert --copy-from: border kept (32 + 2 rows*2 ends)"
+assert_eq "$(squares_at "$G" "0 4 1 1")" "1" "insert --copy-from: one layer per new cell"
+# insert 3 cols in the middle with --fill Grass
+tt insert "$G" --axis col --at 5 --count 3 --fill Grass
+assert_eq "$(field "$G" width)" "13" "insert cols --fill: width 10 -> 13"
+# remove them again -> back to original interior size
+tt remove "$G" --axis col --at 5 --count 3
+assert_eq "$(field "$G" width)"  "10" "remove cols: width 13 -> 10"
+tt remove "$G" --axis row --at 4 --count 2
+assert_eq "$(field "$G" height)" "8"  "remove rows: height 10 -> 8"
+assert_eq "$(count "$G" Forest)" "32" "remove: back to the original border ring"
+# append at the far edge (POS == size)
+tt insert "$G" --axis row --at 8 --count 1 --fill Grass
+assert_eq "$(field "$G" height)" "9"  "insert at far edge (POS==size) appends"
+
+echo ""
+echo "== move (relocate + backfill origin + clear destination) =="
+MV="$WORK/mv.json"
+tt new "$MV" --size 20 20
+tt fill "$MV" --rect "0 0 20 20" --model Grass
+tt place "$MV" --at 2 2 --model house1          # house1 is 6x6
+tt delete "$MV" --rect "2 2 6 6" --model Grass   # FixGrassUnderHouse convention
+tt move "$MV" --from "2 2" --to "10 10" --model house1 --fill-old Grass --clear-new
+assert_eq "$(count "$MV" house1)" "1" "move: house not duplicated"
+assert_eq "$(squares_at "$MV" "10 10 1 1")" "1" "move: house sits at destination origin"
+assert_eq "$(squares_at "$MV" "2 2 1 1")" "1" "move: origin cell holds one layer (grass)"
+gold=$(python3 "$TTMAP" dump "$MV" --rect "2 2 6 6" --json 2>/dev/null | \
+  python3 -c "import sys,json;print(sum(1 for s in json.load(sys.stdin) if s['model']=='Grass'))")
+assert_eq "$gold" "36" "move --fill-old: origin 6x6 backfilled with Grass"
+gnew=$(python3 "$TTMAP" dump "$MV" --rect "10 10 6 6" --json 2>/dev/null | \
+  python3 -c "import sys,json;print(sum(1 for s in json.load(sys.stdin) if s['model']=='Grass'))")
+assert_eq "$gnew" "0" "move --clear-new: destination 6x6 cleared of Grass"
+# overlapping move (shift by 1) leaves no Grass under the house, backfills only the vacated column
+tt move "$MV" --from "10 10" --to "11 10" --model house1 --fill-old Grass --clear-new
+gover=$(python3 "$TTMAP" dump "$MV" --rect "11 10 6 6" --json 2>/dev/null | \
+  python3 -c "import sys,json;print(sum(1 for s in json.load(sys.stdin) if s['model']=='Grass'))")
+assert_eq "$gover" "0" "move overlap: no Grass under shifted house"
+gcol=$(python3 "$TTMAP" dump "$MV" --rect "10 10 1 6" --json 2>/dev/null | \
+  python3 -c "import sys,json;print(sum(1 for s in json.load(sys.stdin) if s['model']=='Grass'))")
+assert_eq "$gcol" "6" "move overlap: vacated column backfilled with Grass"
+
+echo ""
 echo "== --out (does not touch the input) =="
 O="$WORK/o.json"
 tt new "$O" --size 6 6

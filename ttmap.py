@@ -125,26 +125,115 @@ def save_model(model, path):
         model.saveMap(path)
 
 
+def _fill_one(model, x, y, z, model_name, rotation=None):
+    """Position-preserving fill of a single cell: reuse the square already at
+    (x,y,z) - dropping any extra stacked layers - and set its model/rotation,
+    or create one when the cell is empty. Callers wrap this in
+    _stdout_to_stderr(); the model layer prints chatter on delete/create."""
+    existing = model.getSquareItems(x, y, z)
+    if existing:
+        keep = existing[0]
+        for extra in existing[1:]:
+            model.deleteSquareById(extra.id)
+    else:
+        keep = model.createObjectAt(x, y, z)
+    keep.setModel(model_name)
+    keep.setProperty('rotation', str(rotation) if rotation is not None else '0')
+    model.updateModelSize(keep)
+
+
 def _fill_cells(model, selection, model_name, rotation):
     """Position-preserving fill: for each cell, reuse the square already there
     (delete any extra stacked layers), and create one only for empty cells.
     Keeps the squares array order stable so diffs stay minimal - cells that
     already hold the target model+rotation produce no change at all."""
     z = selection.zLevel
-    rot = str(rotation) if rotation is not None else '0'
     with _stdout_to_stderr():
         for y in range(selection.startRow, selection.endRow + 1):
             for x in range(selection.startCol, selection.endCol + 1):
-                existing = model.getSquareItems(x, y, z)
-                if existing:
-                    keep = existing[0]
-                    for extra in existing[1:]:
-                        model.deleteSquareById(extra.id)
-                else:
-                    keep = model.createObjectAt(x, y, z)
-                keep.setModel(model_name)
-                keep.setProperty('rotation', rot)
-                model.updateModelSize(keep)
+                _fill_one(model, x, y, z, model_name, rotation)
+
+
+def _clone_square(model, serial, new_x=None, new_y=None):
+    """Clone a serialized square into a fresh model object with a NEW id (so a
+    duplicated row/column does not collide with the source's ids). Preserves
+    model, rotation, z, size and additionalProperties; overrides x/y if given."""
+    data = dict(serial)
+    data['id'] = ''  # empty id -> restoreFromJson mints a fresh uuid
+    if new_x is not None:
+        data['x'] = new_x
+    if new_y is not None:
+        data['y'] = new_y
+    obj = model._sqareModel()
+    obj.restoreFromJson(data)
+    return obj
+
+
+def _insert_rows(model, at, count, fill, copy_from):
+    """Insert `count` rows before row `at`, shifting lower rows down. New cells
+    are copied from row `copy_from` (full-fidelity, all layers/z), filled with
+    `fill` at z=0, or left as bare Empty squares."""
+    src = None
+    if copy_from is not None:
+        src = [sq.toSerializableObj() for sq in model._squares if sq.y == copy_from]
+    for sq in model._squares:
+        if sq.y >= at:
+            sq.y += count
+    for i in range(count):
+        new_y = at + i
+        if src is not None:
+            for serial in src:
+                model.addMapObject(_clone_square(model, serial, new_y=new_y))
+        elif fill is not None:
+            for x in range(model.width):
+                _fill_one(model, x, new_y, 0, fill)
+        else:
+            for x in range(model.width):
+                model.createEmpySquareAt(new_y, x)
+    model.height += count
+
+
+def _insert_cols(model, at, count, fill, copy_from):
+    """Insert `count` columns before column `at`, shifting rightward columns
+    right. New cells follow the same copy/fill/empty rule as _insert_rows."""
+    src = None
+    if copy_from is not None:
+        src = [sq.toSerializableObj() for sq in model._squares if sq.x == copy_from]
+    for sq in model._squares:
+        if sq.x >= at:
+            sq.x += count
+    for i in range(count):
+        new_x = at + i
+        if src is not None:
+            for serial in src:
+                model.addMapObject(_clone_square(model, serial, new_x=new_x))
+        elif fill is not None:
+            for y in range(model.height):
+                _fill_one(model, new_x, y, 0, fill)
+        else:
+            for y in range(model.height):
+                model.createEmpySquareAt(y, new_x)
+    model.width += count
+
+
+def _remove_rows(model, at, count):
+    """Delete rows [at, at+count) and shift lower rows up to close the gap."""
+    end = at + count - 1
+    model._squares[:] = [sq for sq in model._squares if not (at <= sq.y <= end)]
+    for sq in model._squares:
+        if sq.y > end:
+            sq.y -= count
+    model.height -= count
+
+
+def _remove_cols(model, at, count):
+    """Delete columns [at, at+count) and shift rightward columns left."""
+    end = at + count - 1
+    model._squares[:] = [sq for sq in model._squares if not (at <= sq.x <= end)]
+    for sq in model._squares:
+        if sq.x > end:
+            sq.x -= count
+    model.width -= count
 
 
 # --------------------------------------------------------------------------- #
@@ -433,6 +522,101 @@ def cmd_clear(args):
     print("cleared generator %s output -> %s" % (args.name, out))
 
 
+def cmd_insert(args):
+    _require_map(args.map)
+    _, model = build_model(args.map)
+    size = model.height if args.axis == 'row' else model.width
+    if args.count < 1:
+        sys.exit("Error: --count must be >= 1")
+    if not (0 <= args.at <= size):
+        sys.exit("Error: --at %d out of range for %s (0..%d, %d appends at the far edge)"
+                 % (args.at, args.axis, size, size))
+    if args.copy_from is not None and not (0 <= args.copy_from < size):
+        sys.exit("Error: --copy-from %d out of range for %s (0..%d)"
+                 % (args.copy_from, args.axis, size - 1))
+    with _stdout_to_stderr():
+        if args.axis == 'row':
+            _insert_rows(model, args.at, args.count, args.fill, args.copy_from)
+        else:
+            _insert_cols(model, args.at, args.count, args.fill, args.copy_from)
+    out = args.out or args.map
+    save_model(model, out)
+    if args.copy_from is not None:
+        how = "copied from %s %d" % (args.axis, args.copy_from)
+    elif args.fill:
+        how = "filled with %s" % args.fill
+    else:
+        how = "empty"
+    print("inserted %d %s(s) before %s %d (%s); new size %dx%d -> %s" % (
+        args.count, args.axis, args.axis, args.at, how, model.width, model.height, out))
+
+
+def cmd_remove(args):
+    _require_map(args.map)
+    _, model = build_model(args.map)
+    size = model.height if args.axis == 'row' else model.width
+    if args.count < 1:
+        sys.exit("Error: --count must be >= 1")
+    if not (0 <= args.at and args.at + args.count <= size):
+        sys.exit("Error: remove range %d..%d out of bounds for %s (size %d)"
+                 % (args.at, args.at + args.count - 1, args.axis, size))
+    with _stdout_to_stderr():
+        if args.axis == 'row':
+            _remove_rows(model, args.at, args.count)
+        else:
+            _remove_cols(model, args.at, args.count)
+    out = args.out or args.map
+    save_model(model, out)
+    print("removed %d %s(s) at index %d; new size %dx%d -> %s" % (
+        args.count, args.axis, args.at, model.width, model.height, out))
+
+
+def cmd_move(args):
+    _require_map(args.map)
+    _, model = build_model(args.map)
+    fx, fy = args.src
+    tx, ty = args.dst
+    z = args.z if args.z is not None else 0
+    targets = [sq for sq in model._squares
+               if sq.x == fx and sq.y == fy and sq.z == z
+               and (args.model is None or sq.getModel() == args.model)]
+    if not targets:
+        what = ("model %s " % args.model) if args.model else ""
+        sys.exit("Error: no %ssquare at (%d,%d,z=%d) to move" % (what, fx, fy, z))
+    foot_w = max(sq.w for sq in targets)
+    foot_h = max(sq.h for sq in targets)
+    if tx < 0 or ty < 0 or tx + foot_w > model.width or ty + foot_h > model.height:
+        sys.exit("Error: destination (%d,%d) + footprint %dx%d exceeds map %dx%d "
+                 "(insert rows/cols first)" % (tx, ty, foot_w, foot_h, model.width, model.height))
+    dx, dy = tx - fx, ty - fy
+    target_ids = {sq.id for sq in targets}
+    with _stdout_to_stderr():
+        if args.clear_new:
+            ex, ey = tx + foot_w - 1, ty + foot_h - 1
+            model._squares[:] = [sq for sq in model._squares
+                if not (tx <= sq.x <= ex and ty <= sq.y <= ey and sq.z == z
+                        and sq.id not in target_ids)]
+        for sq in targets:
+            sq.x += dx
+            sq.y += dy
+        if args.fill_old:
+            old_cells = {(x, y) for x in range(fx, fx + foot_w) for y in range(fy, fy + foot_h)}
+            new_cells = {(x, y) for x in range(tx, tx + foot_w) for y in range(ty, ty + foot_h)}
+            for (x, y) in sorted(old_cells - new_cells):
+                _fill_one(model, x, y, z, args.fill_old)
+    out = args.out or args.map
+    save_model(model, out)
+    extra = []
+    if args.clear_new:
+        extra.append("cleared destination footprint")
+    if args.fill_old:
+        extra.append("backfilled origin with %s" % args.fill_old)
+    suffix = (" [" + "; ".join(extra) + "]") if extra else ""
+    names = ",".join(sorted({sq.getModel() for sq in targets}))
+    print("moved %d square(s) [%s] from (%d,%d) to (%d,%d) at z=%d%s -> %s" % (
+        len(targets), names, fx, fy, tx, ty, z, suffix, out))
+
+
 # --------------------------------------------------------------------------- #
 # Argument parsing
 # --------------------------------------------------------------------------- #
@@ -445,6 +629,16 @@ def _rect(value):
         return [int(p) for p in parts]
     except ValueError:
         raise argparse.ArgumentTypeError("--rect values must be integers")
+
+
+def _coord(value):
+    parts = value.split()
+    if len(parts) != 2:
+        raise argparse.ArgumentTypeError("expects 2 integers: 'x y'")
+    try:
+        return [int(p) for p in parts]
+    except ValueError:
+        raise argparse.ArgumentTypeError("coordinate values must be integers")
 
 
 def build_parser():
@@ -567,6 +761,51 @@ def build_parser():
     p.add_argument("map")
     p.add_argument("--name", required=True, help="generator name or class")
     p.set_defaults(func=cmd_clear)
+
+    p = sub.add_parser("insert", parents=[outparent],
+                       help="insert rows/columns to grow the map (prefer the middle "
+                            "to preserve the outer forest border)")
+    p.add_argument("map")
+    p.add_argument("--axis", choices=("row", "col"), required=True,
+                   help="'row' inserts horizontal rows; 'col' inserts vertical columns")
+    p.add_argument("--at", type=int, required=True, metavar="POS",
+                   help="insert BEFORE this row/col index; POS==size appends at the far edge. "
+                        "Insert in the middle (not at 0/size) to keep the border ring intact")
+    p.add_argument("--count", type=int, default=1,
+                   help="how many rows/cols to insert (default 1)")
+    grp = p.add_mutually_exclusive_group()
+    grp.add_argument("--fill", metavar="MODEL",
+                     help="fill new cells with this single model at z=0 (e.g. Grass)")
+    grp.add_argument("--copy-from", type=int, metavar="POS", dest="copy_from",
+                     help="duplicate the full content (all layers/z) of this existing "
+                          "row/col into each new one - the cleanest way to reproduce a "
+                          "border ring (copy an interior line that already has Forest at its ends)")
+    p.set_defaults(func=cmd_insert)
+
+    p = sub.add_parser("remove", parents=[outparent],
+                       help="remove rows/columns to shrink the map")
+    p.add_argument("map")
+    p.add_argument("--axis", choices=("row", "col"), required=True)
+    p.add_argument("--at", type=int, required=True, metavar="POS",
+                   help="first row/col index to remove")
+    p.add_argument("--count", type=int, default=1,
+                   help="how many rows/cols to remove (default 1)")
+    p.set_defaults(func=cmd_remove)
+
+    p = sub.add_parser("move", parents=[outparent],
+                       help="relocate the object(s) at one cell to another cell")
+    p.add_argument("map")
+    p.add_argument("--from", type=_coord, required=True, dest="src", metavar='"X Y"')
+    p.add_argument("--to", type=_coord, required=True, dest="dst", metavar='"X Y"')
+    p.add_argument("--z", type=int, default=None)
+    p.add_argument("--model", default=None,
+                   help="only move squares of this model at the cell (default: every layer)")
+    p.add_argument("--fill-old", metavar="MODEL", dest="fill_old",
+                   help="backfill the vacated footprint with this model (e.g. Grass)")
+    p.add_argument("--clear-new", action="store_true", dest="clear_new",
+                   help="delete other squares under the destination footprint "
+                        "(e.g. clear Grass so nothing shows under a moved house)")
+    p.set_defaults(func=cmd_move)
 
     return parser
 
