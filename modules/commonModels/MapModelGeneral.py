@@ -112,6 +112,11 @@ class MapModelGeneral(QObject):
         if self._updateCallback:
             self._updateCallback()
 
+    def removeAllMapObjects(self, model):
+        before = len(self._squares)
+        self._squares[:] = [sq for sq in self._squares if sq.properties.get('model') != model]
+        return (before - len(self._squares)) > 0
+
     def deleteRow(self, rowId):
         self._squares[:] = filter(lambda item: item.y != rowId, self._squares)
 
