@@ -353,6 +353,8 @@ def cmd_dump(args):
     for sq in model._squares:
         if args.z is not None and sq.z != args.z:
             continue
+        if args.model is not None and sq.getModel() != args.model:
+            continue
         if rect is not None:
             x0, y0, w, h = rect
             if not (x0 <= sq.x < x0 + w and y0 <= sq.y < y0 + h):
@@ -374,6 +376,136 @@ def cmd_dump(args):
             extra = "  props={%s}" % ", ".join("%s=%s" % (p.name, p.value) for p in sq.additional_properties)
         print("x=%-3d y=%-3d z=%d  model=%-16s rot=%-3s wxh=%dx%d%s" % (
             sq.x, sq.y, sq.z, sq.properties.get('model'), rot, sq.w, sq.h, extra))
+    print("-- %d square(s)" % len(squares))
+
+
+# --------------------------------------------------------------------------- #
+# ASCII map rendering
+# --------------------------------------------------------------------------- #
+
+# Draw priority when several layers share a cell: base ground (0) is covered by
+# a surface such as a road (1), which is covered by any placed structure/object
+# (2). This keeps roads visible over grass while walls/doors/furniture/houses
+# show over the floor they sit on.
+RENDER_GROUND = {'Grass', 'Empty', 'Floor'}
+RENDER_SURFACE = {'Road'}
+
+
+def _render_tier(model_name):
+    if model_name in RENDER_GROUND:
+        return 0
+    if model_name in RENDER_SURFACE:
+        return 1
+    return 2
+
+
+# Stable, mnemonic glyphs for the most common models; everything else is
+# auto-assigned. Kept uppercase so footprint-continuation cells (lowercase)
+# never collide with an origin glyph.
+RENDER_FIXED_GLYPHS = {'Grass': '.', 'Empty': ' ', 'Forest': 'F', 'Road': '#'}
+_GLYPH_POOL = "ABCDEGHIJKLMNOPQRSTUVWXYZ0123456789@$%&*+=?"
+
+
+def _assign_glyphs(models):
+    """Give every distinct model a unique uppercase glyph. Prefer the model's
+    own first alphanumeric character (so R=Road, W=Wall) and fall back to a
+    shared pool on collision. Lowercase variants are reserved for footprints."""
+    glyphs = {}
+    used = set()
+    for name, ch in RENDER_FIXED_GLYPHS.items():
+        if name in models:
+            glyphs[name] = ch
+            used.add(ch)
+    for m in models:
+        if m in glyphs:
+            continue
+        chosen = None
+        for ch in m:
+            up = ch.upper()
+            if up.isalnum() and up not in used:
+                chosen = up
+                break
+        if chosen is None:
+            for ch in _GLYPH_POOL:
+                if ch not in used:
+                    chosen = ch
+                    break
+        glyphs[m] = chosen or '?'
+        used.add(glyphs[m])
+    return glyphs
+
+
+def cmd_render(args):
+    _require_map(args.map)
+    _, model = build_model(args.map)
+    W, H = model.width, model.height
+
+    if args.rect is not None:
+        rx, ry, rw, rh = args.rect
+    else:
+        rx, ry, rw, rh = 0, 0, W, H
+    x_end, y_end = rx + rw, ry + rh
+
+    # For each visible cell keep the single most significant layer. Priority:
+    # higher z, then draw-tier (ground < surface < object), then a multi-cell
+    # object's own origin, then later array order (drawn on top).
+    best = {}  # (cx, cy) -> (sortkey, model_name, is_footprint_continuation)
+    for idx, sq in enumerate(model._squares):
+        if args.z is not None and sq.z != args.z:
+            continue
+        m = sq.getModel()
+        multicell = sq.w > 1 or sq.h > 1
+        tier = _render_tier(m)
+        for dy in range(sq.h):
+            for dx in range(sq.w):
+                cx, cy = sq.x + dx, sq.y + dy
+                if not (rx <= cx < x_end and ry <= cy < y_end):
+                    continue
+                is_origin = dx == 0 and dy == 0
+                key = (sq.z, tier, 1 if (is_origin and multicell) else 0, idx)
+                prev = best.get((cx, cy))
+                if prev is None or key > prev[0]:
+                    best[(cx, cy)] = (key, m, multicell and not is_origin)
+
+    used_models = sorted({v[1] for v in best.values()})
+    glyphs = _assign_glyphs(used_models)
+
+    def cell_glyph(cx, cy):
+        entry = best.get((cx, cy))
+        if entry is None:
+            return ' '
+        _key, m, is_footprint = entry
+        g = glyphs[m]
+        return g.lower() if is_footprint else g
+
+    rows = []
+    for cy in range(ry, y_end):
+        rows.append("".join(cell_glyph(cx, cy) for cx in range(rx, x_end)))
+
+    legend = [{'model': m, 'glyph': glyphs[m]} for m in used_models]
+
+    if args.json:
+        _emit({
+            'map': args.map,
+            'z': args.z,
+            'rect': [rx, ry, rw, rh],
+            'legend': legend,
+            'rows': rows,
+        }, True)
+        return
+
+    # x ruler: a tens digit above each column that is a multiple of 10.
+    ruler = "".join(str((rx + i) // 10 % 10) if (rx + i) % 10 == 0 else ' '
+                    for i in range(rw))
+    labelw = max(3, len(str(y_end - 1)))
+    print("%s %s" % (" " * labelw, ruler))
+    for i, row in enumerate(rows):
+        print("%*d %s" % (labelw, ry + i, row))
+    print("")
+    zdesc = "z=%d" % args.z if args.z is not None else "all z (topmost shown)"
+    print("legend (%s; lowercase = multi-cell footprint):" % zdesc)
+    for item in legend:
+        print("  %s  %s" % (item['glyph'], item['model']))
 
 
 # --------------------------------------------------------------------------- #
@@ -665,12 +797,23 @@ def build_parser():
     p.set_defaults(func=cmd_describe)
 
     p = sub.add_parser("dump", parents=[jsonparent],
-                       help="list squares in a map, optionally filtered by z-level and rect")
+                       help="list squares in a map, optionally filtered by model, z-level and rect")
     p.add_argument("map", help="path to the map JSON file")
     p.add_argument("--z", type=int, help="only squares at this z-level")
+    p.add_argument("--model", help="only squares of this model (find all of one type)")
     p.add_argument("--rect", type=_rect, metavar='"x y w h"',
                    help="only squares inside this rectangle")
     p.set_defaults(func=cmd_dump)
+
+    p = sub.add_parser("render", parents=[jsonparent],
+                       help="draw the map as an ASCII grid (one glyph per model, "
+                            "footprints marked) with a legend")
+    p.add_argument("map", help="path to the map JSON file")
+    p.add_argument("--z", type=int, default=None,
+                   help="render only this z-level; omit to show the topmost layer per cell")
+    p.add_argument("--rect", type=_rect, metavar='"x y w h"',
+                   help="render only this rectangle")
+    p.set_defaults(func=cmd_render)
 
     # --- mutating commands --- #
     outparent = argparse.ArgumentParser(add_help=False)

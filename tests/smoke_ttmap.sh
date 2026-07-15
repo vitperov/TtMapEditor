@@ -204,6 +204,38 @@ gcol=$(python3 "$TTMAP" dump "$MV" --rect "10 10 1 6" --json 2>/dev/null | \
 assert_eq "$gcol" "6" "move overlap: vacated column backfilled with Grass"
 
 echo ""
+echo "== dump --model (find all of one type) / render =="
+Q="$WORK/q.json"
+tt new "$Q" --size 8 6
+tt fill "$Q" --rect "0 0 8 6" --model Grass
+tt border "$Q" --rect "0 0 8 6" --model Forest --width 1
+# --model filters dump to just that type (JSON count unaffected by the text footer)
+qf=$(python3 "$TTMAP" dump "$Q" --model Forest --json 2>/dev/null | \
+  python3 -c "import sys,json;print(len(json.load(sys.stdin)))")
+assert_eq "$qf" "24" "dump --model: finds all 24 Forest squares (perimeter of 8x6)"
+qmix=$(python3 "$TTMAP" dump "$Q" --model Grass --json 2>/dev/null | \
+  python3 -c "import sys,json;print(len(json.load(sys.stdin)))")
+assert_eq "$qmix" "24" "dump --model: finds the 24 interior Grass squares"
+# render: JSON grid is height rows wide by width, legend covers the models present
+rrows=$(python3 "$TTMAP" render "$Q" --json 2>/dev/null | \
+  python3 -c "import sys,json;print(len(json.load(sys.stdin)['rows']))")
+assert_eq "$rrows" "6" "render: one row per map row (height)"
+rw=$(python3 "$TTMAP" render "$Q" --json 2>/dev/null | \
+  python3 -c "import sys,json;print(len(json.load(sys.stdin)['rows'][0]))")
+assert_eq "$rw" "8" "render: each row is width chars wide"
+rleg=$(python3 "$TTMAP" render "$Q" --json 2>/dev/null | \
+  python3 -c "import sys,json;print(len(json.load(sys.stdin)['legend']))")
+assert_eq "$rleg" "2" "render: legend lists the 2 models present (Grass, Forest)"
+# a placed structure draws over the floor it sits on (object tier > ground tier)
+R="$WORK/r.json"
+tt new "$R" --size 6 6 --base-prefab House
+tt fill "$R" --rect "0 0 6 6" --model Floor
+tt place "$R" --at 2 2 --model Wall
+wall_glyph=$(python3 "$TTMAP" render "$R" --json 2>/dev/null | \
+  python3 -c "import sys,json;d=json.load(sys.stdin);print(d['rows'][2][2])")
+assert_eq "$wall_glyph" "W" "render: Wall (object tier) shown over Floor (ground tier)"
+
+echo ""
 echo "== --out (does not touch the input) =="
 O="$WORK/o.json"
 tt new "$O" --size 6 6
