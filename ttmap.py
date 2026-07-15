@@ -99,7 +99,7 @@ BASE_PROPS = ('rotation', 'model')  # properties on MapObjectModelGeneral.classn
 def _selection(rect, z):
     from modules.commonModels.SelectionRange import SelectionRange
     x, y, w, h = rect
-    return SelectionRange(x, y, x + w - 1, y + h - 1, z if z is not None else 0)
+    return SelectionRange.fromRect(x, y, w, h, z)
 
 
 def _parse_kv(items):
@@ -123,117 +123,6 @@ def _find_generator(loader, name):
 def save_model(model, path):
     with _stdout_to_stderr():
         model.saveMap(path)
-
-
-def _fill_one(model, x, y, z, model_name, rotation=None):
-    """Position-preserving fill of a single cell: reuse the square already at
-    (x,y,z) - dropping any extra stacked layers - and set its model/rotation,
-    or create one when the cell is empty. Callers wrap this in
-    _stdout_to_stderr(); the model layer prints chatter on delete/create."""
-    existing = model.getSquareItems(x, y, z)
-    if existing:
-        keep = existing[0]
-        for extra in existing[1:]:
-            model.deleteSquareById(extra.id)
-    else:
-        keep = model.createObjectAt(x, y, z)
-    keep.setModel(model_name)
-    keep.setProperty('rotation', str(rotation) if rotation is not None else '0')
-    model.updateModelSize(keep)
-
-
-def _fill_cells(model, selection, model_name, rotation):
-    """Position-preserving fill: for each cell, reuse the square already there
-    (delete any extra stacked layers), and create one only for empty cells.
-    Keeps the squares array order stable so diffs stay minimal - cells that
-    already hold the target model+rotation produce no change at all."""
-    z = selection.zLevel
-    with _stdout_to_stderr():
-        for y in range(selection.startRow, selection.endRow + 1):
-            for x in range(selection.startCol, selection.endCol + 1):
-                _fill_one(model, x, y, z, model_name, rotation)
-
-
-def _clone_square(model, serial, new_x=None, new_y=None):
-    """Clone a serialized square into a fresh model object with a NEW id (so a
-    duplicated row/column does not collide with the source's ids). Preserves
-    model, rotation, z, size and additionalProperties; overrides x/y if given."""
-    data = dict(serial)
-    data['id'] = ''  # empty id -> restoreFromJson mints a fresh uuid
-    if new_x is not None:
-        data['x'] = new_x
-    if new_y is not None:
-        data['y'] = new_y
-    obj = model._sqareModel()
-    obj.restoreFromJson(data)
-    return obj
-
-
-def _insert_rows(model, at, count, fill, copy_from):
-    """Insert `count` rows before row `at`, shifting lower rows down. New cells
-    are copied from row `copy_from` (full-fidelity, all layers/z), filled with
-    `fill` at z=0, or left as bare Empty squares."""
-    src = None
-    if copy_from is not None:
-        src = [sq.toSerializableObj() for sq in model._squares if sq.y == copy_from]
-    for sq in model._squares:
-        if sq.y >= at:
-            sq.y += count
-    for i in range(count):
-        new_y = at + i
-        if src is not None:
-            for serial in src:
-                model.addMapObject(_clone_square(model, serial, new_y=new_y))
-        elif fill is not None:
-            for x in range(model.width):
-                _fill_one(model, x, new_y, 0, fill)
-        else:
-            for x in range(model.width):
-                model.createEmpySquareAt(new_y, x)
-    model.height += count
-
-
-def _insert_cols(model, at, count, fill, copy_from):
-    """Insert `count` columns before column `at`, shifting rightward columns
-    right. New cells follow the same copy/fill/empty rule as _insert_rows."""
-    src = None
-    if copy_from is not None:
-        src = [sq.toSerializableObj() for sq in model._squares if sq.x == copy_from]
-    for sq in model._squares:
-        if sq.x >= at:
-            sq.x += count
-    for i in range(count):
-        new_x = at + i
-        if src is not None:
-            for serial in src:
-                model.addMapObject(_clone_square(model, serial, new_x=new_x))
-        elif fill is not None:
-            for y in range(model.height):
-                _fill_one(model, new_x, y, 0, fill)
-        else:
-            for y in range(model.height):
-                model.createEmpySquareAt(y, new_x)
-    model.width += count
-
-
-def _remove_rows(model, at, count):
-    """Delete rows [at, at+count) and shift lower rows up to close the gap."""
-    end = at + count - 1
-    model._squares[:] = [sq for sq in model._squares if not (at <= sq.y <= end)]
-    for sq in model._squares:
-        if sq.y > end:
-            sq.y -= count
-    model.height -= count
-
-
-def _remove_cols(model, at, count):
-    """Delete columns [at, at+count) and shift rightward columns left."""
-    end = at + count - 1
-    model._squares[:] = [sq for sq in model._squares if not (at <= sq.x <= end)]
-    for sq in model._squares:
-        if sq.x > end:
-            sq.x -= count
-    model.width -= count
 
 
 # --------------------------------------------------------------------------- #
@@ -315,9 +204,9 @@ def cmd_list_generators(args):
 def cmd_describe(args):
     _require_map(args.map)
     _, model = build_model(args.map)
-    zlevels = sorted({sq.z for sq in model._squares})
+    zlevels = sorted({sq.z for sq in model.getSquares()})
     counts = {}
-    for sq in model._squares:
+    for sq in model.getSquares():
         counts.setdefault(sq.z, {})
         m = sq.properties.get('model')
         counts[sq.z][m] = counts[sq.z].get(m, 0) + 1
@@ -350,7 +239,7 @@ def cmd_dump(args):
 
     rect = args.rect
     squares = []
-    for sq in model._squares:
+    for sq in model.getSquares():
         if args.z is not None and sq.z != args.z:
             continue
         if args.model is not None and sq.getModel() != args.model:
@@ -379,110 +268,14 @@ def cmd_dump(args):
     print("-- %d square(s)" % len(squares))
 
 
-# --------------------------------------------------------------------------- #
-# ASCII map rendering
-# --------------------------------------------------------------------------- #
-
-# Draw priority when several layers share a cell: base ground (0) is covered by
-# a surface such as a road (1), which is covered by any placed structure/object
-# (2). This keeps roads visible over grass while walls/doors/furniture/houses
-# show over the floor they sit on.
-RENDER_GROUND = {'Grass', 'Empty', 'Floor'}
-RENDER_SURFACE = {'Road'}
-
-
-def _render_tier(model_name):
-    if model_name in RENDER_GROUND:
-        return 0
-    if model_name in RENDER_SURFACE:
-        return 1
-    return 2
-
-
-# Stable, mnemonic glyphs for the most common models; everything else is
-# auto-assigned. Kept uppercase so footprint-continuation cells (lowercase)
-# never collide with an origin glyph.
-RENDER_FIXED_GLYPHS = {'Grass': '.', 'Empty': ' ', 'Forest': 'F', 'Road': '#'}
-_GLYPH_POOL = "ABCDEGHIJKLMNOPQRSTUVWXYZ0123456789@$%&*+=?"
-
-
-def _assign_glyphs(models):
-    """Give every distinct model a unique uppercase glyph. Prefer the model's
-    own first alphanumeric character (so R=Road, W=Wall) and fall back to a
-    shared pool on collision. Lowercase variants are reserved for footprints."""
-    glyphs = {}
-    used = set()
-    for name, ch in RENDER_FIXED_GLYPHS.items():
-        if name in models:
-            glyphs[name] = ch
-            used.add(ch)
-    for m in models:
-        if m in glyphs:
-            continue
-        chosen = None
-        for ch in m:
-            up = ch.upper()
-            if up.isalnum() and up not in used:
-                chosen = up
-                break
-        if chosen is None:
-            for ch in _GLYPH_POOL:
-                if ch not in used:
-                    chosen = ch
-                    break
-        glyphs[m] = chosen or '?'
-        used.add(glyphs[m])
-    return glyphs
-
-
 def cmd_render(args):
     _require_map(args.map)
     _, model = build_model(args.map)
-    W, H = model.width, model.height
+    from modules.commonModels.MapRenderer import MapRenderer
 
-    if args.rect is not None:
-        rx, ry, rw, rh = args.rect
-    else:
-        rx, ry, rw, rh = 0, 0, W, H
-    x_end, y_end = rx + rw, ry + rh
-
-    # For each visible cell keep the single most significant layer. Priority:
-    # higher z, then draw-tier (ground < surface < object), then a multi-cell
-    # object's own origin, then later array order (drawn on top).
-    best = {}  # (cx, cy) -> (sortkey, model_name, is_footprint_continuation)
-    for idx, sq in enumerate(model._squares):
-        if args.z is not None and sq.z != args.z:
-            continue
-        m = sq.getModel()
-        multicell = sq.w > 1 or sq.h > 1
-        tier = _render_tier(m)
-        for dy in range(sq.h):
-            for dx in range(sq.w):
-                cx, cy = sq.x + dx, sq.y + dy
-                if not (rx <= cx < x_end and ry <= cy < y_end):
-                    continue
-                is_origin = dx == 0 and dy == 0
-                key = (sq.z, tier, 1 if (is_origin and multicell) else 0, idx)
-                prev = best.get((cx, cy))
-                if prev is None or key > prev[0]:
-                    best[(cx, cy)] = (key, m, multicell and not is_origin)
-
-    used_models = sorted({v[1] for v in best.values()})
-    glyphs = _assign_glyphs(used_models)
-
-    def cell_glyph(cx, cy):
-        entry = best.get((cx, cy))
-        if entry is None:
-            return ' '
-        _key, m, is_footprint = entry
-        g = glyphs[m]
-        return g.lower() if is_footprint else g
-
-    rows = []
-    for cy in range(ry, y_end):
-        rows.append("".join(cell_glyph(cx, cy) for cx in range(rx, x_end)))
-
-    legend = [{'model': m, 'glyph': glyphs[m]} for m in used_models]
+    result = MapRenderer(model).render(z=args.z, rect=args.rect)
+    rows, legend = result['rows'], result['legend']
+    rx, ry, rw, rh = result['rect']
 
     if args.json:
         _emit({
@@ -497,7 +290,7 @@ def cmd_render(args):
     # x ruler: a tens digit above each column that is a multiple of 10.
     ruler = "".join(str((rx + i) // 10 % 10) if (rx + i) % 10 == 0 else ' '
                     for i in range(rw))
-    labelw = max(3, len(str(y_end - 1)))
+    labelw = max(3, len(str(ry + rh - 1)))
     print("%s %s" % (" " * labelw, ruler))
     for i, row in enumerate(rows):
         print("%*d %s" % (labelw, ry + i, row))
@@ -525,7 +318,8 @@ def cmd_fill(args):
     _require_map(args.map)
     _, model = build_model(args.map)
     sel = _selection(args.rect, args.z)
-    _fill_cells(model, sel, args.model, args.rotation)
+    with _stdout_to_stderr():
+        model.fillSelection(sel, args.model, args.rotation)
     out = args.out or args.map
     save_model(model, out)
     n = len(model.getAllObjectOfType(args.model, sel))
@@ -535,21 +329,12 @@ def cmd_fill(args):
 def cmd_border(args):
     _require_map(args.map)
     _, model = build_model(args.map)
-    x, y, w, h = args.rect
-    bw = args.width
-    z = args.z if args.z is not None else 0
-    strips = [
-        [x, y, w, bw],                 # top
-        [x, y + h - bw, w, bw],        # bottom
-        [x, y, bw, h],                 # left
-        [x + w - bw, y, bw, h],        # right
-    ]
-    for strip in strips:
-        sel = _selection(strip, z)
-        _fill_cells(model, sel, args.model, args.rotation)
+    sel = _selection(args.rect, args.z)
+    with _stdout_to_stderr():
+        model.fillBorder(sel, args.model, args.width, args.rotation)
     out = args.out or args.map
     save_model(model, out)
-    print("drew %s border (width %d) around rect %s -> %s" % (args.model, bw, args.rect, out))
+    print("drew %s border (width %d) around rect %s -> %s" % (args.model, args.width, args.rect, out))
 
 
 def cmd_place(args):
@@ -667,10 +452,7 @@ def cmd_insert(args):
         sys.exit("Error: --copy-from %d out of range for %s (0..%d)"
                  % (args.copy_from, args.axis, size - 1))
     with _stdout_to_stderr():
-        if args.axis == 'row':
-            _insert_rows(model, args.at, args.count, args.fill, args.copy_from)
-        else:
-            _insert_cols(model, args.at, args.count, args.fill, args.copy_from)
+        model.insertLine(args.axis, args.at, args.count, args.fill, args.copy_from)
     out = args.out or args.map
     save_model(model, out)
     if args.copy_from is not None:
@@ -693,10 +475,7 @@ def cmd_remove(args):
         sys.exit("Error: remove range %d..%d out of bounds for %s (size %d)"
                  % (args.at, args.at + args.count - 1, args.axis, size))
     with _stdout_to_stderr():
-        if args.axis == 'row':
-            _remove_rows(model, args.at, args.count)
-        else:
-            _remove_cols(model, args.at, args.count)
+        model.removeLine(args.axis, args.at, args.count)
     out = args.out or args.map
     save_model(model, out)
     print("removed %d %s(s) at index %d; new size %dx%d -> %s" % (
@@ -709,33 +488,12 @@ def cmd_move(args):
     fx, fy = args.src
     tx, ty = args.dst
     z = args.z if args.z is not None else 0
-    targets = [sq for sq in model._squares
-               if sq.x == fx and sq.y == fy and sq.z == z
-               and (args.model is None or sq.getModel() == args.model)]
-    if not targets:
-        what = ("model %s " % args.model) if args.model else ""
-        sys.exit("Error: no %ssquare at (%d,%d,z=%d) to move" % (what, fx, fy, z))
-    foot_w = max(sq.w for sq in targets)
-    foot_h = max(sq.h for sq in targets)
-    if tx < 0 or ty < 0 or tx + foot_w > model.width or ty + foot_h > model.height:
-        sys.exit("Error: destination (%d,%d) + footprint %dx%d exceeds map %dx%d "
-                 "(insert rows/cols first)" % (tx, ty, foot_w, foot_h, model.width, model.height))
-    dx, dy = tx - fx, ty - fy
-    target_ids = {sq.id for sq in targets}
-    with _stdout_to_stderr():
-        if args.clear_new:
-            ex, ey = tx + foot_w - 1, ty + foot_h - 1
-            model._squares[:] = [sq for sq in model._squares
-                if not (tx <= sq.x <= ex and ty <= sq.y <= ey and sq.z == z
-                        and sq.id not in target_ids)]
-        for sq in targets:
-            sq.x += dx
-            sq.y += dy
-        if args.fill_old:
-            old_cells = {(x, y) for x in range(fx, fx + foot_w) for y in range(fy, fy + foot_h)}
-            new_cells = {(x, y) for x in range(tx, tx + foot_w) for y in range(ty, ty + foot_h)}
-            for (x, y) in sorted(old_cells - new_cells):
-                _fill_one(model, x, y, z, args.fill_old)
+    try:
+        with _stdout_to_stderr():
+            result = model.moveObject((fx, fy), (tx, ty), z,
+                                      args.model, args.fill_old, args.clear_new)
+    except ValueError as e:
+        sys.exit("Error: " + str(e))
     out = args.out or args.map
     save_model(model, out)
     extra = []
@@ -744,9 +502,9 @@ def cmd_move(args):
     if args.fill_old:
         extra.append("backfilled origin with %s" % args.fill_old)
     suffix = (" [" + "; ".join(extra) + "]") if extra else ""
-    names = ",".join(sorted({sq.getModel() for sq in targets}))
+    names = ",".join(result['names'])
     print("moved %d square(s) [%s] from (%d,%d) to (%d,%d) at z=%d%s -> %s" % (
-        len(targets), names, fx, fy, tx, ty, z, suffix, out))
+        result['count'], names, fx, fy, tx, ty, z, suffix, out))
 
 
 # --------------------------------------------------------------------------- #
