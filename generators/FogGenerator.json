@@ -1,8 +1,10 @@
 {
+  "description": "Places Fog markers on a regular grid across the map, one every intervalSquares cells (added as a layer). Fog hides the map until a player explores it. Clear removes all Fog.",
   "schema": {
     "intervalSquares": {
       "type": "int",
-      "value": "4"
+      "value": "4",
+      "description": "Spacing in cells between fog markers (smaller = denser fog)."
     }
   }
 }

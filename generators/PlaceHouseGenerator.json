@@ -1,17 +1,21 @@
 {
   "order": "2",
+  "description": "For each LandLot on the map, randomly places a house at a random spot inside the lot and clears the Forest/Grass under it. Run AFTER MapSkeletonGenerator (which creates the lots). The class is LandLotContentGenerator; pass either name to --name.",
   "schema": {
     "houseProbability": {
       "type": "float",
-      "value": "0.8"
+      "value": "0.8",
+      "description": "Chance (0..1) that a given land lot gets a house."
     },
     "forestProbability": {
       "type": "float",
-      "value": "0.2"
+      "value": "0.2",
+      "description": "Currently NOT read by this generator (kept for compatibility). Use ForestGenerator to add trees."
     },
     "houseModels": {
       "type": "str",
-      "value": "house1,house2"
+      "value": "house1,house2",
+      "description": "Comma-separated house model names to pick from at random, e.g. house1,house2. Each must be a valid object type (see list-objects)."
     }
   }
 }

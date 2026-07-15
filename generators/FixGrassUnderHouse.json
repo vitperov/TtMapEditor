@@ -1,4 +1,5 @@
 {
+  "description": "Cleanup pass: removes Grass squares that sit underneath large (2x2 or bigger) objects such as houses, so grass does not poke through them. Run after houses are placed. No options; Clear is not applicable.",
   "schema": {
   }
 }

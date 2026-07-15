@@ -1,9 +1,11 @@
 {
   "order": "3",
+  "description": "Scatters trees (Forest) over free Grass cells inside each LandLot, skipping cells occupied by placed objects (with a 1-cell keepout around large objects like houses). Run AFTER houses are placed. Clear reverts Forest back to Grass within the lots.",
   "schema": {
     "forestProbability": {
       "type": "float",
-      "value": "0.2"
+      "value": "0.2",
+      "description": "Chance (0..1) that each free grass cell inside a land lot becomes forest."
     }
   }
 }
