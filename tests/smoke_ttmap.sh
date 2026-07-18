@@ -91,6 +91,32 @@ tt delete "$T" --rect "0 0 20 2" --model Forest
 assert_eq "$(count "$T" Forest)" "72"   "delete: 40 Forest removed (112 -> 72)"
 
 echo ""
+echo "== delprop (remove additionalProperties) =="
+DP="$WORK/dp.json"
+tt new "$DP" --size 6 6 --base-prefab House
+tt fill "$DP" --rect "0 0 6 6" --model Floor
+tt setprop "$DP" --rect "0 0 6 6" --model Floor --prop internalTexture=floorWood1 --prop lootContainer=box
+prop_count() {   # prop_count <map> <model> <propKey>  -> squares of model carrying that additionalProperty
+  python3 "$TTMAP" dump "$1" --model "$2" --json 2>/dev/null | \
+    python3 -c "import sys,json;print(sum(1 for s in json.load(sys.stdin) if '$3' in s.get('additionalProperties',{})))"
+}
+assert_eq "$(prop_count "$DP" Floor internalTexture)" "36" "delprop setup: 36 Floor carry internalTexture"
+# delete one key -> the other survives
+tt delprop "$DP" --rect "0 0 6 6" --model Floor --prop internalTexture
+assert_eq "$(prop_count "$DP" Floor internalTexture)" "0"  "delprop --prop: internalTexture removed"
+assert_eq "$(prop_count "$DP" Floor lootContainer)" "36"   "delprop --prop: lootContainer untouched"
+# --all clears the rest; on save the additionalProperties key is omitted entirely
+tt delprop "$DP" --rect "0 0 6 6" --model Floor --all
+assert_eq "$(prop_count "$DP" Floor lootContainer)" "0" "delprop --all: every additionalProperty gone"
+naked=$(python3 "$TTMAP" dump "$DP" --model Floor --json 2>/dev/null | \
+  python3 -c "import sys,json;print(sum('additionalProperties' in s for s in json.load(sys.stdin)))")
+assert_eq "$naked" "0" "delprop --all: additionalProperties key omitted on save"
+# base props cannot be deleted (exit non-zero, model unchanged)
+if tt delprop "$DP" --rect "0 0 6 6" --model Floor --prop model; then delok=yes; else delok=no; fi
+assert_eq "$delok" "no" "delprop: refuses to delete a base prop (model)"
+assert_eq "$(count "$DP" Floor)" "36" "delprop: base-prop guard left Floors intact"
+
+echo ""
 echo "== diff cleanliness (position-preserving fill) =="
 D="$WORK/d.json"; D0="$WORK/d0.json"; D1="$WORK/d1.json"
 tt new "$D" --size 20 12

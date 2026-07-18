@@ -391,6 +391,28 @@ def cmd_setprop(args):
     print("updated %d %s squares (%s) in rect %s -> %s" % (n, args.model, changes, args.rect, out))
 
 
+def cmd_delprop(args):
+    _require_map(args.map)
+    _, model = build_model(args.map)
+    sel = _selection(args.rect, args.z)
+    if args.all:
+        n = model.deleteGroupAdditionalProperty(sel, args.model, clearAll=True)
+        what = "all additional properties"
+    else:
+        # Accept bare keys ("doorState") or forgiving "key=value" pairs (drop the value).
+        keys = [k.split("=", 1)[0] for k in args.prop]
+        for key in keys:
+            if key in BASE_PROPS:
+                sys.exit("Error: cannot delete base property '%s' - model/rotation are "
+                         "intrinsic; use setprop to change them, delprop only removes "
+                         "additionalProperties." % key)
+        n = model.deleteGroupAdditionalProperty(sel, args.model, names=keys)
+        what = ", ".join(keys)
+    out = args.out or args.map
+    save_model(model, out)
+    print("deleted %s from %d %s square(s) in rect %s -> %s" % (what, n, args.model, args.rect, out))
+
+
 def cmd_wall_frame(args):
     _require_map(args.map)
     _, model = build_model(args.map)
@@ -636,6 +658,21 @@ def build_parser():
                    help="property to set (repeatable); rotation/model are base props, "
                         "anything else is an additionalProperty")
     p.set_defaults(func=cmd_setprop)
+
+    p = sub.add_parser("delprop", parents=[outparent],
+                       help="delete additionalProperties from all squares of one model "
+                            "in a rect (setprop's inverse)")
+    p.add_argument("map")
+    p.add_argument("--rect", type=_rect, required=True, metavar='"x y w h"')
+    p.add_argument("--z", type=int, default=None)
+    p.add_argument("--model", required=True, help="only squares of this model are changed")
+    grp = p.add_mutually_exclusive_group(required=True)
+    grp.add_argument("--prop", action="append", metavar="KEY",
+                     help="additionalProperty key to delete (repeatable); base props "
+                          "rotation/model cannot be deleted")
+    grp.add_argument("--all", action="store_true",
+                     help="delete ALL additionalProperties (reset the object to none)")
+    p.set_defaults(func=cmd_delprop)
 
     p = sub.add_parser("wall-frame", parents=[outparent],
                        help="generate walls + corners around a rect (House)")

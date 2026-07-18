@@ -223,6 +223,27 @@ class MapModelGeneral(QObject):
                         square.setProperty(property, value)
                     self.updateModelSize(square)
 
+    def deleteGroupAdditionalProperty(self, selectionRange, modelFilter, names=None, clearAll=False):
+        """Delete additional properties from every square of modelFilter in range.
+        Pass names=[...] to drop those keys, or clearAll=True to remove all of them
+        (resetting additionalProperties to empty). Returns the number of squares
+        that actually lost at least one property."""
+        affected = 0
+        for square in self._squares:
+            if selectionRange.startCol <= square.x <= selectionRange.endCol and selectionRange.startRow <= square.y <= selectionRange.endRow and square.z == selectionRange.zLevel:
+                if square.properties['model'] == modelFilter:
+                    if clearAll:
+                        if square.clearAdditionalProperties():
+                            affected += 1
+                    else:
+                        removed = False
+                        for name in names or []:
+                            if square.deleteAdditionalProperty(name):
+                                removed = True
+                        if removed:
+                            affected += 1
+        return affected
+
     def updateModelSize(self, square):
         model_name = square.getProperty('model')
         map_object = self._objCollection.getObject(model_name)
