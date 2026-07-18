@@ -404,8 +404,11 @@ class MapModelGeneral(QObject):
         if not targets:
             what = ("model %s " % modelFilter) if modelFilter else ""
             raise ValueError("no %ssquare at (%d,%d,z=%d) to move" % (what, fx, fy, z))
-        foot_w = max(sq.w for sq in targets)
-        foot_h = max(sq.h for sq in targets)
+        # Rotation-aware footprint: a rotated object occupies getSize() cells,
+        # not its raw stored w/h. Bounds check, clearNew region and fillOld
+        # backfill must all use the on-grid size or a rotated object bleeds.
+        foot_w = max(sq.getSize().w for sq in targets)
+        foot_h = max(sq.getSize().h for sq in targets)
         if tx < 0 or ty < 0 or tx + foot_w > self.width or ty + foot_h > self.height:
             raise ValueError("destination (%d,%d) + footprint %dx%d exceeds map %dx%d "
                              "(insert rows/cols first)"

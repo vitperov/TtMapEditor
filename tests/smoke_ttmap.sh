@@ -236,6 +236,30 @@ wall_glyph=$(python3 "$TTMAP" render "$R" --json 2>/dev/null | \
 assert_eq "$wall_glyph" "W" "render: Wall (object tier) shown over Floor (ground tier)"
 
 echo ""
+echo "== rotation-aware footprint (render / dump / move) =="
+RT="$WORK/rt.json"
+tt new "$RT" --size 16 16
+tt fill "$RT" --rect "0 0 16 16" --model Grass
+# shopSmall is 4x7; rotated 90 it occupies 7 wide x 4 tall on the grid.
+tt place "$RT" --at 4 4 --model shopSmall --rotation 90
+# render: the shop glyph's bounding box must be 7 wide x 4 tall (not the raw 4x7).
+read shw shh < <(python3 "$TTMAP" render "$RT" --z 0 --json 2>/dev/null | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+cells=[(x,y) for y,row in enumerate(d['rows']) for x,ch in enumerate(row) if ch in ('S','s')]
+xs=[x for x,_ in cells]; ys=[y for _,y in cells]
+print(max(xs)-min(xs)+1, max(ys)-min(ys)+1)")
+assert_eq "$shw" "7" "render: rotated 4x7 shop draws 7 cells wide"
+assert_eq "$shh" "4" "render: rotated 4x7 shop draws 4 cells tall"
+# dump text shows the rotation-aware wxh (7x4), not the raw stored 4x7.
+dwxh=$(python3 "$TTMAP" dump "$RT" --model shopSmall 2>/dev/null | grep -oE 'wxh=[0-9]+x[0-9]+' | head -1)
+assert_eq "$dwxh" "wxh=7x4" "dump: text footprint is rotation-aware (7x4)"
+# move bounds check uses the 7-wide footprint: to x=10 (10+7=17 > 16) is rejected.
+if python3 "$TTMAP" move "$RT" --from "4 4" --to "10 4" --model shopSmall >/dev/null 2>&1; then
+  moved_ok=yes; else moved_ok=no; fi
+assert_eq "$moved_ok" "no" "move: rotated footprint bounds check rejects overflow"
+
+echo ""
 echo "== --out (does not touch the input) =="
 O="$WORK/o.json"
 tt new "$O" --size 6 6

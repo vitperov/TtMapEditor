@@ -263,8 +263,11 @@ def cmd_dump(args):
         extra = ""
         if sq.additional_properties:
             extra = "  props={%s}" % ", ".join("%s=%s" % (p.name, p.value) for p in sq.additional_properties)
+        # wxh is the rotation-aware on-grid footprint (getSize), not the raw
+        # stored w/h, so it matches the cells the object actually covers.
+        size = sq.getSize()
         print("x=%-3d y=%-3d z=%d  model=%-16s rot=%-3s wxh=%dx%d%s" % (
-            sq.x, sq.y, sq.z, sq.properties.get('model'), rot, sq.w, sq.h, extra))
+            sq.x, sq.y, sq.z, sq.properties.get('model'), rot, size.w, size.h, extra))
     print("-- %d square(s)" % len(squares))
 
 
