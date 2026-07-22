@@ -25,6 +25,11 @@ class MapModelGeneral(QObject):
         # empty GameObject root. Set per editor type (e.g. "House" for the
         # House editor; None for Terrain). Round-trips through JSON.
         self.basePrefab = basePrefab
+        # Height of a single floor, in relative z units. Used by the runtime to
+        # decide which floor an object (or the player) belongs to. Only
+        # meaningful for buildings, so it is serialized for house maps only
+        # (basePrefab set) and defaults to 1.0.
+        self.floorHeight = 1.0
         self._updateCallback = self.updateEntireMap
 
     def setUpdatedCallback(self, callback):
@@ -167,6 +172,7 @@ class MapModelGeneral(QObject):
         obj['version'] = 1
         if self.basePrefab is not None:
             obj['basePrefab'] = self.basePrefab
+            obj['floorHeight'] = self.floorHeight
         obj['squares'] = squares
         obj['width']   = self.width
         obj['height']  = self.height
@@ -179,6 +185,9 @@ class MapModelGeneral(QObject):
 
         if 'basePrefab' in js:
             self.basePrefab = js['basePrefab']
+
+        if 'floorHeight' in js:
+            self.floorHeight = js['floorHeight']
 
         self._squares = list()
         for square in js['squares']:

@@ -212,19 +212,24 @@ def cmd_describe(args):
         counts[sq.z][m] = counts[sq.z].get(m, 0) + 1
 
     if args.json:
-        _emit({
+        result = {
             'map': args.map,
             'width': model.width,
             'height': model.height,
             'basePrefab': model.basePrefab,
             'zLevels': zlevels,
             'counts': {str(z): counts[z] for z in zlevels},
-        }, True)
+        }
+        if model.basePrefab is not None:
+            result['floorHeight'] = model.floorHeight
+        _emit(result, True)
         return
 
     print("map:        %s" % args.map)
     print("size:       %d x %d  (width x height)" % (model.width, model.height))
     print("basePrefab: %s" % model.basePrefab)
+    if model.basePrefab is not None:
+        print("floorHeight: %s" % model.floorHeight)
     print("z-levels:   %s" % (zlevels or "[]"))
     for z in zlevels:
         print("counts (z=%d):" % z)

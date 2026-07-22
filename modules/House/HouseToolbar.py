@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal, QSize
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFileDialog, QComboBox, QLabel, QMenu
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFileDialog, QComboBox, QDoubleSpinBox, QLabel, QMenu
 from PyQt5.QtGui import QIcon
 from functools import partial
 
@@ -11,6 +11,7 @@ class HouseToolbar(QWidget):
     addColumn = pyqtSignal(bool)
     addRow = pyqtSignal(bool)
     zLevelChanged = pyqtSignal(int)
+    floorHeightChanged = pyqtSignal(float)
     generateWallFrame = pyqtSignal()
     generateRoofFrame = pyqtSignal()
     generateRoofFrameHalf = pyqtSignal()
@@ -73,6 +74,16 @@ class HouseToolbar(QWidget):
         self._floorComboBox.addItems(map(str, [i * 0.5 for i in range(7)]))
         self._floorComboBox.currentIndexChanged.connect(self._floorChanged)
 
+        # Floor height (relative z units) - a per-building property that the
+        # runtime uses to decide which floor an object/player belongs to.
+        self._floorHeightSpin = QDoubleSpinBox()
+        self._floorHeightSpin.setDecimals(1)
+        self._floorHeightSpin.setSingleStep(0.5)
+        self._floorHeightSpin.setMinimum(0.5)
+        self._floorHeightSpin.setMaximum(10.0)
+        self._floorHeightSpin.setValue(1.0)
+        self._floorHeightSpin.valueChanged.connect(self.floorHeightChanged.emit)
+
         # Add buttons to layout
         self._layout.addWidget(self._newBtn)
         self._layout.addWidget(self._openBtn)
@@ -84,6 +95,8 @@ class HouseToolbar(QWidget):
         self._layout.addWidget(self._generateRoofHalfBtn)
         self._layout.addWidget(QLabel("Floor:"))
         self._layout.addWidget(self._floorComboBox)
+        self._layout.addWidget(QLabel("Floor height:"))
+        self._layout.addWidget(self._floorHeightSpin)
         self._layout.addStretch()
 
         # Connect buttons to their respective methods
@@ -122,3 +135,10 @@ class HouseToolbar(QWidget):
         model_z_level = index
         print("Floor changed to", model_z_level)
         self.zLevelChanged.emit(model_z_level)
+
+    def setFloorHeight(self, value):
+        # Reflect the model's value in the spin box without re-emitting
+        # floorHeightChanged (avoids a feedback loop when syncing after open).
+        self._floorHeightSpin.blockSignals(True)
+        self._floorHeightSpin.setValue(value)
+        self._floorHeightSpin.blockSignals(False)
