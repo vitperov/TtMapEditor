@@ -112,6 +112,45 @@ def _parse_kv(items):
     return result
 
 
+_BOOL_TRUE = ('true', '1', 'yes', 'on')
+_BOOL_FALSE = ('false', '0', 'no', 'off')
+
+
+def _prop_type(oc, model_name, key):
+    """Declared additionalProperty type for model_name.key from the catalog,
+    or None if the model/property is unknown (custom key on any object)."""
+    for p in oc.getAdditionalProperties(model_name):
+        if p.name == key:
+            return p.type
+    return None
+
+
+def _coerce_prop_value(oc, model_name, key, raw):
+    """Coerce a CLI string --prop value to the native JSON type the object
+    catalog declares for model_name.key, mirroring the GUI properties dialog
+    (AdditionalPropertiesDlg). Bool/int/stringArray become real JSON
+    true/5/["x"] instead of strings "true"/"5"/"x"; JsonUtility maps these to
+    the bool/int/string[] fields on AdditionalProperties.cs. Unknown types and
+    string-like types (string, texture, enum, lootContainer) pass through
+    unchanged."""
+    ptype = _prop_type(oc, model_name, key)
+    if ptype == 'bool':
+        low = raw.strip().lower()
+        if low in _BOOL_TRUE:
+            return True
+        if low in _BOOL_FALSE:
+            return False
+        sys.exit("Error: property '%s' is bool; expected true/false, got: %r" % (key, raw))
+    if ptype == 'int':
+        try:
+            return int(raw)
+        except (TypeError, ValueError):
+            sys.exit("Error: property '%s' is int; expected an integer, got: %r" % (key, raw))
+    if ptype == 'stringArray':
+        return [v.strip() for v in raw.split(',') if v.strip()]
+    return raw
+
+
 def _find_generator(loader, name):
     for gen_name, _order, plugin in loader.generators:
         if name in (gen_name, plugin.childPluginClassName):
@@ -347,7 +386,7 @@ def cmd_border(args):
 
 def cmd_place(args):
     _require_map(args.map)
-    _, model = build_model(args.map)
+    oc, model = build_model(args.map)
     x, y = args.at
     z = args.z if args.z is not None else 0
     obj = model.createObjectAt(x, y, z)
@@ -356,7 +395,7 @@ def cmd_place(args):
         obj.setProperty('rotation', str(args.rotation))
     model.updateModelSize(obj)
     for key, value in _parse_kv(args.prop).items():
-        obj.setAdditioanalProperty(key, value)
+        obj.setAdditioanalProperty(key, _coerce_prop_value(oc, args.model, key, value))
     out = args.out or args.map
     save_model(model, out)
     print("placed %s at (%d,%d,%d) -> %s" % (args.model, x, y, z, out))
@@ -376,7 +415,7 @@ def cmd_delete(args):
 
 def cmd_setprop(args):
     _require_map(args.map)
-    _, model = build_model(args.map)
+    oc, model = build_model(args.map)
     sel = _selection(args.rect, args.z)
     kv = _parse_kv(args.prop)
     # Count matches BEFORE mutating: if a --prop changes 'model', the filter would
@@ -387,7 +426,7 @@ def cmd_setprop(args):
         if key in BASE_PROPS:
             model.setGroupProperty(sel, args.model, key, value)
         else:
-            additional[key] = value
+            additional[key] = _coerce_prop_value(oc, args.model, key, value)
     if additional:
         model.setGroupProperty(sel, args.model, 'additionalProperties', additional)
     out = args.out or args.map

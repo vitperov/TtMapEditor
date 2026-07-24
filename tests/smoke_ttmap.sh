@@ -296,6 +296,65 @@ assert_eq "$(diff_lines "$O" "$WORK/o_before.json")" "0" "--out: input left unch
 assert_eq "$(count "$WORK/o_out.json" Forest)" "36" "--out: result written to --out path"
 
 echo ""
+echo "== typed --prop coercion (bool / int / stringArray vs string) =="
+# The catalog declares a type per additionalProperty; place/setprop must write
+# the native JSON type (true / 5 / ["x"]), not a string, so JsonUtility can
+# parse the bool/int/string[] fields on AdditionalProperties.cs.
+prop_type() {  # prop_type <map> <model> <prop>  -> python typename of first match
+  python3 -c "
+import json,sys
+d=json.load(open('$1'))
+for s in d['squares']:
+  if s.get('model')=='$2' and '$3' in s.get('additionalProperties',{}):
+    print(type(s['additionalProperties']['$3']).__name__); sys.exit()
+print('MISSING')"
+}
+prop_val() {   # prop_val <map> <model> <prop>  -> json.dumps of first match's value
+  python3 -c "
+import json,sys
+d=json.load(open('$1'))
+for s in d['squares']:
+  if s.get('model')=='$2' and '$3' in s.get('additionalProperties',{}):
+    print(json.dumps(s['additionalProperties']['$3'])); sys.exit()
+print('MISSING')"
+}
+P="$WORK/p.json"
+tt new "$P" --size 8 8
+tt fill "$P" --rect "0 0 8 8" --model Grass
+# bool + enum + string on opponentRespawn
+tt place "$P" --at 1 1 --model opponentRespawn --prop spawnSleeping=true --prop respawnType=oneShot --prop modelName=Zombie
+assert_eq "$(prop_type "$P" opponentRespawn spawnSleeping)" "bool" "place: bool prop is a JSON bool"
+assert_eq "$(prop_val  "$P" opponentRespawn spawnSleeping)" "true" "place: bool value true (unquoted)"
+assert_eq "$(prop_type "$P" opponentRespawn respawnType)" "str"  "place: enum prop stays a string"
+assert_eq "$(prop_type "$P" opponentRespawn modelName)"   "str"  "place: string prop stays a string"
+# int + stringArray + string on nextLevel
+tt place "$P" --at 3 3 --model nextLevel --prop levelId=5 --prop respawnId=2 --prop requireWorn=Jacket,Boots --prop objectiveId=abc
+assert_eq "$(prop_type "$P" nextLevel levelId)"    "int"  "place: int prop is a JSON int"
+assert_eq "$(prop_val  "$P" nextLevel levelId)"    "5"    "place: int value 5 (unquoted)"
+assert_eq "$(prop_type "$P" nextLevel requireWorn)" "list" "place: stringArray prop is a JSON array"
+assert_eq "$(prop_val  "$P" nextLevel requireWorn)" '["Jacket", "Boots"]' "place: stringArray split on comma"
+assert_eq "$(prop_type "$P" nextLevel objectiveId)" "str" "place: string prop stays a string"
+# texture prop stays a string
+tt place "$P" --at 2 2 --model Wall --prop externalTexture=WoodenWall
+assert_eq "$(prop_type "$P" Wall externalTexture)" "str" "place: texture prop stays a string"
+# setprop coerces too (flip bool to false, change int)
+tt setprop "$P" --rect "1 1 1 1" --model opponentRespawn --prop spawnSleeping=false
+tt setprop "$P" --rect "3 3 1 1" --model nextLevel --prop levelId=9
+assert_eq "$(prop_val "$P" opponentRespawn spawnSleeping)" "false" "setprop: bool coerced to JSON false"
+assert_eq "$(prop_val "$P" nextLevel levelId)" "9" "setprop: int coerced to JSON int"
+# round-trip stable: a no-op re-open of the coerced map is a zero-line diff
+cp "$P" "$WORK/p_before.json"
+tt setprop "$P" --rect "1 1 1 1" --model opponentRespawn --prop spawnSleeping=false
+assert_eq "$(diff_lines "$P" "$WORK/p_before.json")" "0" "typed props round-trip clean (no-op is zero-diff)"
+# bad bool / bad int are rejected with a nonzero exit
+if python3 "$TTMAP" place "$P" --at 0 0 --model opponentRespawn --prop spawnSleeping=maybe >/dev/null 2>&1; then
+  bad_bool=ok; else bad_bool=rejected; fi
+assert_eq "$bad_bool" "rejected" "place: non-boolean value for a bool prop is rejected"
+if python3 "$TTMAP" place "$P" --at 0 0 --model nextLevel --prop levelId=xyz >/dev/null 2>&1; then
+  bad_int=ok; else bad_int=rejected; fi
+assert_eq "$bad_int" "rejected" "place: non-integer value for an int prop is rejected"
+
+echo ""
 echo "=========================================="
 echo "  PASSED: $pass    FAILED: $fail"
 echo "=========================================="
