@@ -10,8 +10,13 @@
             "options": ["repeat", "oneShot"]
         },
         {
-            "type": "bool",
-            "name": "spawnSleeping"
+            "type": "enum",
+            "name": "wakeMode",
+            "options": ["none", "proximity", "event"]
+        },
+        {
+            "type": "string",
+            "name": "wakeEventId"
         },
         {
             "type": "string",
