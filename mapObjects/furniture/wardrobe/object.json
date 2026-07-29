@@ -1,5 +1,8 @@
 {
     "name": "Wardrobe",
     "categories": "furniture",
-    "iconFile": "Wardrobe.png"
+    "iconFile": "Wardrobe.png",
+    "additionalProperties": [
+        { "type": "lootContainer", "name": "lootContainer" }
+    ]
 }
