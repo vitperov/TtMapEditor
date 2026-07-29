@@ -25,6 +25,10 @@
         {
             "type": "string",
             "name": "statsModel"
+        },
+        {
+            "type": "string",
+            "name": "onDeathEvent"
         }
     ]
 }
