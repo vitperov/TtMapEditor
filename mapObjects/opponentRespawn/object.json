@@ -21,6 +21,10 @@
         {
             "type": "string",
             "name": "modelName"
+        },
+        {
+            "type": "string",
+            "name": "statsModel"
         }
     ]
 }
