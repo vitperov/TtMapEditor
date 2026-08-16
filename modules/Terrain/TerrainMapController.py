@@ -31,6 +31,7 @@ class TerrainMapController:
 
     def _connectSignals(self):
         self._model.map.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
+        self._model.map.currentFileChanged.connect(self._view.actionsPanel.setCurrentPath)
         self._view.mapWidget.selectionChanged.connect(self._view.propPanel.onSquaresSelected)
 
     def _startActions(self):

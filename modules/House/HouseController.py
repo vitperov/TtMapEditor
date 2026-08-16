@@ -40,6 +40,7 @@ class HouseController:
 
         self._houseModel.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
         self._houseModel.updatedEntireMap.connect(self._syncFloorHeight)
+        self._houseModel.currentFileChanged.connect(self._view.actionsPanel.setCurrentPath)
         self._view.propPanel.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
 
         self._view.mapWidget.deleteRow.connect(self._houseModel.deleteRow)

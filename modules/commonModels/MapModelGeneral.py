@@ -9,6 +9,10 @@ from modules.commonModels.SelectionRange import *
 
 class MapModelGeneral(QObject):
     updatedEntireMap = pyqtSignal()
+    # Emitted when the map's on-disk identity changes (opened, saved, or reset
+    # by newMap). Carries the file path, or '' when the map has no file yet.
+    currentFileChanged = pyqtSignal(str)
+
     def __init__(self, squareModel, objCollection, texturesCollection, lootContainersCollection=None, basePrefab=None):
         QObject.__init__(self)
         self._sqareModel = squareModel
@@ -31,6 +35,12 @@ class MapModelGeneral(QObject):
         # (basePrefab set) and defaults to 1.0.
         self.floorHeight = 1.0
         self._updateCallback = self.updateEntireMap
+        # File this map lives in, and a hash of its contents as last written
+        # there. Together they drive the title bar and let Save skip the dialog.
+        # The empty map an editor opens with counts as saved - there is nothing
+        # in it to lose - so it starts out clean rather than flagged as dirty.
+        self._currentFilePath = None
+        self._savedSnapshot = self._snapshot()
 
     def setUpdatedCallback(self, callback):
         self._updateCallback = callback
@@ -41,6 +51,12 @@ class MapModelGeneral(QObject):
         for row in range(h):
             for column in range(w):
                 self.createEmpySquareAt(row, column)
+
+        # A brand new map belongs to no file yet, and an untouched blank one has
+        # nothing to lose - so it starts clean, and Save will ask for a name.
+        self._currentFilePath = None
+        self._savedSnapshot = self._snapshot()
+        self.currentFileChanged.emit('')
 
         if self._updateCallback is not None:
             self._updateCallback()
@@ -204,10 +220,12 @@ class MapModelGeneral(QObject):
         with open(filename, "w") as writeFile:
             json.dump(self.toSerializableObj(), writeFile, indent=4)
 
+        self._setCurrentFile(filename)
+
     def openMap(self, filename):
         extension = '.json'
         if not filename.endswith(extension):
-            filename = extension + filename
+            filename = filename + extension
 
         print("Loading map from " + filename)
 
@@ -215,9 +233,39 @@ class MapModelGeneral(QObject):
             jsObj = json.load(readFile)
             self.restoreFromJson(jsObj)
 
+        self._setCurrentFile(filename)
+
         if self._updateCallback is not None:
             self._updateCallback()
-            
+
+    def currentFilePath(self):
+        """Path this map was last opened from or saved to, or None if it has
+        never been written (a freshly created map)."""
+        return self._currentFilePath
+
+    def isDirty(self):
+        """True when the map differs from what is on disk.
+
+        Deliberately compares content rather than tracking edits: the ~40
+        mutating methods here (plus PropertiesPanel, which edits squares
+        directly) have no single choke point, so a flag would need wiring at
+        every one of them and would silently lie the moment one was missed.
+        Hashing the serialized map costs ~5 ms on the largest real map, which
+        is affordable at the 1 Hz the title bar polls it at."""
+        return self._snapshot() != self._savedSnapshot
+
+    def _snapshot(self):
+        return hash(json.dumps(self.toSerializableObj(), sort_keys=True))
+
+    def _setCurrentFile(self, filename):
+        """Record the on-disk identity of the map after a successful open/save."""
+        self._currentFilePath = filename
+        self._savedSnapshot = self._snapshot()
+        self.currentFileChanged.emit(filename)
+
+    def updateEntireMap(self):
+        self.updatedEntireMap.emit()
+
     def updateEntireMap(self):
         self.updatedEntireMap.emit()
         

@@ -1,8 +1,11 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal, QSize
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFileDialog, QComboBox, QDoubleSpinBox, QLabel, QMenu
-from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QComboBox, QDoubleSpinBox, QLabel, QMenu, QShortcut
+from PyQt5.QtGui import QIcon, QKeySequence
 from functools import partial
+
+from modules.ApplicationSettings.ApplicationSettingsModel import ApplicationSettingsModel
+from modules.commonModels.MapFileDialogs import MapFileDialogs
 
 class HouseToolbar(QWidget):
     newMap = pyqtSignal(int, int)
@@ -23,6 +26,11 @@ class HouseToolbar(QWidget):
         self._layout = QHBoxLayout()
         self.setLayout(self._layout)
 
+        self._fileDialogs = MapFileDialogs(ApplicationSettingsModel.getHouseMapsDir, 'output/house')
+        # Path of the map currently open, mirrored from the model so Save can
+        # write straight to it. '' until a map has been opened or saved.
+        self._currentPath = ''
+
         # Create main toolbar buttons with standard icons
         self._newBtn = QPushButton()
         self._newBtn.setIcon(QIcon.fromTheme("document-new"))
@@ -35,6 +43,10 @@ class HouseToolbar(QWidget):
         self._saveBtn = QPushButton()
         self._saveBtn.setIcon(QIcon.fromTheme("document-save"))
         self._saveBtn.setIconSize(self.ICON_SIZE)
+
+        self._saveAsBtn = QPushButton()
+        self._saveAsBtn.setIcon(QIcon.fromTheme("document-save-as"))
+        self._saveAsBtn.setIconSize(self.ICON_SIZE)
 
         # Create additional toolbar buttons with icons
         self._addColumnBtn = QPushButton("")
@@ -88,6 +100,7 @@ class HouseToolbar(QWidget):
         self._layout.addWidget(self._newBtn)
         self._layout.addWidget(self._openBtn)
         self._layout.addWidget(self._saveBtn)
+        self._layout.addWidget(self._saveAsBtn)
         self._layout.addWidget(self._addColumnBtn)
         self._layout.addWidget(self._addRowBtn)
         self._layout.addWidget(self._generateWallBtn)
@@ -103,22 +116,40 @@ class HouseToolbar(QWidget):
         self._newBtn.clicked.connect(self._newFile)
         self._openBtn.clicked.connect(self._openFile)
         self._saveBtn.clicked.connect(self._saveFile)
+        self._saveAsBtn.clicked.connect(self._saveFileAs)
         self._generateWallBtn.clicked.connect(self.generateWallFrame.emit)
         self._generateRoofBtn.clicked.connect(self.generateRoofFrame.emit)
         self._generateRoofHalfBtn.clicked.connect(self.generateRoofFrameHalf.emit)
+
+        QShortcut(QKeySequence.New, self, self._newFile)
+        QShortcut(QKeySequence.Open, self, self._openFile)
+        QShortcut(QKeySequence.Save, self, self._saveFile)
+        QShortcut(QKeySequence.SaveAs, self, self._saveFileAs)
+
+    def setCurrentPath(self, path):
+        """Follow the model's open file, so Save knows where to write."""
+        self._currentPath = path
 
     def _newFile(self):
         print("new map")
         self.newMap.emit(8, 8)
 
     def _saveFile(self):
-        name, _ = QFileDialog.getSaveFileName(self, 'Save File', 'output/house', filter='*.json')
+        # Save over the open file without a dialog; fall back to asking when
+        # the map has no file yet (a map just created with New).
+        if self._currentPath:
+            self.saveMap.emit(self._currentPath)
+        else:
+            self._saveFileAs()
+
+    def _saveFileAs(self):
+        name = self._fileDialogs.promptSave(self, self._currentPath)
         if name:
             print(name)
             self.saveMap.emit(name)
 
     def _openFile(self):
-        name, _ = QFileDialog.getOpenFileName(self, 'Open File', 'output/house', filter='*.json')
+        name = self._fileDialogs.promptOpen(self, self._currentPath)
         if name:
             print(name)
             self.openMap.emit(name)
