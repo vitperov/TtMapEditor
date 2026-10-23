@@ -2,7 +2,7 @@
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QFont
-from PyQt5.QtCore import QSize
+from PyQt5.QtCore import QSize, QTimer
 import sys
 import os
 
@@ -19,10 +19,19 @@ from modules.ApplicationSettings.ApplicationSettingsDlg import ApplicationSettin
 from modules.ApplicationSettings.ApplicationSettingsModel import ApplicationSettingsModel
 
 class TtMapEditor(QMainWindow):
+    BASE_TITLE = "TT Map Editor"
+
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("TT Map Editor")
-        
+        self.setWindowTitle(self.BASE_TITLE)
+
+        # Map whose file name the title bar reflects, set once an editor is
+        # opened. The views are central widgets rather than windows, so the
+        # title has to be set here on the QMainWindow.
+        self._mapModel = None
+        self._titleTimer = QTimer(self)
+        self._titleTimer.timeout.connect(self._refreshTitle)
+
         self.centralWidget = QWidget(self)
         self.setCentralWidget(self.centralWidget)
         
@@ -76,7 +85,27 @@ class TtMapEditor(QMainWindow):
         view = TerrainEditorView()
         self.controller = TerrainMapController(view, self.model)
         self.setCentralWidget(view)
-        
+        self._trackMapFile(self.model.map)
+
+    def _trackMapFile(self, mapModel):
+        """Show the open map, and whether it has unsaved edits, in the title."""
+        self._mapModel = mapModel
+        mapModel.currentFileChanged.connect(lambda path: self._refreshTitle())
+        self._refreshTitle()
+        # The unsaved marker is polled rather than pushed: no signal fires on
+        # every edit (see MapModelGeneral.isDirty), and comparing content is
+        # both cheap enough at this rate and incapable of going stale.
+        self._titleTimer.start(1000)
+
+    def _refreshTitle(self):
+        if self._mapModel is None:
+            self.setWindowTitle(self.BASE_TITLE)
+            return
+
+        path = self._mapModel.currentFilePath()
+        unsavedMarker = "*" if self._mapModel.isDirty() else ""
+        self.setWindowTitle("%s%s - %s" % (path or "Untitled", unsavedMarker, self.BASE_TITLE))
+
     def showHouseEditor(self):
         settings = ApplicationSettingsModel()
         nativeMapObjectsDir = os.path.join(os.path.dirname(__file__), 'mapObjects')
@@ -94,6 +123,7 @@ class TtMapEditor(QMainWindow):
         view = HouseView()
         self.controller = HouseController(view=view, houseModel=self.model)
         self.setCentralWidget(view)
+        self._trackMapFile(self.model)
 
     def showSettings(self):
         # Open the settings dialog

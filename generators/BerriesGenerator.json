@@ -1,9 +1,11 @@
 {
   "order": "4",
+  "description": "Scatters Berries pickups randomly on Grass cells across the whole map (added as a layer on top of the grass). Run late, once grass and forest are settled. Clear removes all Berries.",
   "schema": {
     "probability": {
       "type": "float",
-      "value": "0.03"
+      "value": "0.03",
+      "description": "Chance (0..1) that each grass cell gets berries."
     }
   }
 }

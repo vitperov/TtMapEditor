@@ -1,38 +1,46 @@
 {
   "order": "0",
+  "description": "Builds a terrain level from scratch. RESETS the whole map (calls newMap): fills Grass, adds a Forest border around the edge, a horizontal Road across the middle, and a grid of empty LandLot plots. Run this FIRST - the other terrain generators fill in the lots it creates. Final size = landLotWidth*landLotsColumns + 2*forestAroundMap (width) by landLotHeight*landLotsRows + 2*forestAroundMap + roadWidth (height).",
   "schema": {
     "forestAroundMap": {
       "type": "int",
-      "value": "5"
+      "value": "5",
+      "description": "Thickness in cells of the Forest border around the map edge (also used as side margin)."
     },
     "roadWidth": {
       "type": "int",
-      "value": "2"
+      "value": "2",
+      "description": "Width in cells of the horizontal Road across the middle of the map."
     },
     "leftExit": {
       "type": "bool",
-      "value": "false"
+      "value": "false",
+      "description": "If true the road opens through the left forest border (a map exit); if false the left stays blocked."
     },
     "rightExit": {
       "type": "bool",
-      "value": "false"
+      "value": "false",
+      "description": "If true the road opens through the right forest border; if false the right stays blocked."
     },
     "landLotWidth": {
       "type": "int",
-      "value": "22"
+      "value": "22",
+      "description": "Width in cells of each land lot (house plot)."
     },
     "landLotHeight": {
       "type": "int",
-      "value": "15"
+      "value": "15",
+      "description": "Height in cells of each land lot."
     },
     "landLotsRows": {
       "type": "int",
-      "value": "2"
+      "value": "2",
+      "description": "Number of land-lot rows."
     },
     "landLotsColumns": {
       "type": "int",
-      "value": "5"
+      "value": "5",
+      "description": "Number of land-lot columns."
     }
-    
   }
 }

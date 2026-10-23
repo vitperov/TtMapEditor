@@ -78,7 +78,7 @@ class EditorHelper:
         end_col = selectionRange.endCol
         end_row = selectionRange.endRow
         z_level = selectionRange.zLevel
-        check_objects = ["PitchedRoof", "RoofCorner", "PitchedRoofHalf", "RoofCornerHalf",  "FlatRoof", "FlatRoofHalf"]
+        check_objects = ["PitchedRoof", "RoofCorner", "PitchedRoofHalf", "RoofCornerHalf",  "FlatRoof"]
 
         # Top row
         for col in range(start_col, end_col + 1):
@@ -143,7 +143,7 @@ class EditorHelper:
         end_col = selectionRange.endCol
         end_row = selectionRange.endRow
         z_level = selectionRange.zLevel
-        check_objects = ["PitchedRoof", "RoofCorner", "PitchedRoofHalf", "RoofCornerHalf",  "FlatRoof", "FlatRoofHalf"]
+        check_objects = ["PitchedRoof", "RoofCorner", "PitchedRoofHalf", "RoofCornerHalf",  "FlatRoof"]
 
         # Top row
         for col in range(start_col, end_col + 1):

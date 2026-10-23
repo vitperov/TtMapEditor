@@ -1,12 +1,15 @@
 {
+  "description": "Places opponent respawn points (model opponentRespawn) on cells hidden among trees - cells that are not forest themselves but have between minForestAround and maxForestAround forest cells in their surrounding 3x3 neighborhood. Both this and IntervalRespawnGenerator produce opponentRespawn, so clearing one clears all of them.",
   "schema": {
     "minForestAround": {
       "type": "int",
-      "value": "3"
+      "value": "3",
+      "description": "Minimum forest cells (0..8) in the 3x3 around a candidate cell."
     },
     "maxForestAround": {
       "type": "int",
-      "value": "5"
+      "value": "5",
+      "description": "Maximum forest cells (0..8) in the 3x3 - keep below 8 so opponents still have a way out."
     }
   }
 }

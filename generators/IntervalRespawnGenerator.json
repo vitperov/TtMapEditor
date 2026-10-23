@@ -1,16 +1,20 @@
 {
+  "description": "Places opponent respawn points (model opponentRespawn) on a regular grid, one every intervalX by intervalY cells, skipping forest cells (and optionally house footprints). Note: this generator's Clear is not implemented. It shares the opponentRespawn model with HiddenRespawnGenerator.",
   "schema": {
     "intervalX": {
       "type": "int",
-      "value": "15"
+      "value": "15",
+      "description": "Horizontal spacing in cells between respawns."
     },
     "intervalY": {
       "type": "int",
-      "value": "15"
+      "value": "15",
+      "description": "Vertical spacing in cells between respawns."
     },
     "skipHouse": {
       "type": "bool",
-      "value": "False"
+      "value": "False",
+      "description": "If true, do not place respawns on cells covered by a House object."
     }
   }
 }

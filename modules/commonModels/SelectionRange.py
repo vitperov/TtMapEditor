@@ -10,3 +10,7 @@ class SelectionRange:
     @classmethod
     def fromStartPointAndSize(cls, startPoint, size, zLevel):
         return cls(startPoint.x, startPoint.y, startPoint.x + size.w - 1, startPoint.y + size.h - 1, zLevel)
+
+    @classmethod
+    def fromRect(cls, x, y, w, h, zLevel=0):
+        return cls(x, y, x + w - 1, y + h - 1, zLevel if zLevel is not None else 0)

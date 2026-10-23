@@ -33,11 +33,14 @@ class HouseController:
         self._view.actionsPanel.addColumn.connect(self._view.mapWidget.addColumn)
         self._view.actionsPanel.addRow.connect(self._view.mapWidget.addRow)
         self._view.actionsPanel.zLevelChanged.connect(self._setZLevel)
+        self._view.actionsPanel.floorHeightChanged.connect(self._setFloorHeight)
         self._view.actionsPanel.generateWallFrame.connect(self._generateWallFrame)
         self._view.actionsPanel.generateRoofFrame.connect(self._generateRoofFrame)
         self._view.actionsPanel.generateRoofFrameHalf.connect(self._generateRoofFrameHalf)
 
         self._houseModel.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
+        self._houseModel.updatedEntireMap.connect(self._syncFloorHeight)
+        self._houseModel.currentFileChanged.connect(self._view.actionsPanel.setCurrentPath)
         self._view.propPanel.updatedEntireMap.connect(self._view.mapWidget.redrawAll)
 
         self._view.mapWidget.deleteRow.connect(self._houseModel.deleteRow)
@@ -46,6 +49,14 @@ class HouseController:
     def _setZLevel(self, zLevel):
         self._view.mapWidget.selectionRange.zLevel = zLevel
         self._view.mapWidget.redrawAll()
+
+    def _setFloorHeight(self, value):
+        self._houseModel.floorHeight = value
+
+    def _syncFloorHeight(self):
+        # Keep the toolbar spin box in step with the model (e.g. after openMap
+        # restores floorHeight from the file).
+        self._view.actionsPanel.setFloorHeight(self._houseModel.floorHeight)
 
     def _generateWallFrame(self):
         selection = self._view.mapWidget.selectionRange

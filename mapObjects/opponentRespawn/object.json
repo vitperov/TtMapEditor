@@ -10,12 +10,25 @@
             "options": ["repeat", "oneShot"]
         },
         {
-            "type": "bool",
-            "name": "spawnSleeping"
+            "type": "enum",
+            "name": "wakeMode",
+            "options": ["none", "proximity", "event"]
+        },
+        {
+            "type": "string",
+            "name": "wakeEventId"
         },
         {
             "type": "string",
             "name": "modelName"
+        },
+        {
+            "type": "string",
+            "name": "statsModel"
+        },
+        {
+            "type": "string",
+            "name": "onDeathEvent"
         }
     ]
 }

@@ -51,6 +51,30 @@ class ApplicationSettingsDlg(QDialog):
         layout.addWidget(self.texturesDirLabel)
         layout.addLayout(texturesDirLayout)
 
+        # Input for terrainMapsDir with directory chooser button
+        self.terrainMapsDirLabel = QLabel("Terrain Maps Directory:")
+        terrainMapsDirLayout = QHBoxLayout()
+        self.terrainMapsDirInput = QLineEdit()
+        self.terrainMapsDirInput.setText(self.settingsModel.getTerrainMapsDir())  # Load existing value
+        self.terrainMapsDirButton = QPushButton("Browse")
+        self.terrainMapsDirButton.clicked.connect(self.chooseTerrainMapsDir)  # Connect to directory chooser
+        terrainMapsDirLayout.addWidget(self.terrainMapsDirInput)
+        terrainMapsDirLayout.addWidget(self.terrainMapsDirButton)
+        layout.addWidget(self.terrainMapsDirLabel)
+        layout.addLayout(terrainMapsDirLayout)
+
+        # Input for houseMapsDir with directory chooser button
+        self.houseMapsDirLabel = QLabel("House Maps Directory:")
+        houseMapsDirLayout = QHBoxLayout()
+        self.houseMapsDirInput = QLineEdit()
+        self.houseMapsDirInput.setText(self.settingsModel.getHouseMapsDir())  # Load existing value
+        self.houseMapsDirButton = QPushButton("Browse")
+        self.houseMapsDirButton.clicked.connect(self.chooseHouseMapsDir)  # Connect to directory chooser
+        houseMapsDirLayout.addWidget(self.houseMapsDirInput)
+        houseMapsDirLayout.addWidget(self.houseMapsDirButton)
+        layout.addWidget(self.houseMapsDirLabel)
+        layout.addLayout(houseMapsDirLayout)
+
         # Save button layout
         buttonLayout = QHBoxLayout()
         buttonLayout.addStretch()  # Push button to the right
@@ -79,9 +103,23 @@ class ApplicationSettingsDlg(QDialog):
         if directory:
             self.texturesDirInput.setText(directory)
 
+    def chooseTerrainMapsDir(self):
+        # Open directory chooser dialog for terrainMapsDir
+        directory = QFileDialog.getExistingDirectory(self, "Select Terrain Maps Directory", self.terrainMapsDirInput.text())
+        if directory:
+            self.terrainMapsDirInput.setText(directory)
+
+    def chooseHouseMapsDir(self):
+        # Open directory chooser dialog for houseMapsDir
+        directory = QFileDialog.getExistingDirectory(self, "Select House Maps Directory", self.houseMapsDirInput.text())
+        if directory:
+            self.houseMapsDirInput.setText(directory)
+
     def saveSettings(self):
         # Update settings model with new values
         self.settingsModel.setAdditionalMapObjectsDir(self.mapObjectsDirInput.text())
         self.settingsModel.setAdditionalGeneratorsDir(self.generatorsDirInput.text())
         self.settingsModel.setAdditionalTexturesDir(self.texturesDirInput.text())
+        self.settingsModel.setTerrainMapsDir(self.terrainMapsDirInput.text())
+        self.settingsModel.setHouseMapsDir(self.houseMapsDirInput.text())
         self.accept()  # Close dialog after saving

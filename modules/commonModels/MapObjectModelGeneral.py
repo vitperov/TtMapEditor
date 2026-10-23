@@ -91,6 +91,24 @@ class MapObjectModelGeneral(QObject):
         self.additional_properties.append(AdditionalPropertyValue(name, value))
         self.changed.emit()
 
+    def deleteAdditionalProperty(self, name):
+        """Remove one additional property by name. Returns True if it existed."""
+        for i, prop in enumerate(self.additional_properties):
+            if prop.name == name:
+                del self.additional_properties[i]
+                self.changed.emit()
+                return True
+        return False
+
+    def clearAdditionalProperties(self):
+        """Drop every additional property (resets additionalProperties to empty,
+        so the key is omitted on save). Returns True if anything was removed."""
+        if not self.additional_properties:
+            return False
+        self.additional_properties = []
+        self.changed.emit()
+        return True
+
     def restoreFromJson(self, js):
         self.x = js['x']
         self.y = js['y']

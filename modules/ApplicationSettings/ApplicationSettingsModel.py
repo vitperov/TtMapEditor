@@ -41,6 +41,27 @@ class ApplicationSettingsModel:
         self.settings["additionalTexturesDir"] = value
         self._saveSettings()
 
+    # Directory the Terrain editor opens and saves maps in. Points at the game
+    # project's own map folder (e.g. <unity>/Assets/Resources/Maps/Terrain) so
+    # maps are edited in place instead of copied through output/. Empty falls
+    # back to output/terrain, keeping the editor usable without a game checkout.
+    def getTerrainMapsDir(self):
+        return self.settings.get("terrainMapsDir", "")
+
+    def setTerrainMapsDir(self, value):
+        self.settings["terrainMapsDir"] = value
+        self._saveSettings()
+
+    # Same for the House editor (e.g. <unity>/Assets/Resources/Maps/House/json).
+    # Kept independent of terrainMapsDir: the two sit at different depths, and
+    # deriving one from the other would tie the editor to one project's layout.
+    def getHouseMapsDir(self):
+        return self.settings.get("houseMapsDir", "")
+
+    def setHouseMapsDir(self, value):
+        self.settings["houseMapsDir"] = value
+        self._saveSettings()
+
     def _saveSettings(self):
         # Ensure directory exists
         os.makedirs(os.path.dirname(self.settings_file), exist_ok=True)
